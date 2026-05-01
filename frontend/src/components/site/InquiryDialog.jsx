@@ -40,7 +40,7 @@ const BUDGETS = [
   "One-time project",
 ];
 
-export default function InquiryDialog({ open, onOpenChange, defaultService }) {
+export default function InquiryDialog({ open, onOpenChange, defaultService, source }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -70,7 +70,7 @@ export default function InquiryDialog({ open, onOpenChange, defaultService }) {
     }
     setLoading(true);
     try {
-      await submitInquiry(form);
+      await submitInquiry({ ...form, source: source || "inquiry-dialog" });
       toast.success("Inquiry received. We'll be in touch within 24 hours.");
       onOpenChange(false);
       setForm({

@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import MagneticCta from "@/components/site/MagneticCta";
+import { submitRoiLead } from "@/lib/api";
 
 /**
  * RoiCalculator — interactive sliders that compute a projected lift.
@@ -48,12 +50,13 @@ function Slider({ label, value, setValue, min, max, step, format, unit }) {
   );
 }
 
-export default function RoiCalculator({ onSubmitLead }) {
+export default function RoiCalculator() {
   const [revenue, setRevenue] = useState(2_000_000);
   const [roas, setRoas] = useState(2.5);
   const [spend, setSpend] = useState(40_000);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const lift = useMemo(() => {
     const newAnnual = spend * 12 * BRIVO_TARGET_ROAS;
@@ -66,10 +69,19 @@ export default function RoiCalculator({ onSubmitLead }) {
     return Math.round((lift / revenue) * 100);
   }, [lift, revenue]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmitLead?.({ email, revenue, roas, spend, lift });
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitRoiLead({ email, revenue, roas, spend, lift });
+      setSubmitted(true);
+      toast.success("Audit queued — we'll be in touch within 48h.");
+    } catch (err) {
+      const d = err?.response?.data?.detail;
+      toast.error(typeof d === "string" ? d : "Submission failed. Try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -197,9 +209,11 @@ export default function RoiCalculator({ onSubmitLead }) {
                 <MagneticCta strength={0.2}>
                   <button
                     type="submit"
-                    className="bg-[#CCFF00] text-black px-5 py-3.5 hover:bg-white transition-colors flex items-center gap-1 font-mono text-xs uppercase tracking-[0.2em] font-bold"
+                    disabled={submitting}
+                    className="bg-[#CCFF00] text-black px-5 py-3.5 hover:bg-white transition-colors flex items-center gap-1 font-mono text-xs uppercase tracking-[0.2em] font-bold disabled:opacity-60"
+                    data-testid="roi-submit"
                   >
-                    Send <ChevronRight size={14} />
+                    {submitting ? "Sending" : "Send"} <ChevronRight size={14} />
                   </button>
                 </MagneticCta>
               </div>
