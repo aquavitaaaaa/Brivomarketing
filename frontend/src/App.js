@@ -1,53 +1,86 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import Lenis from "@studio-freight/lenis";
+import { Toaster } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import Navigation from "@/components/site/Navigation";
+import Hero from "@/components/site/Hero";
+import StatsBar from "@/components/site/StatsBar";
+import Services from "@/components/site/Services";
+import Process from "@/components/site/Process";
+import Portfolio from "@/components/site/Portfolio";
+import Pricing from "@/components/site/Pricing";
+import Testimonials from "@/components/site/Testimonials";
+import Insights from "@/components/site/Insights";
+import Footer from "@/components/site/Footer";
+import InquiryDialog from "@/components/site/InquiryDialog";
+import ChatWidget from "@/components/site/ChatWidget";
 
 const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [inquiryService, setInquiryService] = useState("");
+
+  const openInquiry = (service = "") => {
+    setInquiryService(service);
+    setInquiryOpen(true);
   };
 
   useEffect(() => {
-    helloWorldApi();
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => lenis.destroy();
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <div className="App relative" data-testid="home-root">
+      <Navigation onCTA={() => openInquiry()} />
+      <Hero onCTA={() => openInquiry()} />
+      <StatsBar />
+      <Services onSelect={(s) => openInquiry(s)} />
+      <Process />
+      <Portfolio />
+      <Pricing onSelect={(tier) => openInquiry(tier)} />
+      <Testimonials />
+      <Insights />
+      <Footer onCTA={() => openInquiry()} />
+      <InquiryDialog
+        open={inquiryOpen}
+        onOpenChange={setInquiryOpen}
+        defaultService={inquiryService}
+      />
+      <ChatWidget />
+      <Toaster
+        theme="dark"
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: "#0A0A0A",
+            border: "1px solid #222",
+            color: "#fff",
+            borderRadius: 0,
+          },
+        }}
+      />
     </div>
   );
 };
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
