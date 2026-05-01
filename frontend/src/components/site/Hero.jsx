@@ -3,7 +3,7 @@ import Marquee from "react-fast-marquee";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import HeroVisual from "@/components/site/HeroVisual";
 import AnalyticsCard from "@/components/site/AnalyticsCard";
-import SleekBackdrop from "@/components/site/SleekBackdrop";
+import MarketingBackdrop from "@/components/site/MarketingBackdrop";
 
 const fadeUp = {
   hidden: { y: 40, opacity: 0 },
@@ -27,9 +27,9 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] grain overflow-hidden flex flex-col"
       data-testid="hero-section"
     >
-      {/* Sleek backdrop — premium ambient bloom + blueprint perspective */}
+      {/* Marketing backdrop — floating dashboards, sites, social tiles */}
       <div className="absolute inset-0 pointer-events-none">
-        <SleekBackdrop />
+        <MarketingBackdrop />
       </div>
 
       {/* Right-side composition: precision visual behind + analytics card on top */}
