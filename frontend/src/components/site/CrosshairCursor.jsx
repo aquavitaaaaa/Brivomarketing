@@ -40,7 +40,7 @@ export default function CrosshairCursor() {
     };
   }, []);
 
-  if (!visible) return null;
+  if (!visible || !enabledRef.current) return null;
 
   const ringSize = scoped ? 56 : 26;
   const dotSize = 4;

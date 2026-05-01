@@ -1,47 +1,84 @@
-# Brivo Marketing — PRD
+# Brivo — AI Performance Studio (Landing)
 
-## Original Problem Statement
-"brivomarketing.com — build a marketing company website where we offer web design + marketing services. Sleek, stunning, shock-and-awe. Inquiries submit to backend. Goal: take large market share and secure deals."
+## Problem statement
+Build a premium, "Tesla/Apple-keynote tier" marketing agency landing page for
+BrivoMarketing with a dark, neon lime/violet aesthetic. Owl logo provided by
+user (public/owl-logo.jpg). Must convert — hero CTA, inquiry dialog, case
+studies, pricing, pre-footer mega CTA.
+
+## Users
+Founders of high-growth brands considering an agency retainer. Expect
+substance (real KPIs, receipts) and motion/interaction polish on par with
+top design studios.
+
+## Core requirements — status
+- Hero with owl branding, animated headline, live-stats, service marquee — DONE
+- Marketing backdrop with floating browser/dashboard mockups — DONE
+- Press shelf ("As featured in" typographic wordmarks + quotes) — DONE (`PressShelf`)
+- ROI calculator with 3 sliders + email-capture → Inquiry dialog — DONE (`RoiCalculator`)
+- Portfolio grid that opens case-study modal (hero, KPI grid, quote, CTA) — DONE (`Portfolio` → `CaseStudyModal`)
+- Big pre-footer CTA card with owl crest — DONE (`BigCtaCard`)
+- Live results ticker strip with marquee — DONE (`LiveTicker`)
+- Social-proof toaster (bottom-left, rotating messages) — DONE (`SocialProofToaster`)
+- Magnetic CTA effect on primary buttons — DONE (`MagneticCta` wraps Hero / Footer / BigCTA / ROI / CaseStudy)
+- Crosshair cursor (desktop only, scopes-up on interactives) — DONE (`CrosshairCursor`)
+- Scroll-reveal wrappers on StatsBar and Insights — DONE (`ScrollReveal`)
+- 404 "Lost in the noise." page with owl — DONE (`/app/frontend/src/pages/NotFound.jsx`, route `*`)
+- Favicon + OG + Twitter meta + correct page title — DONE (`public/index.html`)
+- "Made with Emergent" badge removed — DONE
+- Owl logo (user-provided `owl-logo.jpg`) everywhere — DONE
+
+## Changelog
+- 2026-02-XX — Wired all 10 orphaned enhancement components into App.js,
+  Portfolio, Hero, Footer. Added `@keyframes marquee`, `.animate-marquee`,
+  `.custom-cursor-on`, `.roi-slider` CSS. Added favicon, OG/Twitter meta,
+  updated page title to "Brivo — AI Performance Studio". Hero CTA and Footer
+  CTA wrapped in MagneticCta. Portfolio cards open CaseStudyModal with KPIs +
+  quote. ROI email submit opens Inquiry dialog pre-populated.
+- Tested by frontend testing agent (iteration_2.json) → 100% pass, zero bugs,
+  zero console errors.
+- Follow-up polish: hid MarketingBackdrop on mobile (<md) to fix H1
+  readability; AnalyticsCard now hidden below md instead of lg.
 
 ## Architecture
-- **Backend**: FastAPI + MongoDB (Motor). Pydantic v2 models with UUIDs.
-- **Frontend**: React 19 + Tailwind, framer-motion, react-fast-marquee, Lenis smooth scroll, Shadcn UI for Dialog / Select / Input / Textarea, sonner for toasts.
-- **AI**: emergentintegrations LlmChat with `anthropic/claude-sonnet-4-5-20250929` via EMERGENT_LLM_KEY. Chat history persisted to Mongo and replayed as context for multi-turn continuity.
-- **Design**: dark cinematic, electric green (#CCFF00) accent, Cabinet Grotesk + Satoshi + JetBrains Mono fonts, asymmetric Bento layouts, grain texture, glassmorphic nav.
+```
+/app/frontend/
+├── public/
+│   ├── index.html            # favicon, OG tags, title = "Brivo — AI Performance Studio"
+│   └── owl-logo.jpg          # user-provided logo (referenced everywhere)
+└── src/
+    ├── App.js                # routes: "/" Home + "*" NotFound; mounts CrosshairCursor, SocialProofToaster, CaseStudyModal globally
+    ├── index.css             # added marquee keyframes, cursor utility, roi-slider thumb
+    ├── pages/NotFound.jsx
+    └── components/site/
+        ├── Hero.jsx                 (hero-cta wrapped in MagneticCta; backdrop hidden on mobile)
+        ├── MarketingBackdrop.jsx
+        ├── LiveTicker.jsx           (between Hero and PressShelf)
+        ├── PressShelf.jsx           (replaces PressBar in App.js; PressBar.jsx unused)
+        ├── Portfolio.jsx            (buttons -> onOpen(project))
+        ├── CaseStudyModal.jsx       (global, controlled by App.activeCase)
+        ├── RoiCalculator.jsx        (onSubmitLead -> openInquiry)
+        ├── BigCtaCard.jsx           (pre-footer)
+        ├── Footer.jsx               (footer-cta wrapped in MagneticCta)
+        ├── SocialProofToaster.jsx   (global, hidden md:block)
+        ├── CrosshairCursor.jsx      (global, pointer:fine only)
+        ├── MagneticCta.jsx
+        └── ScrollReveal.jsx         (wraps StatsBar, Insights in App.js)
+```
 
-## User Personas
-1. **Founder / CMO** evaluating agencies — needs proof of craft, pricing transparency, fast contact.
-2. **Marketing manager** scoping vendors — needs services breakdown, case studies, tier comparison.
-3. **Curious browser** — engaged via AI chat to qualify intent before form.
+## Backlog / P1-P2
+- Replace typographic press wordmarks with real authorised press logos (needs legal sign-off)
+- Real case-study pages (`/work/:slug`) with richer narrative, gallery, attachments
+- Blog/Insights real content (currently static card grid in `Insights.jsx`)
+- Connect Inquiry form → email (Resend) or CRM webhook
+- Connect ROI lead-capture → same backend endpoint; store in Mongo
+- `PressBar.jsx` is now unused — delete on next refactor pass
 
-## Core Requirements (static)
-- Stunning hero, services, portfolio, pricing, testimonials, blog/insights, footer
-- Working inquiry form persisting to MongoDB
-- AI chat assistant with multi-turn context
-- Mobile responsive, no emoji icons, no Inter/Roboto fonts
-
-## What's Implemented (Feb 2026)
-- ✅ Hero with massive type + kinetic marquee + 3D background
-- ✅ Stats bar, 5-card services grid, 3-step process, 4-item portfolio bento
-- ✅ 3-tier pricing (Ignite / Accelerate / Dominate) with "Most Popular" highlight
-- ✅ Testimonials carousel with prev/next + image swap
-- ✅ Insights/blog teaser
-- ✅ Massive "Ready to scale?" footer with CTA + contact
-- ✅ Inquiry Dialog (Shadcn) — name, email, company, service, budget, message → POST /api/inquiries
-- ✅ AI Chat Widget (floating) — POST /api/chat → Claude Sonnet 4.5 with conversation history replay
-- ✅ Lenis smooth scroll, framer-motion entrance animations, magnetic underlines, accent glow buttons
-- ✅ All testing-agent issues resolved (chat session continuity fixed)
-
-## Backlog (P0 / P1 / P2)
-- **P1**: Email notifications on new inquiry (Resend/SendGrid)
-- **P1**: Admin dashboard (`/admin`) to view & manage inquiries
-- **P1**: Real case study detail pages (currently links go to `#`)
-- **P2**: Calendly / book-a-call embed
-- **P2**: Newsletter signup + insights detail pages
-- **P2**: Custom logo/illustration system to replace stock imagery
-- **P2**: A/B testing variants for hero CTAs
-
-## Next Tasks
-1. Add Resend email notifications + admin dashboard
-2. Build out case study detail pages with metrics
-3. Add Calendly integration for direct booking
+## Dev notes for next agent
+- User is highly visual-driven. Keep Tesla/Apple tier polish; avoid generic
+  SaaS tropes and "AI slop" purple gradients.
+- Do not revert the owl logo to an SVG. The `owl-logo.jpg` in `public/` is
+  deliberate and user-provided.
+- Backend exists (`/app/backend`) but the Inquiry dialog is currently
+  frontend-only (no POST). Hooking it to `/api/inquiries` is the next
+  logical backend task.

@@ -28,13 +28,13 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] grain overflow-hidden flex flex-col"
       data-testid="hero-section"
     >
-      {/* Marketing backdrop — floating dashboards, sites, social tiles */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Marketing backdrop — floating dashboards, sites, social tiles (desktop only) */}
+      <div className="absolute inset-0 pointer-events-none hidden md:block">
         <MarketingBackdrop />
       </div>
 
       {/* Right-side composition: precision visual behind + analytics card on top */}
-      <div className="hidden lg:flex absolute right-12 lg:right-20 top-1/2 -translate-y-1/2 w-[520px] xl:w-[600px] aspect-square pointer-events-none z-[1] items-center justify-center">
+      <div className="hidden md:flex absolute right-12 lg:right-20 top-1/2 -translate-y-1/2 w-[520px] xl:w-[600px] aspect-square pointer-events-none z-[1] items-center justify-center">
         <div className="absolute inset-0 opacity-50">
           <HeroVisual />
         </div>
