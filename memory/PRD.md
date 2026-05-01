@@ -44,12 +44,20 @@ dialog, ROI calculator, case studies, pre-footer mega CTA.
 ### Admin dashboard (`/admin`) — DONE
 - **Analytics tab** — 4 stat cards, daily chart, top countries / devices /
   browsers / OS / pages / referrers, CTA click leaderboard, 7/14/30-day range
+- **Messages tab** — every chat-widget conversation. Left column: session list
+  with visitor country / device / browser / IP. Right column: full transcript
+  with per-message role + timestamp.
 - **Leads tab** — inbox, expandable row, status transitions
   (new / contacted / qualified / won / lost), ROI snapshot surfaced
+- **Agents tab** — CRUD over AI personas. Each agent: name, role
+  (chat / voice / email), provider+model (whitelisted to 6 options), editable
+  system prompt, temperature, enabled flag, default-for-role flag. Public
+  `/api/chat` routes through whichever chat agent is marked `is_default`, so
+  prompt edits go live without a redeploy.
 - **Calls tab** — inbound + outbound call log with transcript + recording link
 - **Operator tab** — status banner, toggle inbound on/off, outbound dial form
   (Name / Company / Custom task / Phone). Shows "Not connected" banner until
-  `BLAND_API_KEY` is added.
+  `BLAND_API_KEY` is added. Resend email-alert indicator.
 - JWT stored in `localStorage.brivo_admin_token`; expiry 7 days
 
 ## Backlog (explicitly deferred by user — "add later")

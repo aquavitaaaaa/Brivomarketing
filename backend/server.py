@@ -677,6 +677,14 @@ async def create_agent(payload: AgentCreate, admin: dict = Depends(get_current_a
     now = datetime.now(timezone.utc).isoformat()
     doc.update({"id": str(uuid.uuid4()), "created_at": now, "updated_at": now})
 
+    # Whitelist (provider, model)
+    allowed = {(o["provider"], o["model"]) for o in agents_module.MODEL_OPTIONS}
+    if (doc["provider"], doc["model"]) not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported model: {doc['provider']}/{doc['model']}",
+        )
+
     # Only one default per role
     if doc["is_default"]:
         await db.agents.update_many(
@@ -701,6 +709,17 @@ async def update_agent(
     existing = await db.agents.find_one({"id": agent_id})
     if not existing:
         raise HTTPException(status_code=404, detail="Agent not found")
+
+    # Whitelist provider/model if either is being changed
+    if "provider" in changes or "model" in changes:
+        prov = changes.get("provider", existing["provider"])
+        mdl = changes.get("model", existing["model"])
+        allowed = {(o["provider"], o["model"]) for o in agents_module.MODEL_OPTIONS}
+        if (prov, mdl) not in allowed:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported model: {prov}/{mdl}",
+            )
 
     # Enforce single-default per role
     if changes.get("is_default") is True:
