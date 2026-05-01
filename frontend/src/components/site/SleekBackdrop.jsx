@@ -27,30 +27,37 @@ const PARTICLES = [
 export default function SleekBackdrop() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-      {/* 1. Deep ambient gradient with vertical vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0B0B0F] via-[#0E0E14] to-[#0A0A0E]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.55)_100%)]" />
+      {/* 1. Deep ambient gradient — LIGHTER, more atmospheric */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1F1F2C] via-[#191925] to-[#13131C]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(111,79,255,0.18),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_20%,rgba(204,255,0,0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.35)_100%)]" />
 
-      {/* 2. Aurora bloom — large, slow, soft */}
+      {/* 2. Aurora bloom — larger, brighter softer */}
       <motion.div
-        className="absolute -top-1/4 left-[10%] w-[900px] h-[700px] rounded-full bg-[#CCFF00]/[0.06] blur-[160px]"
+        className="absolute -top-1/4 left-[10%] w-[1000px] h-[800px] rounded-full bg-[#CCFF00]/[0.10] blur-[160px]"
         animate={{ x: [0, 60, 0], y: [0, -30, 0] }}
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -top-1/4 right-[6%] w-[1000px] h-[700px] rounded-full bg-[#6F4FFF]/[0.10] blur-[180px]"
+        className="absolute -top-1/4 right-[6%] w-[1100px] h-[800px] rounded-full bg-[#6F4FFF]/[0.18] blur-[180px]"
         animate={{ x: [0, -50, 0], y: [0, 40, 0] }}
         transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[1200px] h-[500px] rounded-full bg-[#CCFF00]/[0.05] blur-[140px]"
+        className="absolute bottom-[-15%] left-1/2 -translate-x-1/2 w-[1300px] h-[600px] rounded-full bg-[#CCFF00]/[0.08] blur-[140px]"
         animate={{ x: [-20, 20, -20], scale: [1, 1.05, 1] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-[10%] left-[20%] w-[500px] h-[500px] rounded-full bg-[#36F1CD]/[0.05] blur-[140px]"
+        className="absolute bottom-[10%] left-[20%] w-[600px] h-[600px] rounded-full bg-[#36F1CD]/[0.09] blur-[140px]"
         animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+      />
+      <motion.div
+        className="absolute top-[20%] right-[30%] w-[500px] h-[500px] rounded-full bg-[#FF6FA8]/[0.08] blur-[140px]"
+        animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
+        transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
 
       {/* 3. Faint blueprint micro-grid */}
@@ -162,7 +169,7 @@ export default function SleekBackdrop() {
       ))}
 
       {/* 8. Floor fade */}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#0B0B0F]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#13131C]" />
     </div>
   );
 }

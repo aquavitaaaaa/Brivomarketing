@@ -6,12 +6,12 @@
 @tailwind utilities;
 
 :root {
-  --brivo-bg: #0B0B0F;
-  --brivo-surface: #131319;
-  --brivo-elevated: #1A1A22;
-  --brivo-border: #2A2A36;
+  --brivo-bg: #15151E;
+  --brivo-surface: #1B1B26;
+  --brivo-elevated: #22222F;
+  --brivo-border: #34344A;
   --brivo-text: #FFFFFF;
-  --brivo-text-secondary: #A1A1AA;
+  --brivo-text-secondary: #B5B5C5;
   --brivo-accent: #CCFF00;
   --brivo-accent-hover: #B3E600;
   --brivo-violet: #6F4FFF;
