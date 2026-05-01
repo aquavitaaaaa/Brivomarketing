@@ -1,37 +1,37 @@
-import Marquee from "react-fast-marquee";
-
+// Static client wordmark row — calm, not scrolling.
 const LOGOS = [
-  "OBSIDIAN", "VAULT", "HALO", "NEONLAB", "AURA", "MERIDIAN",
-  "CIRRUS", "NORTHBLK", "FORGE", "PARALLAX", "ARCH&CO", "STRATA",
+  { name: "OBSIDIAN", style: "font-display tracking-[0.1em]" },
+  { name: "VAULT", style: "font-display tracking-[0.2em]" },
+  { name: "Halo", style: "font-display italic tracking-tight" },
+  { name: "NEONLAB", style: "font-display tracking-[0.15em]" },
+  { name: "Aura", style: "font-display italic tracking-tight" },
+  { name: "MERIDIAN", style: "font-display tracking-[0.1em]" },
+  { name: "Forge", style: "font-display tracking-tight" },
+  { name: "Strata", style: "font-display italic tracking-tight" },
 ];
 
 export default function TrustBar() {
   return (
     <section
-      className="relative py-12 md:py-16 border-y border-white/10 bg-[#0E0E14] overflow-hidden"
+      className="px-6 md:px-10 lg:px-16 py-14 md:py-16 border-y border-[#E7E3D8] bg-white"
       data-testid="trust-bar"
     >
-      <div className="absolute inset-0 gradient-mesh-soft pointer-events-none" />
-      <div className="relative px-6 md:px-12 lg:px-24 mb-8 flex items-center gap-3">
-        <span className="w-1.5 h-1.5 bg-[#CCFF00] rounded-full" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">
-          Trusted by 180+ category leaders
-        </span>
+      <div className="text-center mb-10">
+        <span className="eyebrow">Trusted by leading brands across 27 industries</span>
       </div>
-      <div className="marquee-mask">
-        <Marquee gradient={false} speed={40}>
-          {LOGOS.map((l, i) => (
-            <div
-              key={i}
-              className="mx-10 md:mx-14 flex items-center gap-3 group"
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-y-8 gap-x-6 items-center">
+        {LOGOS.map((l, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-center group"
+          >
+            <span
+              className={`text-xl md:text-[22px] font-[600] ${l.style} text-[#0B1B2B]/35 group-hover:text-[#0B1B2B] transition-colors duration-500`}
             >
-              <span className="w-1.5 h-1.5 rotate-45 bg-white/40 group-hover:bg-[#CCFF00] transition-colors" />
-              <span className="font-display text-2xl md:text-3xl font-black uppercase tracking-tighter text-white/40 group-hover:text-white transition-colors">
-                {l}
-              </span>
-            </div>
-          ))}
-        </Marquee>
+              {l.name}
+            </span>
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -21,24 +21,28 @@ import { Loader2, Send } from "lucide-react";
 import { submitInquiry } from "@/lib/api";
 
 const SERVICES = [
-  "Web Design & Dev",
+  "Web Design & Development",
   "SEO & Content",
-  "Paid Ads",
-  "Social Media",
-  "Branding & Identity",
+  "Paid Media",
+  "Social & Content",
+  "Brand & Identity",
   "Ignite Tier",
   "Accelerate Tier",
-  "Dominate Tier",
+  "Partner Tier",
   "Other",
 ];
 
 const BUDGETS = [
-  "< $2,500 / mo",
-  "$2,500 – $7,500 / mo",
-  "$7,500 – $15,000 / mo",
-  "$15,000+ / mo",
+  "< $2,500 / month",
+  "$2,500 – $7,500 / month",
+  "$7,500 – $15,000 / month",
+  "$15,000+ / month",
   "One-time project",
 ];
+
+const labelCls = "text-[11px] tracking-[0.18em] uppercase text-[#8190A1] font-medium";
+const inputCls =
+  "bg-white border border-[#E7E3D8] rounded-lg h-11 focus-visible:ring-[#B8864C] focus-visible:ring-offset-0 focus-visible:ring-2 focus-visible:border-[#B8864C] text-[#0B1B2B] placeholder:text-[#B6BDC7]";
 
 export default function InquiryDialog({ open, onOpenChange, defaultService, source }) {
   const [form, setForm] = useState({
@@ -71,7 +75,7 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
     setLoading(true);
     try {
       await submitInquiry({ ...form, source: source || "inquiry-dialog" });
-      toast.success("Inquiry received. We'll be in touch within 24 hours.");
+      toast.success("Thank you. We'll be in touch within 24 hours.");
       onOpenChange(false);
       setForm({
         name: "",
@@ -82,8 +86,7 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
         message: "",
       });
     } catch (err) {
-      const msg =
-        err?.response?.data?.detail || "Something went wrong. Try again.";
+      const msg = err?.response?.data?.detail || "Something went wrong. Please try again.";
       toast.error(typeof msg === "string" ? msg : "Submission failed.");
     } finally {
       setLoading(false);
@@ -93,83 +96,74 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="bg-[#0A0A0A] border border-white/10 text-white max-w-2xl rounded-none p-0 overflow-hidden"
+        className="bg-white border border-[#E7E3D8] text-[#0B1B2B] max-w-2xl rounded-2xl p-0 overflow-hidden"
         data-testid="inquiry-dialog"
       >
-        <div className="grain absolute inset-0 pointer-events-none" />
         <div className="relative px-8 py-8 md:px-10 md:py-10">
           <DialogHeader className="text-left">
-            <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#CCFF00]">
-              / Start a Project
+            <span className="text-[11px] tracking-[0.2em] uppercase text-[#B8864C] font-medium">
+              Start a conversation
             </span>
-            <DialogTitle className="font-display text-3xl md:text-4xl font-black uppercase tracking-tight mt-3">
-              Tell us where you're stuck.
+            <DialogTitle className="font-display text-[28px] md:text-[34px] font-[500] tracking-tight mt-3 text-[#0B1B2B]">
+              Tell us about your project.
             </DialogTitle>
-            <DialogDescription className="text-white/60 text-sm mt-2">
-              Reply within 24 hours. No bots, no fluff — a strategist will read this.
+            <DialogDescription className="text-[#4E5C6E] text-[14px] mt-2 leading-relaxed">
+              A senior strategist will read your brief and reply within 24 hours. No bots, no generic sales decks.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={submit} className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Name *
-              </Label>
+              <Label className={labelCls}>Name *</Label>
               <Input
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
                 placeholder="Jane Doe"
-                className="bg-black border border-white/15 rounded-none h-11 focus-visible:ring-[#CCFF00] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className={inputCls}
                 data-testid="inquiry-name"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Email *
-              </Label>
+              <Label className={labelCls}>Email *</Label>
               <Input
                 type="email"
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
-                placeholder="jane@brand.com"
-                className="bg-black border border-white/15 rounded-none h-11 focus-visible:ring-[#CCFF00] focus-visible:ring-offset-0 focus-visible:ring-1"
+                placeholder="jane@company.com"
+                className={inputCls}
                 data-testid="inquiry-email"
                 required
               />
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Company
-              </Label>
+              <Label className={labelCls}>Company</Label>
               <Input
                 value={form.company}
                 onChange={(e) => update("company", e.target.value)}
                 placeholder="Acme Inc."
-                className="bg-black border border-white/15 rounded-none h-11 focus-visible:ring-[#CCFF00] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className={inputCls}
                 data-testid="inquiry-company"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Service *
-              </Label>
+              <Label className={labelCls}>Service of interest *</Label>
               <Select
                 value={form.service_interest}
                 onValueChange={(v) => update("service_interest", v)}
               >
                 <SelectTrigger
-                  className="bg-black border border-white/15 rounded-none h-11 focus:ring-[#CCFF00]"
+                  className="bg-white border border-[#E7E3D8] rounded-lg h-11 focus:ring-2 focus:ring-[#B8864C] text-[#0B1B2B]"
                   data-testid="inquiry-service"
                 >
-                  <SelectValue placeholder="Pick a service" />
+                  <SelectValue placeholder="Choose a service" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0A0A0A] border border-white/15 text-white rounded-none">
+                <SelectContent className="bg-white border border-[#E7E3D8] text-[#0B1B2B] rounded-lg">
                   {SERVICES.map((s) => (
-                    <SelectItem key={s} value={s} className="font-body">
+                    <SelectItem key={s} value={s}>
                       {s}
                     </SelectItem>
                   ))}
@@ -178,22 +172,20 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
             </div>
 
             <div className="space-y-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Budget
-              </Label>
+              <Label className={labelCls}>Budget</Label>
               <Select
                 value={form.budget}
                 onValueChange={(v) => update("budget", v)}
               >
                 <SelectTrigger
-                  className="bg-black border border-white/15 rounded-none h-11 focus:ring-[#CCFF00]"
+                  className="bg-white border border-[#E7E3D8] rounded-lg h-11 focus:ring-2 focus:ring-[#B8864C] text-[#0B1B2B]"
                   data-testid="inquiry-budget"
                 >
-                  <SelectValue placeholder="Select range" />
+                  <SelectValue placeholder="Select a range" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0A0A0A] border border-white/15 text-white rounded-none">
+                <SelectContent className="bg-white border border-[#E7E3D8] text-[#0B1B2B] rounded-lg">
                   {BUDGETS.map((b) => (
-                    <SelectItem key={b} value={b} className="font-body">
+                    <SelectItem key={b} value={b}>
                       {b}
                     </SelectItem>
                   ))}
@@ -202,28 +194,26 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">
-                Project Brief *
-              </Label>
+              <Label className={labelCls}>Project brief *</Label>
               <Textarea
                 value={form.message}
                 onChange={(e) => update("message", e.target.value)}
-                placeholder="What are you trying to scale, fix, or launch?"
+                placeholder="Tell us what you're trying to launch, scale, or solve."
                 rows={5}
-                className="bg-black border border-white/15 rounded-none focus-visible:ring-[#CCFF00] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className="bg-white border border-[#E7E3D8] rounded-lg focus-visible:ring-[#B8864C] focus-visible:ring-offset-0 focus-visible:ring-2 focus-visible:border-[#B8864C] text-[#0B1B2B] placeholder:text-[#B6BDC7]"
                 data-testid="inquiry-message"
                 required
               />
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-4 pt-2">
-              <span className="text-xs text-white/40">
-                * Required. We never share your info.
+              <span className="text-[12px] text-[#8190A1]">
+                * Required. We never share your information.
               </span>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-xs uppercase tracking-[0.2em] font-bold px-7 py-4 accent-glow disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-[#0B1B2B] text-white rounded-full text-[13px] font-medium px-7 py-3.5 hover:bg-[#14283F] transition-all disabled:opacity-60"
                 data-testid="inquiry-submit"
               >
                 {loading ? (
@@ -231,7 +221,7 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
                 ) : (
                   <Send size={14} />
                 )}
-                {loading ? "Sending" : "Send Brief"}
+                {loading ? "Sending" : "Send brief"}
               </button>
             </div>
           </form>

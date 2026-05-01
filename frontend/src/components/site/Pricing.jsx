@@ -7,10 +7,10 @@ const tiers = [
     name: "Ignite",
     price: "$2,500",
     sub: "/month",
-    tagline: "For early-stage brands ready to launch with momentum.",
+    tagline: "For early-stage brands launching with focus and momentum.",
     features: [
-      "1 marketing channel managed",
-      "Conversion-tuned landing site",
+      "One marketing channel managed",
+      "Conversion-focused landing site",
       "Monthly performance report",
       "Email support",
       "30-day strategy sprint",
@@ -22,12 +22,12 @@ const tiers = [
     name: "Accelerate",
     price: "$7,500",
     sub: "/month",
-    tagline: "Most chosen. Multi-channel scale with a dedicated strategist.",
+    tagline: "Most chosen. Multi-channel growth with a dedicated strategist.",
     features: [
-      "3 channels managed",
+      "Three channels managed",
       "Custom website (up to 12 pages)",
-      "Weekly reporting + reviews",
-      "Dedicated strategist",
+      "Weekly reporting &amp; reviews",
+      "Dedicated senior strategist",
       "Creative production included",
       "Priority Slack support",
     ],
@@ -35,17 +35,17 @@ const tiers = [
   },
   {
     id: "dominate",
-    name: "Dominate",
+    name: "Partner",
     price: "$15K+",
     sub: "/month",
-    tagline: "Full-stack execution for category leaders. We become your team.",
+    tagline: "Full-service execution for established category leaders.",
     features: [
       "All channels — fully managed",
-      "Unlimited site & landing pages",
-      "Daily ops, daily reporting",
+      "Unlimited site &amp; landing pages",
+      "Daily operations &amp; reporting",
       "Brand + creative studio access",
-      "Quarterly market strategy offsite",
-      "24/7 support",
+      "Quarterly strategy offsite",
+      "24/7 priority support",
     ],
     highlight: false,
   },
@@ -55,76 +55,73 @@ export default function Pricing({ onSelect }) {
   return (
     <section
       id="pricing"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 lg:py-40 bg-[#0E0E14] border-y border-white/10 relative overflow-hidden"
+      className="px-6 md:px-10 lg:px-16 py-24 md:py-32 bg-white border-b border-[#E7E3D8]"
       data-testid="pricing-section"
     >
-      <div className="grid md:grid-cols-12 gap-8 mb-16">
-        <div className="md:col-span-4">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#CCFF00]">
-            / Pricing
-          </span>
-        </div>
-        <div className="md:col-span-8">
+      <div className="grid md:grid-cols-12 gap-10 mb-16 items-end">
+        <div className="md:col-span-7">
+          <span className="eyebrow-accent">Engagements</span>
           <h2
-            className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase leading-[0.9] tracking-tighter"
+            className="mt-5 font-display text-4xl sm:text-5xl md:text-[56px] font-[400] text-[#0B1B2B] leading-[1.08] tracking-tight"
             data-testid="pricing-title"
           >
-            Pick your <span className="text-[#CCFF00]">tier</span>.
-            <br />
-            We handle the rest.
+            Clear, predictable <em className="italic text-[#B8864C] font-[500]">retainers.</em>
           </h2>
-          <p className="mt-6 text-white/60 max-w-xl">
-            Transparent retainers. No hourly games. Cancel any time after your
-            first 90 days.
-          </p>
         </div>
+        <p className="md:col-span-4 md:col-start-9 text-[#4E5C6E] text-[16px] leading-relaxed">
+          Transparent monthly partnerships. No hourly billing. Cancel any time after the first 90 days.
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-px bg-white/10 border border-white/10">
+      <div className="grid md:grid-cols-3 gap-5">
         {tiers.map((t, i) => (
           <motion.div
             key={t.id}
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, delay: i * 0.1 }}
-            className={`relative bg-[#131319] p-8 md:p-10 flex flex-col overflow-hidden ${
-              t.highlight ? "md:scale-[1.03] md:-my-2 z-10 bg-[#16161E]" : ""
+            className={`relative rounded-2xl p-8 md:p-10 flex flex-col ${
+              t.highlight
+                ? "bg-[#0B1B2B] text-white border border-[#0B1B2B] md:scale-[1.02]"
+                : "bg-[#FBFAF6] text-[#0B1B2B] border border-[#E7E3D8]"
             }`}
             data-testid={`pricing-tier-${t.id}`}
           >
             {t.highlight && (
-              <div className="absolute -top-3 left-8 bg-[#CCFF00] text-black font-mono text-[10px] uppercase tracking-[0.25em] font-bold px-3 py-1.5">
-                Most Popular
+              <div className="absolute -top-3 left-8 bg-[#B8864C] text-white text-[11px] uppercase tracking-[0.18em] font-medium px-3 py-1.5 rounded-full">
+                Most popular
               </div>
             )}
 
             <div className="flex-1">
-              <h3 className="font-display text-3xl font-black uppercase tracking-tight mb-2">
+              <h3 className="font-display text-[30px] font-[500] tracking-tight mb-2">
                 {t.name}
               </h3>
-              <p className="text-white/50 text-sm leading-relaxed mb-8">
+              <p className={`text-[14px] leading-relaxed mb-8 ${t.highlight ? "text-white/65" : "text-[#4E5C6E]"}`}>
                 {t.tagline}
               </p>
 
-              <div className="flex items-baseline gap-1 mb-10 font-mono">
-                <span className="text-5xl font-bold text-white">{t.price}</span>
-                <span className="text-white/40 text-sm">{t.sub}</span>
+              <div className="flex items-baseline gap-1 mb-10">
+                <span className="font-display text-[48px] font-[500] tracking-tight">
+                  {t.price}
+                </span>
+                <span className={`text-[14px] ${t.highlight ? "text-white/50" : "text-[#8190A1]"}`}>
+                  {t.sub}
+                </span>
               </div>
 
-              <ul className="space-y-4 mb-10">
+              <ul className="space-y-3.5 mb-10">
                 {t.features.map((f) => (
                   <li
                     key={f}
-                    className="flex items-start gap-3 text-sm text-white/80"
+                    className={`flex items-start gap-3 text-[14px] ${t.highlight ? "text-white/85" : "text-[#0B1B2B]/80"}`}
                   >
                     <Check
                       size={16}
-                      className={
-                        t.highlight ? "text-[#CCFF00] mt-0.5 flex-shrink-0" : "text-white/60 mt-0.5 flex-shrink-0"
-                      }
+                      className={`mt-0.5 flex-shrink-0 ${t.highlight ? "text-[#B8864C]" : "text-[#B8864C]"}`}
                     />
-                    <span>{f}</span>
+                    <span dangerouslySetInnerHTML={{ __html: f }} />
                   </li>
                 ))}
               </ul>
@@ -132,23 +129,15 @@ export default function Pricing({ onSelect }) {
 
             <button
               onClick={() => onSelect(`${t.name} Tier`)}
-              className={`font-mono text-xs uppercase tracking-[0.2em] font-bold px-6 py-4 transition-all ${
+              className={`rounded-full text-[14px] font-medium px-6 py-3.5 transition-all ${
                 t.highlight
-                  ? "bg-[#CCFF00] text-black accent-glow"
-                  : "border border-white/20 text-white hover:border-[#CCFF00] hover:text-[#CCFF00]"
+                  ? "bg-[#B8864C] text-white hover:bg-[#8E6535]"
+                  : "bg-[#0B1B2B] text-white hover:bg-[#14283F]"
               }`}
               data-testid={`pricing-cta-${t.id}`}
             >
               Choose {t.name}
             </button>
-
-            {t.highlight && (
-              <>
-                <div className="absolute inset-0 border-2 border-[#CCFF00]/50 pointer-events-none" />
-                <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#CCFF00]/15 blur-3xl rounded-full pointer-events-none" />
-                <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-[#6F4FFF]/15 blur-3xl rounded-full pointer-events-none" />
-              </>
-            )}
           </motion.div>
         ))}
       </div>

@@ -1,44 +1,41 @@
 import { ShieldCheck } from "lucide-react";
 
-// Platform partners / certifications. Plain wordmarks styled appropriately.
 const partners = [
-  { name: "Google Premier Partner", short: "Google", style: "font-display font-black tracking-tight" },
-  { name: "Meta Business Partner", short: "Meta", style: "font-display font-black tracking-tight italic" },
-  { name: "HubSpot Solutions", short: "HubSpot", style: "font-display font-black tracking-tight" },
-  { name: "Shopify Partner", short: "Shopify", style: "font-display font-black tracking-tight" },
-  { name: "Klaviyo Master", short: "Klaviyo", style: "font-display font-black tracking-tighter" },
-  { name: "TikTok Marketing Partner", short: "TikTok", style: "font-display font-black tracking-tight" },
+  { name: "Google Premier Partner", short: "Google" },
+  { name: "Meta Business Partner", short: "Meta" },
+  { name: "HubSpot Solutions Partner", short: "HubSpot" },
+  { name: "Shopify Plus Partner", short: "Shopify" },
+  { name: "Klaviyo Master Partner", short: "Klaviyo" },
+  { name: "TikTok Marketing Partner", short: "TikTok" },
 ];
 
 export default function Partners() {
   return (
     <section
-      className="px-6 md:px-12 lg:px-24 py-16 md:py-20 border-t border-white/10 bg-[#0B0B0F]"
+      className="px-6 md:px-10 lg:px-16 py-20 md:py-24 bg-[#FBFAF6] border-b border-[#E7E3D8]"
       data-testid="partners-section"
     >
       <div className="flex items-center justify-between flex-wrap gap-6 mb-10">
         <div className="flex items-center gap-3">
-          <ShieldCheck size={16} className="text-[#CCFF00]" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/55">
-            Certified Platform Partners
-          </span>
+          <ShieldCheck size={16} className="text-[#B8864C]" />
+          <span className="eyebrow">Certified platform partners</span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
+        <span className="text-[11px] text-[#8190A1] tracking-wider">
           Active certifications · Renewed Q1 2026
         </span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-white/10 border border-white/10">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {partners.map((p) => (
           <div
             key={p.short}
-            className="bg-[#131319] px-5 py-7 flex flex-col items-start justify-between min-h-[120px] hover:bg-[#16161E] transition-colors group"
+            className="bg-white rounded-xl border border-[#E7E3D8] px-5 py-6 flex flex-col items-start justify-between min-h-[110px] hover:border-[#B8864C] transition-colors group"
             data-testid={`partner-${p.short.toLowerCase()}`}
           >
-            <span className={`text-2xl text-white/75 group-hover:text-white transition-colors ${p.style}`}>
+            <span className="font-display text-[22px] font-[600] text-[#0B1B2B]/75 group-hover:text-[#0B1B2B] transition-colors tracking-tight">
               {p.short}
             </span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 mt-3">
+            <span className="text-[10px] tracking-[0.15em] uppercase text-[#8190A1] mt-3">
               {p.name}
             </span>
           </div>

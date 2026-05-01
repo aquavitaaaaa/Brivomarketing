@@ -1,66 +1,59 @@
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Logo from "@/components/site/Logo";
-import MagneticCta from "@/components/site/MagneticCta";
 
 export default function Footer({ onCTA }) {
   return (
     <footer
-      className="relative bg-[#0B0B0F] border-t border-white/10 px-6 md:px-12 lg:px-24 pt-24 md:pt-32 pb-12 grain overflow-hidden"
+      className="relative bg-[#0B1B2B] text-white px-6 md:px-10 lg:px-16 pt-24 md:pt-28 pb-10 overflow-hidden"
       data-testid="footer"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(204,255,0,0.08),transparent_60%)] pointer-events-none" />
-      <div className="absolute top-1/2 -left-40 w-[500px] h-[500px] bg-[#6F4FFF]/8 blur-[100px] rounded-full pointer-events-none" />
+      {/* soft aura */}
+      <div className="absolute -top-40 -right-20 w-[600px] h-[600px] rounded-full bg-[#B8864C]/10 blur-[140px] pointer-events-none" />
 
       <div className="relative z-10 grid md:grid-cols-12 gap-10 mb-20">
         <div className="md:col-span-8">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#CCFF00]">
-            / Let's Build
+          <span className="text-[11px] tracking-[0.22em] uppercase text-[#B8864C]">
+            Get in touch
           </span>
           <motion.h2
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 24, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="mt-6 font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase leading-[0.85] tracking-[-0.05em]"
+            className="mt-5 font-display text-[44px] sm:text-[60px] md:text-[80px] font-[400] leading-[1.02] tracking-tight"
             data-testid="footer-cta-title"
           >
-            Ready to
+            Let&apos;s build something
             <br />
-            <span className="text-[#CCFF00]">scale?</span>
+            <em className="italic text-[#B8864C] font-[500]">worth remembering.</em>
           </motion.h2>
         </div>
         <div className="md:col-span-4 flex md:items-end">
-          <MagneticCta>
-            <button
-              onClick={onCTA}
-              className="group inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow cursor-target"
-              data-testid="footer-cta"
-            >
-              Start a Project
-              <ArrowUpRight
-                size={18}
-                className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-              />
-            </button>
-          </MagneticCta>
+          <button
+            onClick={onCTA}
+            className="group inline-flex items-center gap-2 bg-[#B8864C] text-white rounded-full px-7 py-4 text-[14px] font-medium hover:bg-[#8E6535] transition-all"
+            data-testid="footer-cta"
+          >
+            Start a project
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+          </button>
         </div>
       </div>
 
       <div className="relative z-10 grid md:grid-cols-12 gap-10 pt-12 border-t border-white/10">
         <div className="md:col-span-4">
-          <Logo size={36} />
-          <p className="mt-5 text-white/60 text-sm max-w-xs leading-relaxed">
-            A high-performance digital marketing & web design studio. Built for
-            founders who refuse average.
+          <Logo size={40} mono />
+          <p className="mt-5 text-white/60 text-[14px] max-w-xs leading-relaxed">
+            A modern performance studio for established brands. Web, marketing, and measurement under one roof.
           </p>
         </div>
 
         <div className="md:col-span-2">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4">
+          <div className="text-[11px] tracking-[0.2em] uppercase text-white/45 mb-4">
             Studio
           </div>
-          <ul className="space-y-3 text-sm text-white/80">
+          <ul className="space-y-3 text-[14px] text-white/80">
             <li><a className="link-underline" href="#services">Services</a></li>
             <li><a className="link-underline" href="#work">Work</a></li>
             <li><a className="link-underline" href="#process">Process</a></li>
@@ -69,35 +62,35 @@ export default function Footer({ onCTA }) {
         </div>
 
         <div className="md:col-span-3">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4">
+          <div className="text-[11px] tracking-[0.2em] uppercase text-white/45 mb-4">
             Contact
           </div>
           <a
             href="mailto:hello@brivomarketing.com"
-            className="block font-display text-xl md:text-2xl font-bold link-underline hover:text-[#CCFF00] transition-colors"
+            className="block font-display text-[20px] md:text-[22px] font-[500] link-underline hover:text-[#B8864C] transition-colors"
             data-testid="footer-email"
           >
             hello@brivomarketing.com
           </a>
-          <p className="mt-3 text-white/50 text-sm">Worldwide • EST time zone</p>
+          <p className="mt-3 text-white/55 text-[13px]">Worldwide · EST time zone</p>
         </div>
 
         <div className="md:col-span-3">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4">
-            Social
+          <div className="text-[11px] tracking-[0.2em] uppercase text-white/45 mb-4">
+            Connect
           </div>
-          <ul className="space-y-3 text-sm text-white/80">
-            <li><a className="link-underline" href="#">Instagram</a></li>
+          <ul className="space-y-3 text-[14px] text-white/80">
             <li><a className="link-underline" href="#">LinkedIn</a></li>
-            <li><a className="link-underline" href="#">X / Twitter</a></li>
+            <li><a className="link-underline" href="#">Instagram</a></li>
+            <li><a className="link-underline" href="#">X · Twitter</a></li>
             <li><a className="link-underline" href="#">Dribbble</a></li>
           </ul>
         </div>
       </div>
 
-      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 font-mono text-[10px] uppercase tracking-[0.25em] text-white/40">
+      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 text-[12px] text-white/45">
         <span>© 2026 BrivoMarketing — All rights reserved</span>
-        <span>Crafted with obsession</span>
+        <span>Designed and engineered with care.</span>
       </div>
     </footer>
   );

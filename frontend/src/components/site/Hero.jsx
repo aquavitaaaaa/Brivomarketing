@@ -1,215 +1,158 @@
 import { motion } from "framer-motion";
-import Marquee from "react-fast-marquee";
-import { ArrowUpRight, TrendingUp } from "lucide-react";
-import HeroVisual from "@/components/site/HeroVisual";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import AnalyticsCard from "@/components/site/AnalyticsCard";
-import MarketingBackdrop from "@/components/site/MarketingBackdrop";
-import MagneticCta from "@/components/site/MagneticCta";
 
 const fadeUp = {
-  hidden: { y: 40, opacity: 0 },
+  hidden: { y: 28, opacity: 0 },
   show: (i = 0) => ({
     y: 0,
     opacity: 1,
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 + i * 0.08 },
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.12 + i * 0.08 },
   }),
 };
-
-const liveStats = [
-  { label: "Revenue tracked", value: "$120M+", trend: "+38% YoY" },
-  { label: "Brands scaled", value: "180+", trend: "Active retainers" },
-  { label: "Avg. ROAS", value: "4.2x", trend: "Verified" },
-];
 
 export default function Hero({ onCTA }) {
   return (
     <section
       id="top"
-      className="relative min-h-[100vh] grain overflow-hidden flex flex-col"
+      className="relative min-h-[100vh] overflow-hidden flex flex-col bg-[#FBFAF6]"
       data-testid="hero-section"
     >
-      {/* Marketing backdrop — floating dashboards, sites, social tiles (desktop only) */}
-      <div className="absolute inset-0 pointer-events-none hidden md:block">
-        <MarketingBackdrop />
-      </div>
+      {/* Soft ambient backdrop */}
+      <div className="absolute inset-0 soft-aura pointer-events-none" />
+      <div className="absolute inset-0 grid-faint pointer-events-none opacity-70" />
 
-      {/* Right-side composition: precision visual behind + analytics card on top */}
-      <div className="hidden md:flex absolute right-12 lg:right-20 top-1/2 -translate-y-1/2 w-[520px] xl:w-[600px] aspect-square pointer-events-none z-[1] items-center justify-center">
-        <div className="absolute inset-0 opacity-50">
-          <HeroVisual />
-        </div>
-        <div className="relative pointer-events-auto">
-          <AnalyticsCard />
-        </div>
-      </div>
+      <div className="relative z-10 flex-1 px-6 md:px-10 lg:px-16 pt-32 md:pt-36 pb-16 md:pb-24">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          {/* Left column — copy */}
+          <div className="lg:col-span-7">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={0}
+              className="inline-flex items-center gap-3"
+            >
+              <span className="chip">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8864C]" />
+                Marketing &amp; Web Studio · Est. 2019
+              </span>
+            </motion.div>
 
-      <div className="relative z-10 flex-1 px-6 md:px-12 lg:px-24 pt-32 md:pt-40 pb-12">
-        <div className="max-w-[860px]">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={0}
-            className="flex items-center gap-3 mb-8 flex-wrap"
-          >
-            <span className="relative w-2 h-2">
-              <span className="absolute inset-0 bg-[#CCFF00] rounded-full" />
-              <span className="absolute inset-0 bg-[#CCFF00] rounded-full animate-ping opacity-75" />
-            </span>
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.32em] text-white/75">
-              BrivoMarketing
-            </span>
-            <span className="text-white/25">·</span>
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.32em] text-[#CCFF00]/80">
-              AI Performance Studio · Q2 2026
-            </span>
-          </motion.div>
+            <motion.h1
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={1}
+              className="mt-7 font-display text-[2.6rem] sm:text-[3.6rem] md:text-[4.4rem] lg:text-[5rem] xl:text-[5.6rem] font-[400] leading-[1.02] tracking-[-0.02em] text-[#0B1B2B]"
+              data-testid="hero-title"
+            >
+              Marketing that moves
+              <br />
+              your business
+              <br />
+              <em className="font-[500] italic text-[#B8864C] not-italic-ua" style={{ fontStyle: "italic" }}>forward.</em>
+            </motion.h1>
 
-          <motion.h1
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={1}
-            className="font-display text-[3rem] sm:text-7xl md:text-8xl lg:text-[7rem] xl:text-[8.5rem] font-black uppercase leading-[0.86] tracking-[-0.045em]"
-            data-testid="hero-title"
-          >
-            Dominate
-            <br />
-            the digital
-            <br />
-            <span className="text-[#CCFF00]">noise.</span>
-          </motion.h1>
+            <motion.p
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={2}
+              className="mt-8 max-w-xl text-[#4E5C6E] text-[17px] md:text-[18px] leading-[1.65]"
+            >
+              We design thoughtful websites and measurable marketing systems for established brands — with the discipline of a consultancy and the creative edge of a studio.
+            </motion.p>
 
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={2}
-            className="mt-10 max-w-xl text-white/70 text-base md:text-lg leading-relaxed"
-          >
-            We engineer AI‑powered websites and ruthless marketing systems for
-            brands that refuse to be ignored. Where others guess, our models
-            see. Less fluff. More market share.
-          </motion.p>
-
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={3}
-            className="mt-10 flex flex-wrap items-center gap-5"
-          >
-            <MagneticCta>
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={3}
+              className="mt-10 flex flex-wrap items-center gap-4"
+            >
               <button
                 onClick={onCTA}
-                className="group relative inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow overflow-hidden cursor-target"
+                className="group btn-primary"
                 data-testid="hero-cta"
               >
-                <span className="relative flex items-center gap-3 z-10">
-                  Start a Project
-                  <ArrowUpRight
-                    size={18}
-                    className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                  />
-                </span>
-                <span className="absolute inset-0 overflow-hidden pointer-events-none">
-                  <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-white/40 skew-x-[-20deg] shine-sweep" />
-                </span>
+                Start a project
+                <ArrowRight
+                  size={16}
+                  className="transition-transform group-hover:translate-x-1"
+                />
               </button>
-            </MagneticCta>
-            <a
-              href="#work"
-              className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white link-underline"
-              data-testid="hero-secondary-cta"
-            >
-              See the work →
-            </a>
-          </motion.div>
+              <a
+                href="#work"
+                className="btn-ghost"
+                data-testid="hero-secondary-cta"
+              >
+                See our work
+              </a>
+            </motion.div>
 
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={4}
-            className="mt-10 flex items-center gap-3 pt-6 border-t border-white/10 max-w-md"
-          >
-            <div className="flex -space-x-2">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={4}
+              className="mt-12 grid sm:grid-cols-2 gap-5 max-w-lg"
+            >
               {[
-                "https://images.unsplash.com/photo-1774481528970-41e591147018?w=60&h=60&fit=crop&crop=faces&q=70",
-                "https://images.unsplash.com/photo-1762635696772-0ed637b1a3a7?w=60&h=60&fit=crop&crop=faces&q=70",
-                "https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=60&h=60&fit=crop&q=70",
-              ].map((src, i) => (
-                <div
-                  key={i}
-                  className="w-9 h-9 rounded-full border-2 border-[#0B0B0F] overflow-hidden"
-                >
-                  <img src={src} alt="" className="w-full h-full object-cover grayscale" />
+                "Trusted by 180+ established brands",
+                "Transparent pricing. No long contracts.",
+              ].map((t) => (
+                <div key={t} className="flex items-start gap-3">
+                  <CheckCircle2 size={18} className="text-[#B8864C] mt-0.5 flex-shrink-0" />
+                  <span className="text-[14px] text-[#0B1B2B]/75 leading-relaxed">
+                    {t}
+                  </span>
                 </div>
               ))}
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/55">
-              Trusted by 180+ founders worldwide
-            </span>
+            </motion.div>
+          </div>
+
+          {/* Right column — analytics card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-5 flex items-center justify-center"
+          >
+            <AnalyticsCard />
           </motion.div>
         </div>
       </div>
 
-      {/* Live stats strip */}
+      {/* Bottom hairline stats */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.0, duration: 0.8 }}
-        className="relative z-10 px-6 md:px-12 lg:px-24"
+        transition={{ delay: 0.9, duration: 0.7 }}
+        className="relative z-10 px-6 md:px-10 lg:px-16 pb-10"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 backdrop-blur-xl">
-          {liveStats.map((s, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 border-t border-[#E7E3D8]">
+          {[
+            { label: "Revenue generated", value: "$120M+" },
+            { label: "Brands partnered", value: "180+" },
+            { label: "Average ROAS", value: "4.2x" },
+            { label: "Client retention", value: "92%" },
+          ].map((s, i) => (
             <div
               key={s.label}
-              className="bg-[#0E0E14] px-6 py-5 flex items-center gap-5 group hover:bg-[#131319] transition-colors"
+              className={`py-6 md:py-7 ${i > 0 ? "md:border-l border-[#E7E3D8]" : ""} ${i > 0 && i < 2 ? "border-l border-[#E7E3D8]" : ""} md:pl-6 ${i > 1 && "pt-0 md:pt-7 border-t md:border-t-0 border-[#E7E3D8]"}`}
               data-testid={`hero-stat-${i}`}
             >
-              <div className="w-10 h-10 border border-white/15 flex items-center justify-center text-[#CCFF00] flex-shrink-0">
-                <TrendingUp size={16} />
+              <div className="font-display text-3xl md:text-4xl font-[500] text-[#0B1B2B] tracking-tight">
+                {s.value}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
-                  {s.label}
-                </div>
-                <div className="font-display text-2xl md:text-3xl font-black tracking-tight mt-1">
-                  {s.value}
-                </div>
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45 text-right hidden md:block">
-                {s.trend}
+              <div className="mt-2 text-[12px] text-[#8190A1] tracking-[0.05em]">
+                {s.label}
               </div>
             </div>
           ))}
         </div>
       </motion.div>
-
-      {/* Service marquee */}
-      <div className="relative z-10 mt-12 lg:mt-16 border-y border-white/10 py-6 marquee-mask bg-black/30 backdrop-blur-xl">
-        <Marquee gradient={false} speed={50} pauseOnHover>
-          {[
-            "WEB DESIGN",
-            "SEO",
-            "PAID ADS",
-            "SOCIAL MEDIA",
-            "BRANDING",
-            "CRO",
-            "WEB DEV",
-            "CONTENT",
-          ].map((w, i) => (
-            <span
-              key={i}
-              className="font-display text-3xl md:text-5xl uppercase font-black tracking-tighter mx-10 flex items-center"
-            >
-              {w}
-              <span className="w-2 h-2 rotate-45 bg-[#CCFF00] ml-10" />
-            </span>
-          ))}
-        </Marquee>
-      </div>
     </section>
   );
 }

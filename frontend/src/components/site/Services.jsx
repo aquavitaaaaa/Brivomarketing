@@ -5,54 +5,49 @@ import {
   Megaphone,
   Share2,
   Sparkles,
-  ArrowUpRight,
+  ArrowRight,
 } from "lucide-react";
 
 const services = [
   {
     id: "web",
     icon: Code2,
-    title: "Web Design & Dev",
-    desc: "Conversion-tuned, custom-coded sites that load fast, rank well, and close deals.",
+    title: "Web design & development",
+    desc: "Conversion-focused websites, thoughtfully designed and beautifully built for the long term.",
     tag: "01",
-    metrics: ["+412% leads", "0.9s LCP", "100/100 Lighthouse"],
-    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&w=600&q=70",
+    metrics: ["Custom design systems", "Headless architecture", "Accessibility first"],
   },
   {
     id: "seo",
     icon: Search,
-    title: "SEO & Content",
-    desc: "Technical SEO, content engines, and link strategies that compound for years.",
+    title: "SEO & content strategy",
+    desc: "Technical SEO and editorial content engines that compound visibility for years — not weeks.",
     tag: "02",
-    metrics: ["1.2M organic", "Top 3 keywords", "DR 70+"],
-    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&w=600&q=70",
+    metrics: ["Technical audits", "Editorial planning", "Authority building"],
   },
   {
     id: "ads",
     icon: Megaphone,
-    title: "Paid Ads",
-    desc: "Google, Meta, TikTok. We don't run ads — we build profitable acquisition systems.",
+    title: "Paid media",
+    desc: "Measured, efficient acquisition across Google, Meta and LinkedIn — engineered for sustainable ROAS.",
     tag: "03",
-    metrics: ["5.8x ROAS", "-42% CAC", "$30M tracked"],
-    img: "https://images.unsplash.com/photo-1771931342240-2c277b33905f?crop=entropy&cs=srgb&fm=jpg&w=600&q=70",
+    metrics: ["Full-funnel strategy", "Creative testing", "Attribution clarity"],
   },
   {
     id: "social",
     icon: Share2,
-    title: "Social Media",
-    desc: "Cultural-first content, community ops, and creator strategy that move metrics.",
+    title: "Social & content",
+    desc: "Brand-forward social programs and creative production that earn attention and build community.",
     tag: "04",
-    metrics: ["+820% reach", "Viral hits", "Creator network"],
-    img: "https://images.unsplash.com/photo-1602475063211-3d98d60e3b1f?crop=entropy&cs=srgb&fm=jpg&w=600&q=70",
+    metrics: ["Monthly editorial", "Creator partnerships", "Community ops"],
   },
   {
     id: "brand",
     icon: Sparkles,
-    title: "Branding & Identity",
-    desc: "Visual systems and logo design built to stop scrolls and command premium pricing.",
+    title: "Brand & identity",
+    desc: "Identity systems that signal quality and command the pricing your business deserves.",
     tag: "05",
-    metrics: ["Premium pricing", "Brand books", "Full systems"],
-    img: "https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?crop=entropy&cs=srgb&fm=jpg&w=600&q=70",
+    metrics: ["Naming & positioning", "Visual identity", "Brand guidelines"],
   },
 ];
 
@@ -60,91 +55,73 @@ export default function Services({ onSelect }) {
   return (
     <section
       id="services"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 lg:py-40 relative bg-[#0B0B0F]"
+      className="px-6 md:px-10 lg:px-16 py-24 md:py-32 bg-white border-b border-[#E7E3D8]"
       data-testid="services-section"
     >
-      <div className="grid md:grid-cols-12 gap-8 mb-16 items-end">
-        <div className="md:col-span-4">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#CCFF00]">
-            / Services
-          </span>
+      <div className="grid md:grid-cols-12 gap-10 mb-16 items-end">
+        <div className="md:col-span-6">
+          <span className="eyebrow-accent">Our services</span>
+          <h2
+            className="mt-5 font-display text-4xl sm:text-5xl md:text-[56px] font-[400] text-[#0B1B2B] leading-[1.08] tracking-tight"
+            data-testid="services-title"
+          >
+            A complete studio, <em className="italic text-[#B8864C] font-[500]">under one roof.</em>
+          </h2>
         </div>
-        <h2
-          className="md:col-span-8 font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase leading-[0.9] tracking-tighter"
-          data-testid="services-title"
-        >
-          Five weapons.
-          <br />
-          One <span className="text-stroke-accent">ruthless</span> system.
-        </h2>
+        <p className="md:col-span-5 md:col-start-8 text-[#4E5C6E] text-[17px] leading-relaxed">
+          Five connected disciplines, delivered by senior operators. We bring them together so you don&apos;t have to manage five different vendors.
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {services.map((s, i) => {
           const Icon = s.icon;
-          const isLast = i === services.length - 1;
           return (
             <motion.button
               key={s.id}
               onClick={() => onSelect(s.title)}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, delay: i * 0.07 }}
-              className={`group relative bg-[#131319] p-8 md:p-10 text-left transition-all duration-500 hover:bg-[#181821] overflow-hidden ${
-                isLast ? "lg:col-span-1 md:col-span-2" : ""
-              }`}
+              className="group relative text-left bg-[#FBFAF6] rounded-2xl border border-[#E7E3D8] p-8 md:p-10 card-lift"
               data-testid={`service-card-${s.id}`}
             >
-              {/* Hover image reveal */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                <img
-                  src={s.img}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/85 to-black/40" />
-              </div>
-
-              {/* Accent corner glow on hover */}
-              <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#CCFF00]/0 group-hover:bg-[#CCFF00]/15 blur-3xl rounded-full transition-all duration-700" />
-
-              <div className="relative flex items-start justify-between mb-12">
-                <div className="w-12 h-12 border border-white/15 flex items-center justify-center group-hover:border-[#CCFF00] group-hover:text-[#CCFF00] group-hover:bg-black/40 transition-all">
-                  <Icon size={20} />
+              <div className="flex items-start justify-between mb-10">
+                <div className="w-12 h-12 rounded-full bg-white border border-[#E7E3D8] flex items-center justify-center text-[#B8864C] group-hover:bg-[#0B1B2B] group-hover:text-[#B8864C] group-hover:border-[#0B1B2B] transition-all">
+                  <Icon size={18} />
                 </div>
-                <span className="font-mono text-xs text-white/30 group-hover:text-[#CCFF00] transition-colors">
+                <span className="font-display text-sm font-[500] text-[#8190A1]">
                   {s.tag}
                 </span>
               </div>
 
-              <h3 className="relative font-display text-2xl md:text-3xl font-bold uppercase tracking-tight mb-4">
+              <h3 className="font-display text-[26px] md:text-[28px] font-[500] text-[#0B1B2B] tracking-tight leading-[1.15] mb-4">
                 {s.title}
               </h3>
-              <p className="relative text-white/60 text-sm md:text-base leading-relaxed mb-6 group-hover:text-white/80 transition-colors">
+              <p className="text-[#4E5C6E] text-[15px] leading-relaxed mb-7">
                 {s.desc}
               </p>
 
-              <div className="relative flex flex-wrap gap-2 mb-10">
+              <ul className="space-y-2 mb-8">
                 {s.metrics.map((m) => (
-                  <span
+                  <li
                     key={m}
-                    className="font-mono text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 border border-white/15 text-white/60 group-hover:border-[#CCFF00]/40 group-hover:text-[#CCFF00] transition-all"
+                    className="flex items-center gap-2 text-[13px] text-[#0B1B2B]/75"
                   >
+                    <span className="w-1 h-1 rounded-full bg-[#B8864C]" />
                     {m}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
-              <div className="relative flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-white/50 group-hover:text-[#CCFF00] transition-colors">
-                Engage
-                <ArrowUpRight
+              <div className="flex items-center gap-2 text-[13px] font-medium text-[#0B1B2B] group-hover:text-[#B8864C] transition-colors">
+                Learn more
+                <ArrowRight
                   size={14}
-                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  className="transition-transform group-hover:translate-x-1"
                 />
               </div>
-
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#CCFF00]/40 pointer-events-none transition-all" />
             </motion.button>
           );
         })}

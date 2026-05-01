@@ -5,7 +5,6 @@ import { Toaster } from "sonner";
 
 import Navigation from "@/components/site/Navigation";
 import Hero from "@/components/site/Hero";
-import LiveTicker from "@/components/site/LiveTicker";
 import StatsBar from "@/components/site/StatsBar";
 import TrustBar from "@/components/site/TrustBar";
 import PressShelf from "@/components/site/PressShelf";
@@ -54,14 +53,12 @@ const Home = () => {
     <div className="App relative" data-testid="home-root">
       <Navigation onCTA={() => openInquiry("", "nav-cta")} />
       <Hero onCTA={() => openInquiry("", "hero-cta")} />
-      <LiveTicker />
-      <PressShelf />
+      <TrustBar />
       <ScrollReveal>
         <StatsBar />
       </ScrollReveal>
-      <TrustBar />
+      <PressShelf />
       <Services onSelect={(s) => openInquiry(s, "service-card")} />
-      <Industries onSelect={(s) => openInquiry(`${s} marketing`, "industry")} />
       <Differentiators />
       <Process />
       <Portfolio
@@ -72,6 +69,7 @@ const Home = () => {
           });
         }}
       />
+      <Industries onSelect={(s) => openInquiry(`${s} marketing`, "industry")} />
       <RoiCalculator />
       <Pricing onSelect={(tier) => openInquiry(tier, "pricing")} />
       <Testimonials />
@@ -109,14 +107,15 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster
-        theme="dark"
+        theme="light"
         position="bottom-center"
         toastOptions={{
           style: {
-            background: "#0A0A0A",
-            border: "1px solid #222",
-            color: "#fff",
-            borderRadius: 0,
+            background: "#FFFFFF",
+            border: "1px solid #E7E3D8",
+            color: "#0B1B2B",
+            borderRadius: 12,
+            fontFamily: "Inter, sans-serif",
           },
         }}
       />

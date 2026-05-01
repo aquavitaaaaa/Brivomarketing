@@ -1,17 +1,12 @@
 /**
- * BrivoMarketing — Owl Crest Logomark
- * --------------------------------------------------------------
- * Uses the user's bespoke owl crest artwork (public/owl-logo.jpg)
- * presented as a circular badge with:
- *   • Soft lime emission halo
- *   • Brand-tinted outer ring
- *   • Subtle inner stroke for depth
+ * BrivoMarketing — refined light-theme logomark.
+ * Circular crest + navy wordmark + subtle gold dot accent.
  */
-export default function Logo({ size = 44, mono = false, className = "", showWordmark = true }) {
-  const ringColor = mono ? "rgba(255,255,255,0.55)" : "rgba(204,255,0,0.55)";
-  const glow = mono
-    ? "0 0 0 1px rgba(255,255,255,0.25), 0 0 16px rgba(255,255,255,0.18)"
-    : "0 0 0 1px rgba(204,255,0,0.4), 0 0 18px rgba(204,255,0,0.30), 0 0 36px rgba(204,255,0,0.12)";
+export default function Logo({ size = 40, mono = false, className = "", showWordmark = true }) {
+  const ringColor = mono ? "rgba(255,255,255,0.35)" : "rgba(184,134,76,0.55)";
+  const shadow = mono
+    ? "0 0 0 1px rgba(255,255,255,0.15)"
+    : "0 4px 14px -4px rgba(11,27,43,0.18), 0 0 0 1px rgba(184,134,76,0.25)";
 
   return (
     <span className={`inline-flex items-center gap-3 ${className}`} data-testid="brivo-logo">
@@ -20,10 +15,10 @@ export default function Logo({ size = 44, mono = false, className = "", showWord
         style={{
           width: size,
           height: size,
-          boxShadow: glow,
+          boxShadow: shadow,
           border: `1px solid ${ringColor}`,
         }}
-        aria-label="BrivoMarketing — AI Performance Studio"
+        aria-label="BrivoMarketing"
       >
         <img
           src="/owl-logo.jpg"
@@ -31,21 +26,16 @@ export default function Logo({ size = 44, mono = false, className = "", showWord
           className="w-full h-full object-cover"
           draggable="false"
         />
-        {/* subtle inner highlight ring */}
-        <span
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 0 18px rgba(0,0,0,0.35)" }}
-        />
       </span>
 
       {showWordmark && (
-        <span className="flex flex-col leading-none">
-          <span className="font-display text-base md:text-[17px] font-black tracking-tight uppercase text-white">
-            Brivo<span className="text-white/55">Marketing</span>
+        <span className="flex flex-col leading-tight">
+          <span className={`font-display text-[19px] md:text-[20px] font-semibold tracking-tight ${mono ? "text-white" : "text-[#0B1B2B]"}`}>
+            Brivo<span className={mono ? "text-white/65" : "text-[#0B1B2B]/55"}>Marketing</span>
           </span>
-          <span className="font-mono text-[8px] uppercase tracking-[0.42em] text-white/55 mt-1.5 hidden md:flex items-center gap-2">
-            <span className="inline-block w-1 h-1 rounded-full bg-[#CCFF00] shadow-[0_0_8px_rgba(204,255,0,0.85)]" />
-            AI Performance Studio · 2026
+          <span className={`text-[10px] tracking-[0.22em] uppercase mt-0.5 flex items-center gap-1.5 ${mono ? "text-white/55" : "text-[#8190A1]"}`}>
+            <span className="inline-block w-1 h-1 rounded-full bg-[#B8864C]" />
+            Performance Studio
           </span>
         </span>
       )}

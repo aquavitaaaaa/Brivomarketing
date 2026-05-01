@@ -2,13 +2,8 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import MagneticCta from "@/components/site/MagneticCta";
 import { submitRoiLead } from "@/lib/api";
 
-/**
- * RoiCalculator — interactive sliders that compute a projected lift.
- * Captures email at the end as a soft lead-gen.
- */
 const BRIVO_TARGET_ROAS = 5.8;
 
 function fmtMoney(n) {
@@ -22,17 +17,17 @@ function Slider({ label, value, setValue, min, max, step, format, unit }) {
   return (
     <div>
       <div className="flex items-baseline justify-between mb-3">
-        <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/55">
+        <span className="text-[11px] tracking-[0.18em] uppercase text-[#8190A1] font-medium">
           {label}
         </span>
-        <span className="font-display text-2xl md:text-3xl font-black text-[#CCFF00]">
+        <span className="font-display text-[26px] md:text-[30px] font-[500] text-[#0B1B2B]">
           {format(value)}
-          {unit && <span className="text-base text-white/40 ml-1">{unit}</span>}
+          {unit && <span className="text-base text-[#8190A1] ml-1">{unit}</span>}
         </span>
       </div>
-      <div className="relative h-2 bg-white/[0.06] rounded-full">
+      <div className="relative h-2 bg-[#F3F1EA] rounded-full">
         <div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#CCFF00] to-[#9CCC00] rounded-full"
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#B8864C] to-[#8E6535] rounded-full"
           style={{ width: pct + "%" }}
         />
         <input
@@ -75,10 +70,10 @@ export default function RoiCalculator() {
     try {
       await submitRoiLead({ email, revenue, roas, spend, lift });
       setSubmitted(true);
-      toast.success("Audit queued — we'll be in touch within 48h.");
+      toast.success("Audit queued — we'll be in touch within 48 hours.");
     } catch (err) {
       const d = err?.response?.data?.detail;
-      toast.error(typeof d === "string" ? d : "Submission failed. Try again.");
+      toast.error(typeof d === "string" ? d : "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -87,38 +82,30 @@ export default function RoiCalculator() {
   return (
     <section
       id="roi"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 bg-[#0B0B0F] relative overflow-hidden"
+      className="px-6 md:px-10 lg:px-16 py-24 md:py-32 bg-[#FBFAF6] border-b border-[#E7E3D8]"
       data-testid="roi-section"
     >
-      <div className="absolute -top-40 right-[-10%] w-[800px] h-[800px] rounded-full bg-[#CCFF00]/[0.05] blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 -left-40 w-[700px] h-[700px] rounded-full bg-[#6F4FFF]/[0.10] blur-[140px] pointer-events-none" />
-
-      <div className="relative grid md:grid-cols-12 gap-8 mb-12 md:mb-16 items-end">
+      <div className="grid md:grid-cols-12 gap-10 mb-14 items-end">
         <div className="md:col-span-7">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#CCFF00]">
-            / Free Audit
-          </span>
+          <span className="eyebrow-accent">Complimentary audit</span>
           <motion.h2
-            initial={{ y: 30, opacity: 0 }}
+            initial={{ y: 24, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase leading-[0.9] tracking-tighter"
+            className="mt-5 font-display text-4xl sm:text-5xl md:text-[56px] font-[400] text-[#0B1B2B] leading-[1.08] tracking-tight"
           >
-            Your potential
-            <br />
-            <span className="text-[#CCFF00]">lift, calculated.</span>
+            Your potential, <em className="italic text-[#B8864C] font-[500]">in numbers.</em>
           </motion.h2>
         </div>
-        <p className="md:col-span-4 md:col-start-9 text-white/60 text-base leading-relaxed">
-          Slide your numbers. We'll show what scaling to a 5.8x ROAS could mean
-          for your top-line.
+        <p className="md:col-span-4 md:col-start-9 text-[#4E5C6E] text-[16px] leading-relaxed">
+          A quick projection of what scaling to a 5.8x ROAS could mean for your top-line. No obligation.
         </p>
       </div>
 
-      <div className="relative grid lg:grid-cols-12 gap-px bg-white/8 border border-white/10">
+      <div className="grid lg:grid-cols-12 gap-0 rounded-2xl overflow-hidden border border-[#E7E3D8] bg-white">
         {/* Sliders */}
-        <div className="lg:col-span-7 bg-[#13131C] p-8 md:p-12 space-y-10">
+        <div className="lg:col-span-7 p-8 md:p-12 space-y-10">
           <Slider
             label="Annual Revenue"
             value={revenue}
@@ -148,91 +135,80 @@ export default function RoiCalculator() {
             format={fmtMoney}
           />
 
-          <div className="flex items-start gap-3 pt-4 border-t border-white/8">
-            <Sparkles size={16} className="text-[#CCFF00] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-white/45 leading-relaxed">
-              Projection assumes scaling to Brivo's portfolio benchmark of
-              <span className="text-[#CCFF00]"> 5.8x ROAS</span>. Actual results
-              vary by vertical, offer, and creative quality.
+          <div className="flex items-start gap-3 pt-6 border-t border-[#EFECE3]">
+            <Sparkles size={16} className="text-[#B8864C] flex-shrink-0 mt-0.5" />
+            <p className="text-[13px] text-[#8190A1] leading-relaxed">
+              Projection assumes scaling to our portfolio benchmark of
+              <span className="text-[#0B1B2B] font-medium"> 5.8x ROAS</span>. Actual results vary by vertical, offer, and creative quality.
             </p>
           </div>
         </div>
 
-        {/* Result */}
-        <div className="lg:col-span-5 relative bg-gradient-to-br from-[#CCFF00] to-[#9CCC00] text-black p-8 md:p-12 flex flex-col justify-between min-h-[480px] overflow-hidden">
-          {/* Decorative pattern */}
-          <div
-            className="absolute inset-0 opacity-20 pointer-events-none"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.4) 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }}
-          />
+        {/* Result panel — navy */}
+        <div className="lg:col-span-5 relative bg-[#0B1B2B] text-white p-8 md:p-12 flex flex-col justify-between min-h-[500px] overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#B8864C]/15 blur-[120px]" />
 
           <div className="relative">
-            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-black/70">
-              Projected Lift / Year
+            <span className="text-[11px] tracking-[0.2em] uppercase text-[#B8864C]">
+              Projected lift · per year
             </span>
             <motion.div
               key={lift}
               initial={{ scale: 0.96, opacity: 0.7 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.25 }}
-              className="mt-5 font-display font-black text-5xl md:text-6xl lg:text-7xl tracking-[-0.04em] leading-none"
+              className="mt-5 font-display font-[500] text-[56px] md:text-[72px] tracking-tight leading-none"
             >
               +{fmtMoney(lift)}
             </motion.div>
-            <div className="mt-3 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-black/65">
-              <span className="w-1.5 h-1.5 rounded-full bg-black" />
+            <div className="mt-4 inline-flex items-center gap-2 text-[12px] tracking-wider text-white/70">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B8864C]" />
               {liftPct}% revenue uplift
             </div>
-            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-black/55">
-              When scaled to 5.8x ROAS · Brivo benchmark
+            <div className="mt-2 text-[12px] text-white/45">
+              When scaled to 5.8x ROAS benchmark
             </div>
           </div>
 
           {!submitted ? (
-            <form onSubmit={handleSubmit} className="relative mt-6">
-              <label className="font-mono text-[10px] uppercase tracking-[0.25em] text-black/65">
-                Send me the full audit →
+            <form onSubmit={handleSubmit} className="relative mt-8">
+              <label className="text-[11px] tracking-[0.18em] uppercase text-white/55">
+                Get the full audit
               </label>
-              <div className="mt-2 flex bg-[#0B0B0F] border-2 border-black">
+              <div className="mt-3 flex bg-white/5 border border-white/15 rounded-full overflow-hidden">
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="founder@brand.com"
-                  className="flex-1 bg-transparent text-white px-4 py-3.5 placeholder-white/40 focus:outline-none font-mono text-sm cursor-target"
+                  placeholder="you@company.com"
+                  className="flex-1 bg-transparent text-white px-5 py-3.5 placeholder-white/40 focus:outline-none text-[14px]"
                   data-testid="roi-email"
                 />
-                <MagneticCta strength={0.2}>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-[#CCFF00] text-black px-5 py-3.5 hover:bg-white transition-colors flex items-center gap-1 font-mono text-xs uppercase tracking-[0.2em] font-bold disabled:opacity-60"
-                    data-testid="roi-submit"
-                  >
-                    {submitting ? "Sending" : "Send"} <ChevronRight size={14} />
-                  </button>
-                </MagneticCta>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="bg-[#B8864C] text-white px-6 py-3.5 hover:bg-[#8E6535] transition-colors flex items-center gap-1 text-[13px] font-medium disabled:opacity-60"
+                  data-testid="roi-submit"
+                >
+                  {submitting ? "Sending" : "Send"} <ChevronRight size={14} />
+                </button>
               </div>
-              <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.25em] text-black/55">
-                No spam. Audit lands in your inbox within 48h.
+              <div className="mt-3 text-[11px] text-white/40">
+                No spam. Audit arrives in your inbox within 48 hours.
               </div>
             </form>
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative mt-6 bg-black text-[#CCFF00] p-5"
+              className="relative mt-8 bg-white/5 border border-[#B8864C]/40 p-5 rounded-xl"
             >
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/45 mb-2">
+              <div className="text-[11px] tracking-[0.2em] uppercase text-[#B8864C] mb-2">
                 ✓ Audit queued
               </div>
-              <div className="font-display text-lg font-bold">
-                Check {email} — we'll be in touch within 48 hours.
+              <div className="font-display text-[17px] font-[500]">
+                Check {email} — we&apos;ll be in touch within 48 hours.
               </div>
             </motion.div>
           )}
