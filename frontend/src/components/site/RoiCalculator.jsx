@@ -205,6 +205,7 @@ export default function RoiCalculator() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="founder@brand.com"
                   className="flex-1 bg-transparent text-white px-4 py-3.5 placeholder-white/40 focus:outline-none font-mono text-sm cursor-target"
+                  data-testid="roi-email"
                 />
                 <MagneticCta strength={0.2}>
                   <button
