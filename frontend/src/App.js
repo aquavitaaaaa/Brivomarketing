@@ -8,13 +8,16 @@ import Navigation from "@/components/site/Navigation";
 import Hero from "@/components/site/Hero";
 import StatsBar from "@/components/site/StatsBar";
 import TrustBar from "@/components/site/TrustBar";
+import PressBar from "@/components/site/PressBar";
 import Services from "@/components/site/Services";
+import Industries from "@/components/site/Industries";
 import Differentiators from "@/components/site/Differentiators";
 import Process from "@/components/site/Process";
 import Portfolio from "@/components/site/Portfolio";
 import Pricing from "@/components/site/Pricing";
 import Testimonials from "@/components/site/Testimonials";
 import Insights from "@/components/site/Insights";
+import Partners from "@/components/site/Partners";
 import Footer from "@/components/site/Footer";
 import InquiryDialog from "@/components/site/InquiryDialog";
 import ChatWidget from "@/components/site/ChatWidget";
@@ -46,15 +49,18 @@ const Home = () => {
     <div className="App relative" data-testid="home-root">
       <Navigation onCTA={() => openInquiry()} />
       <Hero onCTA={() => openInquiry()} />
+      <PressBar />
       <StatsBar />
       <TrustBar />
       <Services onSelect={(s) => openInquiry(s)} />
+      <Industries onSelect={(s) => openInquiry(`${s} marketing`)} />
       <Differentiators />
       <Process />
       <Portfolio />
       <Pricing onSelect={(tier) => openInquiry(tier)} />
       <Testimonials />
       <Insights />
+      <Partners />
       <Footer onCTA={() => openInquiry()} />
       <InquiryDialog
         open={inquiryOpen}

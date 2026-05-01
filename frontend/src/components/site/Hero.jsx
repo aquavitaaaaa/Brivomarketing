@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Marquee from "react-fast-marquee";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import HeroVisual from "@/components/site/HeroVisual";
+import AnalyticsCard from "@/components/site/AnalyticsCard";
 
 const fadeUp = {
   hidden: { y: 40, opacity: 0 },
@@ -40,9 +41,14 @@ export default function Hero({ onCTA }) {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B0B0F]" />
       </div>
 
-      {/* Right-side precision visual (absolute, won't conflict with text) */}
-      <div className="hidden lg:block absolute right-12 lg:right-24 top-1/2 -translate-y-1/2 w-[480px] xl:w-[560px] aspect-square pointer-events-none z-[1]">
-        <HeroVisual />
+      {/* Right-side composition: precision visual behind + analytics card on top */}
+      <div className="hidden lg:flex absolute right-12 lg:right-20 top-1/2 -translate-y-1/2 w-[520px] xl:w-[600px] aspect-square pointer-events-none z-[1] items-center justify-center">
+        <div className="absolute inset-0 opacity-50">
+          <HeroVisual />
+        </div>
+        <div className="relative pointer-events-auto">
+          <AnalyticsCard />
+        </div>
       </div>
 
       <div className="relative z-10 flex-1 px-6 md:px-12 lg:px-24 pt-32 md:pt-40 pb-12">
