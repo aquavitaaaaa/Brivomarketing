@@ -1,0 +1,146 @@
+{
+  "theme": "dark",
+  "archetype": "4 & 5 (Swiss High-Contrast + Jewel & Luxury)",
+  "typography": {
+    "fonts": [
+      {
+        "name": "Cabinet Grotesk",
+        "type": "heading",
+        "url": "https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,500,700,900,400&display=swap"
+      },
+      {
+        "name": "Satoshi",
+        "type": "body",
+        "url": "https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap"
+      },
+      {
+        "name": "JetBrains Mono",
+        "type": "mono",
+        "url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      }
+    ],
+    "scale": {
+      "h1": "text-4xl sm:text-5xl md:text-6xl tracking-tighter font-black uppercase",
+      "h2": "text-3xl sm:text-4xl md:text-5xl tracking-tight font-bold uppercase",
+      "h3": "text-2xl md:text-3xl font-bold",
+      "h4": "text-xl md:text-2xl font-bold",
+      "body": "text-base md:text-lg text-white/70 leading-relaxed font-normal",
+      "label": "text-xs uppercase tracking-[0.2em] font-mono text-accent"
+    }
+  },
+  "colors": {
+    "background": "#050505",
+    "surface": "#0A0A0A",
+    "surface_elevated": "#111111",
+    "border": "#222222",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A1A1AA",
+    "accent": "#CCFF00",
+    "accent_hover": "#B3E600"
+  },
+  "spacing_and_layout": {
+    "container_padding": "px-6 md:px-12 lg:px-24",
+    "section_spacing": "py-24 md:py-32 lg:py-40",
+    "grid_system": "Use 'Bento Tetris' for portfolio, and wide asymmetrical CSS Grid for Services. Emphasize generous spacing (3x scale) to let the high-contrast elements breathe."
+  },
+  "components": {
+    "buttons": "Sharp rectangles, no border-radius. bg-accent text-black font-bold uppercase tracking-widest px-8 py-4 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(204,255,0,0.4)] transition-all duration-300.",
+    "cards": "Flat solid surfaces. bg-surface_elevated border border-white/5. Hover state: border-accent/50 with subtle internal glow. No heavy shadows, just clean borders.",
+    "glassmorphism": "Used strictly for floating nav and chat widget. bg-black/60 backdrop-blur-2xl border-b border-white/10."
+  },
+  "motion_and_interactions": {
+    "scroll": "Lenis smooth scrolling (MANDATORY).",
+    "entrance": "Framer motion staggered fade-up for texts. Image reveals with scale down from 1.1 to 1.0.",
+    "hover": "High contrast shift, accent color reveal, magnetic button effects."
+  },
+  "sections": [
+    {
+      "name": "Navigation",
+      "instructions": "Sticky floating nav, glassmorphism, logo on left, links center, 'START A PROJECT' CTA on right. Use JetBrains Mono for links."
+    },
+    {
+      "name": "Hero Section",
+      "instructions": "Shock and awe. Massive typography (Cabinet Grotesk) reading 'DOMINATE THE DIGITAL NOISE'. Asymmetric layout. Background image overlaid with black/60 + noise texture. Include a kinetic marquee (react-fast-marquee) reading 'WEB DESIGN - SEO - PAID ADS' at the bottom. Use 'data-testid=\"hero-cta\"' for the main button.",
+      "media_requirements": ["hero_background", "texture_overlay"]
+    },
+    {
+      "name": "Stats / Social Proof",
+      "instructions": "A sleek horizontal bar beneath the hero. Big numbers (e.g., '$100M+ Generated', '150+ Brands Scaled'). JetBrains Mono for numbers, Satoshi for descriptors."
+    },
+    {
+      "name": "Services Showcase",
+      "instructions": "5 Cards. Use 'Control Room' grid. Web Dev, SEO, Paid Ads, Social Media, Branding. Cards should have a hover effect that reveals an accent border. Include an icon (lucide-react) and a short punchy description."
+    },
+    {
+      "name": "Process / How We Work",
+      "instructions": "Vertical timeline or a 3-step asymmetric bento layout. 1. Audit, 2. Execute, 3. Dominate. Use huge typography for numbers (01, 02, 03) with text stroke (transparent fill, white border)."
+    },
+    {
+      "name": "Portfolio / Case Studies",
+      "instructions": "Grid-based 'Tetris' Layout. Showcase 3-4 projects. Large images. On hover, show overlay with ROAS/Conversion metrics. Use 'data-testid=\"portfolio-item\"' on each card.",
+      "media_requirements": ["portfolio_1", "portfolio_2"]
+    },
+    {
+      "name": "Pricing Packages",
+      "instructions": "3 tiers (Ignite, Accelerate, Dominate). Central tier ('Accelerate') highlighted with accent border and 'MOST POPULAR' label. List features using Shadcn Icons. Sharp UI."
+    },
+    {
+      "name": "Testimonials",
+      "instructions": "Minimalist carousel. High-end fashion portrait style images for clients. Quote in large italics, client name and company below.",
+      "media_requirements": ["testimonial_1", "testimonial_2"]
+    },
+    {
+      "name": "Blog / Insights Teaser",
+      "instructions": "List view or 3-column grid of recent articles. Focus on typography. Overline dates."
+    },
+    {
+      "name": "Footer",
+      "instructions": "Massive typography 'READY TO SCALE?' Dark footer, contrasting the section above. Big email link, social links, copyright."
+    },
+    {
+      "name": "Floating Elements",
+      "instructions": "1. AI Assistant Chat Widget (bottom right) with glowing accent dot. 2. Inquiry Modal (Triggered by CTA buttons, Shadcn Dialog, form with Name, Email, Company, Service, Budget, Message)."
+    }
+  ],
+  "image_urls": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1770031079091-c6356e82ea9b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGRhcmslMjBnbGFzc21vcnBoaXNtJTIwM2R8ZW58MHx8fHwxNzc3NjA5MDE0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Abstract metallic rings with glowing orb inside"
+    },
+    "texture_overlay": {
+      "url": "https://images.unsplash.com/photo-1602475063211-3d98d60e3b1f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwyfHxkYXJrJTIwZ3JhaW4lMjB0ZXh0dXJlJTIwYmxhY2t8ZW58MHx8fHwxNzc3NjA5MDE0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "black textile on black background for noise overlay"
+    },
+    "portfolio_1": {
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwzfHxkYXJrJTIwbW9kZXJuJTIwd2Vic2l0ZSUyMGRhc2hib2FyZCUyMHBvcnRmb2xpb3xlbnwwfHx8fDE3Nzc2MDkwMTR8MA&ixlib=rb-4.1.0&q=85",
+      "description": "graphs of performance analytics on a laptop screen"
+    },
+    "portfolio_2": {
+      "url": "https://images.unsplash.com/photo-1771931342240-2c277b33905f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwbmVvbiUyMGdyZWVuJTIwZ2xvd2luZyUyMGRhcmt8ZW58MHx8fHwxNzc3NjA5MDE0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Four dark green glowing squares with yellow highlights"
+    },
+    "team_office": {
+      "url": "https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxzdGFydHVwJTIwb2ZmaWNlJTIwZGFyayUyMG5pZ2h0fGVufDB8fHx8MTc3NzYwOTAxMHww&ixlib=rb-4.1.0&q=85",
+      "description": "group of people having a meeting"
+    },
+    "testimonial_1": {
+      "url": "https://images.unsplash.com/photo-1774481528970-41e591147018?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxoaWdoJTIwZW5kJTIwZmFzaGlvbiUyMHBvcnRyYWl0JTIwZGFya3xlbnwwfHx8fDE3Nzc2MDkwMTB8MA&ixlib=rb-4.1.0&q=85",
+      "description": "A close-up of a woman's face with dramatic lighting"
+    },
+    "testimonial_2": {
+      "url": "https://images.unsplash.com/photo-1762635696772-0ed637b1a3a7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwyfHxoaWdoJTIwZW5kJTIwZmFzaGlvbiUyMHBvcnRyYWl0JTIwZGFya3xlbnwwfHx8fDE3Nzc2MDkwMTB8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Woman in sheer black dress with long gloves"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Ensure Lenis is installed (yarn add @studio-freight/lenis) and wrapping the app for smooth momentum scrolling.",
+    "Use framer-motion for staggering text reveals and image scale-ins. No raw CSS transitions for major layout entry.",
+    "Do not use Shadcn card components for the creative sections; construct flat geometric divs with borders manually for ultimate control.",
+    "The inquiry form should be built with Shadcn dialog and form components, visually stripped back to match the dark aesthetic (border-white/10).",
+    "Add 'data-testid' to all interactive elements as per the testing rules.",
+    "Ensure contrast passes APCA standards; text on dark background must be white or white/70.",
+    "The accent color (#CCFF00) should be used sparingly for maximum impact (hover states, key buttons, glowing dots).",
+    "Load fonts from the provided CDNs in the HTML head or global CSS.",
+    "Never use generic fonts like Inter, Roboto, or Open Sans."
+  ]
+}
