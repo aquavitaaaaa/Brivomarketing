@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { LogOut, BarChart3, Inbox, PhoneCall, Radio } from "lucide-react";
+import { LogOut, BarChart3, Inbox, PhoneCall, Radio, MessageSquare, Bot } from "lucide-react";
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import LeadsTab from "@/components/admin/LeadsTab";
 import CallsTab from "@/components/admin/CallsTab";
 import OperatorTab from "@/components/admin/OperatorTab";
+import MessagesTab from "@/components/admin/MessagesTab";
+import AgentsTab from "@/components/admin/AgentsTab";
 
 const TABS = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "messages", label: "Messages", icon: MessageSquare },
   { id: "leads", label: "Leads", icon: Inbox },
+  { id: "agents", label: "Agents", icon: Bot },
   { id: "calls", label: "Calls", icon: PhoneCall },
   { id: "operator", label: "Operator", icon: Radio },
 ];
@@ -47,7 +51,9 @@ export default function AdminDashboard() {
   const Tab = TABS.find((t) => t.id === tab);
   const TabContent = {
     analytics: AnalyticsTab,
+    messages: MessagesTab,
     leads: LeadsTab,
+    agents: AgentsTab,
     calls: CallsTab,
     operator: OperatorTab,
   }[tab];

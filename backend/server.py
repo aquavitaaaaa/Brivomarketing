@@ -25,6 +25,7 @@ from auth import (
 import bland_client
 import analytics_utils
 import email_client
+import agents as agents_module
 import asyncio
 
 mongo_url = os.environ['MONGO_URL']
@@ -115,6 +116,31 @@ class ChatMessage(BaseModel):
     role: str
     content: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+# -------------------- Agents --------------------
+class AgentCreate(BaseModel):
+    name: str
+    role: str = "chat"  # chat | voice | email
+    provider: str = "anthropic"
+    model: str = "claude-sonnet-4-5-20250929"
+    system_prompt: str
+    description: Optional[str] = ""
+    temperature: Optional[float] = 0.7
+    enabled: bool = True
+    is_default: bool = False
+
+
+class AgentUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    system_prompt: Optional[str] = None
+    description: Optional[str] = None
+    temperature: Optional[float] = None
+    enabled: Optional[bool] = None
+    is_default: Optional[bool] = None
 
 
 # =====================================================================
@@ -539,15 +565,49 @@ async def bland_webhook(request: Request):
 # CHAT (existing)
 # =====================================================================
 @api_router.post("/chat", response_model=ChatResponse)
-async def chat(payload: ChatRequest):
+async def chat(payload: ChatRequest, request: Request):
     if not EMERGENT_LLM_KEY:
         raise HTTPException(status_code=500, detail="LLM key not configured")
 
     session_id = payload.session_id or str(uuid.uuid4())
 
+    # Resolve the active chat agent (admin-editable).
+    agent = await agents_module.get_default_chat_agent(db)
+    if agent:
+        system_prompt = agent["system_prompt"]
+        provider = agent.get("provider", "anthropic")
+        model = agent.get("model", "claude-sonnet-4-5-20250929")
+    else:
+        system_prompt = BRIVO_SYSTEM_MESSAGE
+        provider = "anthropic"
+        model = "claude-sonnet-4-5-20250929"
+
     prior = await db.chat_messages.find(
         {"session_id": session_id}, {"_id": 0}
     ).sort("created_at", 1).to_list(100)
+
+    # Upsert session metadata on first message so admin can see visitor info.
+    if not prior:
+        ip = analytics_utils.client_ip_from_request(request)
+        ua = request.headers.get("user-agent")
+        ua_info = analytics_utils.parse_user_agent(ua)
+        geo = await analytics_utils.resolve_geo(ip)
+        await db.chat_sessions.update_one(
+            {"session_id": session_id},
+            {
+                "$setOnInsert": {
+                    "session_id": session_id,
+                    "first_message": payload.message,
+                    "ip": ip,
+                    "ua": ua,
+                    **ua_info,
+                    **geo,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "agent_id": agent.get("id") if agent else None,
+                }
+            },
+            upsert=True,
+        )
 
     user_msg = ChatMessage(session_id=session_id, role="user", content=payload.message)
     user_doc = user_msg.model_dump()
@@ -568,8 +628,8 @@ async def chat(payload: ChatRequest):
         llm = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=session_id,
-            system_message=BRIVO_SYSTEM_MESSAGE,
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+            system_message=system_prompt,
+        ).with_model(provider, model)
         reply_text = await llm.send_message(UserMessage(text=composite_text))
     except Exception as e:
         logger.exception("LLM error")
@@ -580,7 +640,123 @@ async def chat(payload: ChatRequest):
     asst_doc['created_at'] = asst_doc['created_at'].isoformat()
     await db.chat_messages.insert_one(asst_doc)
 
+    # Bump session stats
+    await db.chat_sessions.update_one(
+        {"session_id": session_id},
+        {
+            "$set": {
+                "last_message": payload.message,
+                "last_reply": reply_text,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            "$inc": {"message_count": 2},
+        },
+        upsert=True,
+    )
+
     return ChatResponse(session_id=session_id, reply=reply_text)
+
+
+# =====================================================================
+# ADMIN — AGENTS
+# =====================================================================
+@api_router.get("/admin/agents/models")
+async def list_agent_models(admin: dict = Depends(get_current_admin)):
+    return {"options": agents_module.MODEL_OPTIONS}
+
+
+@api_router.get("/admin/agents")
+async def list_agents(admin: dict = Depends(get_current_admin)):
+    docs = await db.agents.find({}, {"_id": 0}).sort("created_at", 1).to_list(200)
+    return docs
+
+
+@api_router.post("/admin/agents")
+async def create_agent(payload: AgentCreate, admin: dict = Depends(get_current_admin)):
+    doc = payload.model_dump()
+    now = datetime.now(timezone.utc).isoformat()
+    doc.update({"id": str(uuid.uuid4()), "created_at": now, "updated_at": now})
+
+    # Only one default per role
+    if doc["is_default"]:
+        await db.agents.update_many(
+            {"role": doc["role"], "is_default": True},
+            {"$set": {"is_default": False}},
+        )
+    await db.agents.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.patch("/admin/agents/{agent_id}")
+async def update_agent(
+    agent_id: str,
+    payload: AgentUpdate,
+    admin: dict = Depends(get_current_admin),
+):
+    changes = {k: v for k, v in payload.model_dump(exclude_unset=True).items()}
+    if not changes:
+        raise HTTPException(status_code=400, detail="Nothing to update")
+
+    existing = await db.agents.find_one({"id": agent_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    # Enforce single-default per role
+    if changes.get("is_default") is True:
+        role = changes.get("role", existing["role"])
+        await db.agents.update_many(
+            {"role": role, "is_default": True, "id": {"$ne": agent_id}},
+            {"$set": {"is_default": False}},
+        )
+
+    changes["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.agents.update_one({"id": agent_id}, {"$set": changes})
+    updated = await db.agents.find_one({"id": agent_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/admin/agents/{agent_id}")
+async def delete_agent(agent_id: str, admin: dict = Depends(get_current_admin)):
+    existing = await db.agents.find_one({"id": agent_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    if existing.get("is_default"):
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete the default agent. Set another agent as default first.",
+        )
+    await db.agents.delete_one({"id": agent_id})
+    return {"ok": True}
+
+
+# =====================================================================
+# ADMIN — CHAT SESSIONS (visitor messages)
+# =====================================================================
+@api_router.get("/admin/chat/sessions")
+async def list_chat_sessions(admin: dict = Depends(get_current_admin)):
+    sessions = await db.chat_sessions.find({}, {"_id": 0}).sort("updated_at", -1).to_list(500)
+    # Fill in missing message counts from chat_messages for older sessions
+    for s in sessions:
+        if s.get("message_count") is None:
+            s["message_count"] = await db.chat_messages.count_documents(
+                {"session_id": s["session_id"]}
+            )
+    return sessions
+
+
+@api_router.get("/admin/chat/sessions/{session_id}")
+async def get_chat_session(
+    session_id: str,
+    admin: dict = Depends(get_current_admin),
+):
+    session = await db.chat_sessions.find_one(
+        {"session_id": session_id}, {"_id": 0}
+    )
+    messages = await db.chat_messages.find(
+        {"session_id": session_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(500)
+    return {"session": session, "messages": messages}
 
 
 # =====================================================================
@@ -615,9 +791,14 @@ async def on_startup():
         await db.analytics_events.create_index("created_at")
         await db.analytics_events.create_index("session_id")
         await db.calls.create_index("bland_call_id", unique=True, sparse=True)
+        await db.chat_sessions.create_index("session_id", unique=True)
+        await db.chat_sessions.create_index("updated_at")
+        await db.chat_messages.create_index("session_id")
+        await db.agents.create_index("id", unique=True)
     except Exception:
         pass
     await seed_admin(db)
+    await agents_module.seed_default_agents(db)
     logger.info("Admin seeded. Ready.")
 
 

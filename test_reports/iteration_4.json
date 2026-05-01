@@ -1,0 +1,40 @@
+{
+  "summary": "Full backend + frontend test of the new Messages + Agents features. 29/29 pytest pass (20 prior regression + 9 new). UI: 6 admin tabs render with correct data-testids, Messages tab lists 3 sessions with country/device/browser badges, clicking a session shows full transcript with Visitor-meta header (Started, Location, Device, IP). Agents tab shows Brivo Strategist with DEFAULT badge, New Agent modal opens with all 5 inputs (name/role/model/prompt/save), creating TEST_UI_Agent persists and appears in list, success toast shown. Public /api/chat continuity verified (message_count = 4 after 2 sends, role sequence user/assistant/user/assistant). Prompt-swap test verified (AGENT-OK: marker reflected in next reply); original BrivoMarketing AI prompt was restored after the test (verified via Agents tab UI). Auth gating on /api/admin/agents and /api/admin/chat/sessions returns 401. No regressions on inquiry/ROI/analytics/leads/calls/operator endpoints.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_agents_and_chat.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/pytest/agents_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py is now ~810 lines and combines public, auth, leads, analytics, operator, webhooks, chat, agents, and admin chat-sessions. Strongly recommend splitting into routers (routers/agents.py, routers/chat.py, routers/operator.py, routers/leads.py) before next feature pass — single-file growth is the #1 maintainability risk here.",
+    "agents.seed_default_agents() only inserts when no chat agent exists at all. If an admin deletes ALL chat agents (cannot delete is_default, but could disable + delete non-default), the seed won't re-run mid-process. Acceptable for skeleton; document this idempotency boundary.",
+    "/api/admin/agents PATCH does not validate that provider/model is one of MODEL_OPTIONS. An admin can save any provider/model string, which will then 502 at /api/chat. Recommend a Pydantic validator that checks (provider, model) ∈ MODEL_OPTIONS.",
+    "/api/admin/chat/sessions has no pagination or filter (limit 500). Once visitor traffic ramps, this list will balloon. Add ?limit=&before= and a country/device filter when productionising.",
+    "chat_messages collection has an index on session_id but not on created_at — the .sort('created_at', 1) for transcripts works because docs naturally insert in order, but a compound index (session_id, created_at) would harden long-session perf.",
+    "On first /api/chat call, the session doc inherits agent_id from the agent at that moment; subsequent prompt edits won't update the session's agent_id record. This is fine semantically, but the admin UI implies the session is using the *current* default — a small note in the Messages header would close the gap."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_agents_and_chat.py (created — 9 new pytest cases)"
+  ],
+  "success_rate": {
+    "backend": "100% (29/29)",
+    "frontend": "100% on tested flows"
+  },
+  "test_credentials": "admin@brivomarketing.com / BrivoOps2026! (from /app/memory/test_credentials.md). Confirmed working.",
+  "seed_data_creation": "Created 3 chat sessions (Hello / 'Hi, what services do you offer?' / 'Hi, what does Accelerate include?') via /api/chat for UI smoke. Created TEST_UI_Agent via the Agents modal (still present — left intentionally so main agent can self-verify the agents grid; harmless and easily removed). Test agents created during pytest are deleted in the same run.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite is now 29 tests across two files: /app/backend/tests/backend_test.py (20) + /app/backend/tests/test_agents_and_chat.py (9). Run all: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. The prompt-swap test in test_chat_reflects_default_agent_prompt mutates the live default agent's system_prompt and restores it in finally — if the test is interrupted (Ctrl-C between PATCH and restore), the chat widget will start every reply with 'AGENT-OK:' until manually fixed. Verified after this run that the prompt is back to the original BrivoMarketing AI seed (visible in the Agents tab card). Bland.ai still skeleton (BLAND_API_KEY empty), Resend still skeleton — those tests assume 503/400 'not configured' responses.",
+  "rca_of_the_issue": "N/A — no bugs encountered. The only flakiness was an initial Playwright timing where data-testid='admin-tab-*' selectors returned None immediately after wait_for_url; clicking those same selectors succeeded a moment later, confirming the testids are correct (verified at AdminDashboard.jsx line 113: data-testid={`admin-tab-${t.id}`})."
+}
