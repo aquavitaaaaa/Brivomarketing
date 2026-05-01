@@ -116,11 +116,29 @@ async def chat(payload: ChatRequest):
 
     session_id = payload.session_id or str(uuid.uuid4())
 
+    # Load prior conversation history (before persisting new message)
+    prior = await db.chat_messages.find(
+        {"session_id": session_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(100)
+
     # Persist user message
     user_msg = ChatMessage(session_id=session_id, role="user", content=payload.message)
     user_doc = user_msg.model_dump()
     user_doc['created_at'] = user_doc['created_at'].isoformat()
     await db.chat_messages.insert_one(user_doc)
+
+    # Build composite prompt with prior history so the stateless LlmChat instance has context
+    if prior:
+        history_lines = [
+            f"{m['role'].upper()}: {m['content']}" for m in prior
+        ]
+        history_block = "\n".join(history_lines)
+        composite_text = (
+            f"<conversation_so_far>\n{history_block}\n</conversation_so_far>\n\n"
+            f"USER (new message): {payload.message}"
+        )
+    else:
+        composite_text = payload.message
 
     try:
         llm = LlmChat(
@@ -129,7 +147,7 @@ async def chat(payload: ChatRequest):
             system_message=BRIVO_SYSTEM_MESSAGE,
         ).with_model("anthropic", "claude-sonnet-4-5-20250929")
 
-        reply_text = await llm.send_message(UserMessage(text=payload.message))
+        reply_text = await llm.send_message(UserMessage(text=composite_text))
     except Exception as e:
         logger.exception("LLM error")
         raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
