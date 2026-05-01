@@ -3,6 +3,7 @@ import Marquee from "react-fast-marquee";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import HeroVisual from "@/components/site/HeroVisual";
 import AnalyticsCard from "@/components/site/AnalyticsCard";
+import NeuralBackdrop from "@/components/site/NeuralBackdrop";
 
 const fadeUp = {
   hidden: { y: 40, opacity: 0 },
@@ -26,7 +27,7 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] grain overflow-hidden flex flex-col"
       data-testid="hero-section"
     >
-      {/* Refined background — subtle mesh + grid, no blobs */}
+      {/* Refined background — neural mesh + subtle grid + drift glows */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute inset-0 opacity-[0.05]"
@@ -36,8 +37,11 @@ export default function Hero({ onCTA }) {
             backgroundSize: "100px 100px",
           }}
         />
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-[#CCFF00]/[0.05] blur-[140px] animate-drift" />
-        <div className="absolute top-1/4 -right-60 w-[700px] h-[700px] rounded-full bg-[#6F4FFF]/[0.09] blur-[160px] animate-drift2" />
+        {/* AI neural constellation overlay */}
+        <NeuralBackdrop />
+        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-[#CCFF00]/[0.06] blur-[140px] animate-drift" />
+        <div className="absolute top-1/4 -right-60 w-[700px] h-[700px] rounded-full bg-[#6F4FFF]/[0.10] blur-[160px] animate-drift2" />
+        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-[#36F1CD]/[0.05] blur-[120px] animate-drift" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B0B0F]" />
       </div>
 
@@ -69,7 +73,7 @@ export default function Hero({ onCTA }) {
             </span>
             <span className="text-white/25">/</span>
             <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
-              Performance Studio · Q2 2026
+              AI Performance Studio · Q2 2026
             </span>
           </motion.div>
 
@@ -95,8 +99,9 @@ export default function Hero({ onCTA }) {
             custom={2}
             className="mt-10 max-w-xl text-white/70 text-base md:text-lg leading-relaxed"
           >
-            We engineer high-converting websites and ruthless marketing systems
-            for brands that refuse to be ignored. Less fluff. More market share.
+            We engineer AI‑powered websites and ruthless marketing systems for
+            brands that refuse to be ignored. Where others guess, our models
+            see. Less fluff. More market share.
           </motion.p>
 
           <motion.div
