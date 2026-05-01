@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import Logo from "@/components/site/Logo";
 
 export default function Footer({ onCTA }) {
   return (
@@ -45,14 +46,9 @@ export default function Footer({ onCTA }) {
 
       <div className="relative z-10 grid md:grid-cols-12 gap-10 pt-12 border-t border-white/10">
         <div className="md:col-span-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#CCFF00] rotate-45" />
-            <span className="font-display text-xl font-black tracking-tighter uppercase">
-              BRIVO
-            </span>
-          </div>
+          <Logo size={36} />
           <p className="mt-5 text-white/60 text-sm max-w-xs leading-relaxed">
-            A high-performance digital marketing & web design agency. Built for
+            A high-performance digital marketing & web design studio. Built for
             founders who refuse average.
           </p>
         </div>
@@ -97,7 +93,7 @@ export default function Footer({ onCTA }) {
       </div>
 
       <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 font-mono text-[10px] uppercase tracking-[0.25em] text-white/40">
-        <span>© 2026 Brivo Marketing — All rights reserved</span>
+        <span>© 2026 BrivoMarketing — All rights reserved</span>
         <span>Crafted with obsession</span>
       </div>
     </footer>

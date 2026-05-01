@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import Logo from "@/components/site/Logo";
 
 const links = [
   { label: "Services", href: "#services" },
@@ -33,11 +34,8 @@ export default function Navigation({ onCTA }) {
       data-testid="main-nav"
     >
       <div className="px-6 md:px-12 lg:px-24 h-20 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-2" data-testid="brand-logo">
-          <div className="w-3 h-3 bg-[#CCFF00] rotate-45" />
-          <span className="font-display text-xl font-black tracking-tighter uppercase">
-            BRIVO
-          </span>
+        <a href="#top" data-testid="brand-logo">
+          <Logo size={32} />
         </a>
 
         <div className="hidden md:flex items-center gap-10">

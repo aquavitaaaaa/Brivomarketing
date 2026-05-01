@@ -16,7 +16,7 @@ export default function ChatWidget() {
     {
       role: "assistant",
       content:
-        "Hey — I'm Brivo AI. Ask about pricing, services, timelines, or how we'd attack your market.",
+        "Hey — I'm BrivoMarketing AI. Ask about pricing, services, timelines, or how we'd attack your market.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -110,7 +110,7 @@ export default function ChatWidget() {
               </div>
               <div className="flex-1">
                 <div className="font-display text-sm font-bold uppercase tracking-tight">
-                  Brivo AI
+                  BrivoMarketing AI
                 </div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
                   Live • Strategist on demand

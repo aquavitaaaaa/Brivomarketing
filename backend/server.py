@@ -21,7 +21,7 @@ db = client[os.environ['DB_NAME']]
 
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
-app = FastAPI(title="Brivo Marketing API")
+app = FastAPI(title="BrivoMarketing API")
 api_router = APIRouter(prefix="/api")
 
 
@@ -67,9 +67,9 @@ class ChatMessage(BaseModel):
 
 
 # ---------- AI System Message ----------
-BRIVO_SYSTEM_MESSAGE = """You are Brivo AI — the in-house strategist for Brivo Marketing, a high-performance digital marketing & web design agency.
+BRIVO_SYSTEM_MESSAGE = """You are BrivoMarketing AI — the in-house strategist for BrivoMarketing, a high-performance digital marketing & web design studio.
 
-Brivo's services:
+BrivoMarketing's services:
 - Web Design & Development (custom, conversion-focused sites)
 - SEO & Content Marketing (technical SEO, content strategy, link building)
 - Paid Advertising (Google Ads, Meta Ads, TikTok, retargeting)
@@ -87,7 +87,7 @@ Tone: Confident, sharp, direct. Sound like a top-tier strategist who closes deal
 # ---------- Routes ----------
 @api_router.get("/")
 async def root():
-    return {"message": "Brivo Marketing API live"}
+    return {"message": "BrivoMarketing API live"}
 
 
 @api_router.post("/inquiries", response_model=Inquiry)
