@@ -24,6 +24,8 @@ from auth import (
 )
 import bland_client
 import analytics_utils
+import email_client
+import asyncio
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -152,6 +154,7 @@ async def create_inquiry(payload: InquiryCreate, request: Request):
     doc['ua'] = request.headers.get("user-agent")
     await db.inquiries.insert_one(doc)
     logger.info(f"New inquiry from {inquiry.email} — {inquiry.service_interest}")
+    asyncio.create_task(email_client.send_new_lead_notification(doc))
     return inquiry
 
 
@@ -182,6 +185,7 @@ async def create_roi_lead(payload: RoiLeadCreate, request: Request):
     doc['ua'] = request.headers.get("user-agent")
     await db.inquiries.insert_one(doc)
     logger.info(f"ROI lead from {inquiry.email} — lift ${payload.lift:,.0f}")
+    asyncio.create_task(email_client.send_new_lead_notification(doc))
     return inquiry
 
 
@@ -377,6 +381,8 @@ async def operator_status(admin: dict = Depends(get_current_admin)):
         "inbound_number": os.environ.get("BLAND_INBOUND_NUMBER", ""),
         "pathway_id": os.environ.get("BLAND_PATHWAY_ID", ""),
         "webhook_secret_set": bool(os.environ.get("BLAND_WEBHOOK_SECRET", "").strip()),
+        "email_configured": email_client.is_configured(),
+        "notify_email": os.environ.get("NOTIFY_EMAIL", ""),
     }
 
 

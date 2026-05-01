@@ -23,8 +23,6 @@ import BigCtaCard from "@/components/site/BigCtaCard";
 import Footer from "@/components/site/Footer";
 import InquiryDialog from "@/components/site/InquiryDialog";
 import ChatWidget from "@/components/site/ChatWidget";
-import CrosshairCursor from "@/components/site/CrosshairCursor";
-import SocialProofToaster from "@/components/site/SocialProofToaster";
 import CaseStudyModal from "@/components/site/CaseStudyModal";
 import ScrollReveal from "@/components/site/ScrollReveal";
 import NotFound from "@/pages/NotFound";
@@ -96,8 +94,6 @@ const Home = () => {
         onCTA={(title) => openInquiry(title, "case-study")}
       />
       <ChatWidget />
-      <SocialProofToaster />
-      <CrosshairCursor />
     </div>
   );
 };

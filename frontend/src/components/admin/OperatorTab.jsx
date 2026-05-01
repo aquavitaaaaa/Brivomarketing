@@ -143,6 +143,20 @@ export default function OperatorTab() {
             </div>
           </div>
         )}
+
+        <div className="mt-4 flex items-center gap-3 pt-4 border-t border-white/10">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              status?.email_configured ? "bg-[#CCFF00]" : "bg-white/25"
+            }`}
+          />
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/55">
+            Lead email alerts:{" "}
+            {status?.email_configured
+              ? `on → ${status.notify_email || "(set NOTIFY_EMAIL)"}`
+              : "off — add RESEND_API_KEY in backend/.env"}
+          </span>
+        </div>
       </div>
 
       {/* Outbound dial */}
