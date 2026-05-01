@@ -150,6 +150,54 @@ html, body {
   box-shadow: 0 20px 60px -20px rgba(204,255,0,0.25), 0 0 0 1px rgba(204,255,0,0.25) inset;
 }
 
+/* LiveTicker marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 42s linear infinite; }
+
+/* Hide native cursor when the crosshair overlay is active */
+@media (pointer: fine) {
+  html.custom-cursor-on,
+  html.custom-cursor-on body,
+  html.custom-cursor-on button,
+  html.custom-cursor-on a,
+  html.custom-cursor-on [role='button'],
+  html.custom-cursor-on .cursor-target,
+  html.custom-cursor-on label {
+    cursor: none !important;
+  }
+  html.custom-cursor-on input,
+  html.custom-cursor-on textarea,
+  html.custom-cursor-on [contenteditable='true'] {
+    cursor: text !important;
+  }
+}
+
+/* ROI Calculator — custom range thumb */
+.roi-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #0B0B0F;
+  border: 2px solid #CCFF00;
+  box-shadow: 0 0 0 4px rgba(204,255,0,0.18), 0 0 16px rgba(204,255,0,0.6);
+  cursor: grab;
+}
+.roi-slider::-webkit-slider-thumb:active { cursor: grabbing; }
+.roi-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #0B0B0F;
+  border: 2px solid #CCFF00;
+  box-shadow: 0 0 0 4px rgba(204,255,0,0.18), 0 0 16px rgba(204,255,0,0.6);
+  cursor: grab;
+}
+
 /* Diagonal stripe pattern */
 .stripes {
   background-image: repeating-linear-gradient(

@@ -4,6 +4,7 @@ import { ArrowUpRight, TrendingUp } from "lucide-react";
 import HeroVisual from "@/components/site/HeroVisual";
 import AnalyticsCard from "@/components/site/AnalyticsCard";
 import MarketingBackdrop from "@/components/site/MarketingBackdrop";
+import MagneticCta from "@/components/site/MagneticCta";
 
 const fadeUp = {
   hidden: { y: 40, opacity: 0 },
@@ -98,22 +99,24 @@ export default function Hero({ onCTA }) {
             custom={3}
             className="mt-10 flex flex-wrap items-center gap-5"
           >
-            <button
-              onClick={onCTA}
-              className="group relative inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow overflow-hidden"
-              data-testid="hero-cta"
-            >
-              <span className="relative flex items-center gap-3 z-10">
-                Start a Project
-                <ArrowUpRight
-                  size={18}
-                  className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                />
-              </span>
-              <span className="absolute inset-0 overflow-hidden pointer-events-none">
-                <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-white/40 skew-x-[-20deg] shine-sweep" />
-              </span>
-            </button>
+            <MagneticCta>
+              <button
+                onClick={onCTA}
+                className="group relative inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow overflow-hidden cursor-target"
+                data-testid="hero-cta"
+              >
+                <span className="relative flex items-center gap-3 z-10">
+                  Start a Project
+                  <ArrowUpRight
+                    size={18}
+                    className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                  />
+                </span>
+                <span className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-white/40 skew-x-[-20deg] shine-sweep" />
+                </span>
+              </button>
+            </MagneticCta>
             <a
               href="#work"
               className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white link-underline"

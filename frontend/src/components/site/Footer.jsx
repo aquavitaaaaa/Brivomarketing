@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Logo from "@/components/site/Logo";
+import MagneticCta from "@/components/site/MagneticCta";
 
 export default function Footer({ onCTA }) {
   return (
@@ -30,17 +31,19 @@ export default function Footer({ onCTA }) {
           </motion.h2>
         </div>
         <div className="md:col-span-4 flex md:items-end">
-          <button
-            onClick={onCTA}
-            className="group inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow"
-            data-testid="footer-cta"
-          >
-            Start a Project
-            <ArrowUpRight
-              size={18}
-              className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-            />
-          </button>
+          <MagneticCta>
+            <button
+              onClick={onCTA}
+              className="group inline-flex items-center gap-3 bg-[#CCFF00] text-black font-mono text-sm uppercase tracking-[0.2em] font-bold px-8 py-5 accent-glow cursor-target"
+              data-testid="footer-cta"
+            >
+              Start a Project
+              <ArrowUpRight
+                size={18}
+                className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+              />
+            </button>
+          </MagneticCta>
         </div>
       </div>
 
