@@ -3,7 +3,7 @@ import Marquee from "react-fast-marquee";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import HeroVisual from "@/components/site/HeroVisual";
 import AnalyticsCard from "@/components/site/AnalyticsCard";
-import NeuralBackdrop from "@/components/site/NeuralBackdrop";
+import SleekBackdrop from "@/components/site/SleekBackdrop";
 
 const fadeUp = {
   hidden: { y: 40, opacity: 0 },
@@ -27,22 +27,9 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] grain overflow-hidden flex flex-col"
       data-testid="hero-section"
     >
-      {/* Refined background — neural mesh + subtle grid + drift glows */}
+      {/* Sleek backdrop — premium ambient bloom + blueprint perspective */}
       <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-            backgroundSize: "100px 100px",
-          }}
-        />
-        {/* AI neural constellation overlay */}
-        <NeuralBackdrop />
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-[#CCFF00]/[0.06] blur-[140px] animate-drift" />
-        <div className="absolute top-1/4 -right-60 w-[700px] h-[700px] rounded-full bg-[#6F4FFF]/[0.10] blur-[160px] animate-drift2" />
-        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-[#36F1CD]/[0.05] blur-[120px] animate-drift" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B0B0F]" />
+        <SleekBackdrop />
       </div>
 
       {/* Right-side composition: precision visual behind + analytics card on top */}
@@ -68,11 +55,11 @@ export default function Hero({ onCTA }) {
               <span className="absolute inset-0 bg-[#CCFF00] rounded-full" />
               <span className="absolute inset-0 bg-[#CCFF00] rounded-full animate-ping opacity-75" />
             </span>
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/70">
+            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.32em] text-white/75">
               BrivoMarketing
             </span>
-            <span className="text-white/25">/</span>
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
+            <span className="text-white/25">·</span>
+            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.32em] text-[#CCFF00]/80">
               AI Performance Studio · Q2 2026
             </span>
           </motion.div>
