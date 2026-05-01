@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Lenis from "@studio-freight/lenis";
 import { Toaster } from "sonner";
 
 import Navigation from "@/components/site/Navigation";
@@ -39,20 +38,6 @@ const Home = () => {
     setInquiryService(service);
     setInquiryOpen(true);
   };
-
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => lenis.destroy();
-  }, []);
 
   return (
     <div className="App relative" data-testid="home-root">
