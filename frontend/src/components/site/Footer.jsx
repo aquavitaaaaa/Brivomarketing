@@ -4,10 +4,11 @@ import { ArrowUpRight } from "lucide-react";
 export default function Footer({ onCTA }) {
   return (
     <footer
-      className="relative bg-[#050505] border-t border-white/10 px-6 md:px-12 lg:px-24 pt-24 md:pt-32 pb-12 grain overflow-hidden"
+      className="relative bg-[#0B0B0F] border-t border-white/10 px-6 md:px-12 lg:px-24 pt-24 md:pt-32 pb-12 grain overflow-hidden"
       data-testid="footer"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(204,255,0,0.06),transparent_60%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(204,255,0,0.08),transparent_60%)] pointer-events-none" />
+      <div className="absolute top-1/2 -left-40 w-[500px] h-[500px] bg-[#6F4FFF]/8 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 grid md:grid-cols-12 gap-10 mb-20">
         <div className="md:col-span-8">

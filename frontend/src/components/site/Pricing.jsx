@@ -55,7 +55,7 @@ export default function Pricing({ onSelect }) {
   return (
     <section
       id="pricing"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 lg:py-40 bg-[#070707] border-y border-white/10"
+      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 lg:py-40 bg-[#0E0E14] border-y border-white/10 relative overflow-hidden"
       data-testid="pricing-section"
     >
       <div className="grid md:grid-cols-12 gap-8 mb-16">
@@ -88,8 +88,8 @@ export default function Pricing({ onSelect }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, delay: i * 0.1 }}
-            className={`relative bg-[#0A0A0A] p-8 md:p-10 flex flex-col ${
-              t.highlight ? "md:scale-[1.02] md:-my-1 z-10" : ""
+            className={`relative bg-[#131319] p-8 md:p-10 flex flex-col overflow-hidden ${
+              t.highlight ? "md:scale-[1.03] md:-my-2 z-10 bg-[#16161E]" : ""
             }`}
             data-testid={`pricing-tier-${t.id}`}
           >
@@ -143,7 +143,11 @@ export default function Pricing({ onSelect }) {
             </button>
 
             {t.highlight && (
-              <div className="absolute inset-0 border border-[#CCFF00]/40 pointer-events-none" />
+              <>
+                <div className="absolute inset-0 border-2 border-[#CCFF00]/50 pointer-events-none" />
+                <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#CCFF00]/15 blur-3xl rounded-full pointer-events-none" />
+                <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-[#6F4FFF]/15 blur-3xl rounded-full pointer-events-none" />
+              </>
             )}
           </motion.div>
         ))}

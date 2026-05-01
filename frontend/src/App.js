@@ -7,7 +7,9 @@ import { Toaster } from "sonner";
 import Navigation from "@/components/site/Navigation";
 import Hero from "@/components/site/Hero";
 import StatsBar from "@/components/site/StatsBar";
+import TrustBar from "@/components/site/TrustBar";
 import Services from "@/components/site/Services";
+import Differentiators from "@/components/site/Differentiators";
 import Process from "@/components/site/Process";
 import Portfolio from "@/components/site/Portfolio";
 import Pricing from "@/components/site/Pricing";
@@ -45,7 +47,9 @@ const Home = () => {
       <Navigation onCTA={() => openInquiry()} />
       <Hero onCTA={() => openInquiry()} />
       <StatsBar />
+      <TrustBar />
       <Services onSelect={(s) => openInquiry(s)} />
+      <Differentiators />
       <Process />
       <Portfolio />
       <Pricing onSelect={(tier) => openInquiry(tier)} />

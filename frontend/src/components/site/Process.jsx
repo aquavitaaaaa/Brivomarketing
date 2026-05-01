@@ -22,7 +22,7 @@ export default function Process() {
   return (
     <section
       id="process"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 bg-[#070707] border-y border-white/10"
+      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 bg-[#0E0E14] border-y border-white/10 relative overflow-hidden"
       data-testid="process-section"
     >
       <div className="grid md:grid-cols-12 gap-8 mb-20">
@@ -49,7 +49,7 @@ export default function Process() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.7, delay: i * 0.12 }}
-            className="bg-[#0A0A0A] p-8 md:p-12 relative"
+            className="bg-[#131319] p-8 md:p-12 relative hover-ring border border-white/5"
             data-testid={`process-step-${i}`}
           >
             <div className="text-stroke font-display text-7xl md:text-9xl font-black leading-none mb-8">

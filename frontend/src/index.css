@@ -1,19 +1,21 @@
 @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,500,700,900,400&f[]=satoshi@900,700,500,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --brivo-bg: #050505;
-  --brivo-surface: #0A0A0A;
-  --brivo-elevated: #111111;
-  --brivo-border: #222222;
+  --brivo-bg: #0B0B0F;
+  --brivo-surface: #131319;
+  --brivo-elevated: #1A1A22;
+  --brivo-border: #2A2A36;
   --brivo-text: #FFFFFF;
   --brivo-text-secondary: #A1A1AA;
   --brivo-accent: #CCFF00;
   --brivo-accent-hover: #B3E600;
+  --brivo-violet: #6F4FFF;
+  --brivo-cyan: #36F1CD;
 }
 
 html, body {
@@ -27,81 +29,57 @@ html, body {
   overflow-x: hidden;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-.font-display {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  letter-spacing: -0.04em;
-}
+.font-display { font-family: 'Cabinet Grotesk', sans-serif; letter-spacing: -0.04em; }
+.font-body { font-family: 'Satoshi', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
 
-.font-body {
-  font-family: 'Satoshi', sans-serif;
-}
+::selection { background: var(--brivo-accent); color: #000; }
 
-.font-mono {
-  font-family: 'JetBrains Mono', monospace;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0B0B0F; }
+::-webkit-scrollbar-thumb { background: #2a2a36; }
+::-webkit-scrollbar-thumb:hover { background: var(--brivo-accent); }
 
-/* Selection */
-::selection {
-  background: var(--brivo-accent);
-  color: #000;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #0A0A0A;
-}
-::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--brivo-accent);
-}
-
-/* Grain */
+/* Grain texture */
 .grain::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.06;
+  opacity: 0.07;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Stroke Text */
+/* Stroke text */
 .text-stroke {
-  -webkit-text-stroke: 2px rgba(255,255,255,0.2);
+  -webkit-text-stroke: 2px rgba(255,255,255,0.18);
+  color: transparent;
+}
+.text-stroke-accent {
+  -webkit-text-stroke: 2px rgba(204,255,0,0.7);
   color: transparent;
 }
 
-/* Marquee gradient masks */
+/* Marquee mask */
 .marquee-mask {
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
-/* Glow */
+/* Glow buttons */
 .accent-glow {
   box-shadow: 0 0 0 rgba(204,255,0,0);
   transition: box-shadow 300ms ease, transform 300ms ease;
 }
 .accent-glow:hover {
-  box-shadow: 0 0 30px rgba(204,255,0,0.45);
+  box-shadow: 0 0 40px rgba(204,255,0,0.55), 0 10px 25px rgba(204,255,0,0.18);
   transform: translateY(-2px);
 }
 
-/* Magnetic underline */
-.link-underline {
-  position: relative;
-}
+.link-underline { position: relative; }
 .link-underline::after {
   content: '';
   position: absolute;
@@ -112,37 +90,102 @@ html, body {
   background: var(--brivo-accent);
   transition: width 250ms ease;
 }
-.link-underline:hover::after {
-  width: 100%;
+.link-underline:hover::after { width: 100%; }
+
+/* Animated gradient mesh for hero / sections */
+.gradient-mesh {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(204,255,0,0.18), transparent 38%),
+    radial-gradient(circle at 78% 30%, rgba(111,79,255,0.22), transparent 42%),
+    radial-gradient(circle at 60% 90%, rgba(54,241,205,0.14), transparent 45%),
+    radial-gradient(circle at 12% 88%, rgba(204,255,0,0.12), transparent 40%);
+  filter: blur(0.4px);
+}
+.gradient-mesh-soft {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(111,79,255,0.10), transparent 42%),
+    radial-gradient(circle at 10% 90%, rgba(204,255,0,0.06), transparent 42%);
+}
+
+/* Slow drifting animation */
+@keyframes drift {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(40px,-30px) scale(1.06); }
+  66% { transform: translate(-30px,30px) scale(0.96); }
+}
+.animate-drift { animation: drift 18s ease-in-out infinite; }
+
+@keyframes drift2 {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-50px,40px) scale(1.1); }
+}
+.animate-drift2 { animation: drift2 22s ease-in-out infinite; }
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float-y { animation: float-y 6s ease-in-out infinite; }
+
+/* Ticker shine sweep */
+@keyframes shine-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+.shine-sweep { animation: shine-sweep 3.5s ease-in-out infinite; }
+
+/* Glow ring (used for hero accent orb) */
+.glow-orb {
+  background: radial-gradient(circle at 35% 30%, #CCFF00 0%, rgba(204,255,0,0.6) 25%, rgba(111,79,255,0.5) 60%, rgba(11,11,15,0) 80%);
+  filter: blur(16px);
+}
+
+/* Subtle hover lift + ring accent */
+.hover-ring {
+  transition: transform 350ms cubic-bezier(0.2,0.8,0.2,1), box-shadow 350ms ease, border-color 350ms ease;
+}
+.hover-ring:hover {
+  transform: translateY(-4px);
+  border-color: rgba(204,255,0,0.5) !important;
+  box-shadow: 0 20px 60px -20px rgba(204,255,0,0.25), 0 0 0 1px rgba(204,255,0,0.25) inset;
+}
+
+/* Diagonal stripe pattern */
+.stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.04) 0,
+    rgba(255,255,255,0.04) 1px,
+    transparent 1px,
+    transparent 8px
+  );
 }
 
 @layer base {
   :root {
-    --background: 0 0% 2%;
+    --background: 240 14% 5%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 4%;
+    --card: 240 12% 9%;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 4%;
+    --popover: 240 12% 9%;
     --popover-foreground: 0 0% 100%;
     --primary: 73 100% 50%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
+    --secondary: 240 10% 14%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 64%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 240 5% 64%;
     --accent: 73 100% 50%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
+    --border: 240 8% 18%;
+    --input: 240 8% 18%;
     --ring: 73 100% 50%;
     --radius: 0px;
   }
 }
 
 @layer base {
-  body {
-    @apply bg-background text-foreground;
-  }
+  body { @apply bg-background text-foreground; }
 }
