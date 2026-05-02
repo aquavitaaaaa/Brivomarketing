@@ -1,9 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Play, Star } from "lucide-react";
+import { ArrowRight, Play, Star, Instagram } from "lucide-react";
 import HeroTechOverlay, { LivePulseBadge } from "@/components/site/HeroTechOverlay";
-
-const HERO_BG =
-  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?crop=entropy&cs=srgb&fm=jpg&w=2400&q=85";
 
 const fadeUp = {
   hidden: { y: 32, opacity: 0 },
@@ -21,33 +18,16 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] w-full overflow-hidden bg-[#0B1B2B] text-white"
       data-testid="hero-section"
     >
-      {/* ── BACKGROUND IMAGE w/ slow ken-burns ───────────────── */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <img
-          src={HERO_BG}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            animation: "heroBgDrift 28s ease-in-out infinite",
-            transformOrigin: "center",
-          }}
-          draggable="false"
-        />
-
-        {/* Slightly lighter overlay so the city's warm tones shine through more */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B1B2B]/35 via-[#0B1B2B]/45 to-[#0B1B2B]/85" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(212,169,113,0.20),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(11,27,43,0.85),transparent_55%)]" />
-
-        {/* Film grain — editorial feel */}
-        <div
-          className="absolute inset-0 opacity-[0.07] mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>\")",
-          }}
-        />
+      {/* ── CUSTOM MESH GRADIENT BACKGROUND ──────────────────── */}
+      <div className="hero-mesh-bg" aria-hidden="true">
+        <div className="hero-mesh-blob hero-mesh-blob-1" />
+        <div className="hero-mesh-blob hero-mesh-blob-2" />
+        <div className="hero-mesh-blob hero-mesh-blob-3" />
+        <div className="hero-mesh-blob hero-mesh-blob-4" />
+        <div className="hero-mesh-grid" />
+        <div className="hero-mesh-arc" />
+        <div className="hero-mesh-vignette" />
+        <div className="hero-mesh-grain" />
       </div>
 
       {/* ── TECH MOTION OVERLAY (particles + constellation + beam) ── */}
@@ -103,7 +83,6 @@ export default function Hero({ onCTA }) {
             animate="show"
             custom={2}
             className="mt-10 max-w-2xl text-white/85 text-[17px] md:text-[19px] leading-[1.65] font-light"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.35)" }}
           >
             A modern performance studio for established brands. We design
             thoughtful websites and build measurable marketing systems — with the
@@ -126,8 +105,10 @@ export default function Hero({ onCTA }) {
               }}
               data-testid="hero-cta"
             >
-              {/* Subtle shine on hover */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[linear-gradient(105deg,transparent_30%,rgba(255,255,255,0.25)_50%,transparent_70%)] -translate-x-full group-hover:translate-x-full" style={{ transitionProperty: "transform, opacity", transitionDuration: "900ms" }} />
+              <span
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[linear-gradient(105deg,transparent_30%,rgba(255,255,255,0.25)_50%,transparent_70%)] -translate-x-full group-hover:translate-x-full"
+                style={{ transitionProperty: "transform, opacity", transitionDuration: "900ms" }}
+              />
               <span className="relative">Start a project</span>
               <ArrowRight
                 size={16}
@@ -144,6 +125,33 @@ export default function Hero({ onCTA }) {
                 <Play size={11} className="fill-white ml-0.5" />
               </span>
               See our work
+            </a>
+          </motion.div>
+
+          {/* Subtle social hint */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            custom={4}
+            className="mt-10 flex items-center gap-3"
+          >
+            <span className="text-[11px] tracking-[0.22em] uppercase text-white/45">
+              Follow our work
+            </span>
+            <span className="w-8 h-px bg-white/20" />
+            <a
+              href="https://www.instagram.com/brivomarketing/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 text-white/70 hover:text-[#E8C28A] transition-colors"
+              data-testid="hero-instagram"
+            >
+              <Instagram
+                size={15}
+                className="transition-transform group-hover:scale-110"
+              />
+              <span className="text-[12px] tracking-wide">@brivomarketing</span>
             </a>
           </motion.div>
         </div>

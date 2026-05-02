@@ -237,6 +237,161 @@ html, body {
   50%      { transform: scale(1.12) translate(-1%, -0.8%); }
 }
 
+/* ─── CUSTOM HERO MESH GRADIENT ────────────────────────────────
+   Premium animated mesh-gradient background. No stock photo.
+   Multiple warm gradient blobs drift + merge against deep navy.
+   Inspired by Apple/Linear/Stripe — but tuned to our brand palette.
+   ============================================================ */
+.hero-mesh-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, #1A2D44 0%, #0B1B2B 70%);
+  overflow: hidden;
+}
+
+.hero-mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  will-change: transform;
+}
+
+/* Large warm amber blob — top-right */
+.hero-mesh-blob-1 {
+  width: 70vw;
+  height: 70vw;
+  max-width: 1100px;
+  max-height: 1100px;
+  background: radial-gradient(circle at 30% 30%, #D4A971 0%, #B8864C 35%, transparent 65%);
+  top: -20%;
+  right: -15%;
+  animation: meshDrift1 22s ease-in-out infinite;
+}
+
+/* Cream/gold blob — center-left */
+.hero-mesh-blob-2 {
+  width: 55vw;
+  height: 55vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle at 50% 50%, #F5D7A4 0%, #C99661 40%, transparent 70%);
+  top: 25%;
+  left: -15%;
+  opacity: 0.55;
+  animation: meshDrift2 26s ease-in-out infinite;
+}
+
+/* Deep burgundy / navy anchor — bottom-right */
+.hero-mesh-blob-3 {
+  width: 60vw;
+  height: 60vw;
+  max-width: 1000px;
+  max-height: 1000px;
+  background: radial-gradient(circle at 50% 50%, #6B4523 0%, #3A2814 50%, transparent 75%);
+  bottom: -25%;
+  right: -10%;
+  opacity: 0.55;
+  animation: meshDrift3 28s ease-in-out infinite;
+}
+
+/* Bright gold accent orb — middle (slow orbit) */
+.hero-mesh-blob-4 {
+  width: 35vw;
+  height: 35vw;
+  max-width: 600px;
+  max-height: 600px;
+  background: radial-gradient(circle at 50% 50%, #FFE3B0 0%, #D4A971 40%, transparent 70%);
+  top: 35%;
+  left: 35%;
+  opacity: 0.45;
+  animation: meshDrift4 18s ease-in-out infinite;
+}
+
+/* Vignette to anchor content + give text legibility */
+.hero-mesh-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, transparent 0%, rgba(11,27,43,0.55) 70%),
+    linear-gradient(to bottom, rgba(11,27,43,0.2) 0%, rgba(11,27,43,0.55) 100%);
+  pointer-events: none;
+}
+
+/* Faint grain on top of the mesh — premium editorial finish */
+.hero-mesh-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+  opacity: 0.10;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Faint precision grid for tech feel (very subtle) */
+.hero-mesh-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(212,169,113,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,169,113,0.06) 1px, transparent 1px);
+  background-size: 90px 90px;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  pointer-events: none;
+}
+
+/* Single elegant arc — signature graphic element ("forward motion") */
+.hero-mesh-arc {
+  position: absolute;
+  width: 140vw;
+  max-width: 2200px;
+  height: 140vw;
+  max-height: 2200px;
+  border: 1px solid rgba(212,169,113,0.18);
+  border-radius: 50%;
+  bottom: -85vw;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: arcRotate 60s linear infinite;
+}
+.hero-mesh-arc::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFE3B0 0%, #D4A971 60%, transparent 100%);
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px 4px rgba(212,169,113,0.5);
+}
+
+@keyframes meshDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-6%, 4%) scale(1.05); }
+  66%      { transform: translate(3%, -3%) scale(0.96); }
+}
+@keyframes meshDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(8%, -5%) scale(1.08); }
+}
+@keyframes meshDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-5%, -4%) scale(1.05); }
+}
+@keyframes meshDrift4 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+  50%      { transform: translate(-10%, 6%) scale(1.15); opacity: 0.6; }
+}
+@keyframes arcRotate {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to   { transform: translateX(-50%) rotate(360deg); }
+}
+
 /* "forward." gold word — slow shimmer for upbeat tech feel */
 .hero-shimmer {
   background: linear-gradient(

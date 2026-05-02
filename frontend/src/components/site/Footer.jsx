@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Instagram, Linkedin, Twitter, Dribbble } from "lucide-react";
 import Logo from "@/components/site/Logo";
 
 export default function Footer({ onCTA }) {
@@ -80,10 +80,45 @@ export default function Footer({ onCTA }) {
             Connect
           </div>
           <ul className="space-y-3 text-[14px] text-white/80">
-            <li><a className="link-underline" href="#">LinkedIn</a></li>
-            <li><a className="link-underline" href="#">Instagram</a></li>
-            <li><a className="link-underline" href="#">X · Twitter</a></li>
-            <li><a className="link-underline" href="#">Dribbble</a></li>
+            <li>
+              <a
+                href="https://www.instagram.com/brivomarketing/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+                data-testid="footer-instagram"
+              >
+                <Instagram size={15} />
+                @brivomarketing
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+              >
+                <Linkedin size={15} />
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+              >
+                <Twitter size={15} />
+                X · Twitter
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+              >
+                <Dribbble size={15} />
+                Dribbble
+              </a>
+            </li>
           </ul>
         </div>
       </div>

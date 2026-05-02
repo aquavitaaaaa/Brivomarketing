@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, Instagram } from "lucide-react";
 import Logo from "@/components/site/Logo";
 
 const links = [
@@ -56,6 +56,20 @@ export default function Navigation({ onCTA }) {
         </div>
 
         <div className="flex items-center gap-3">
+          <a
+            href="https://www.instagram.com/brivomarketing/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className={`hidden md:inline-flex w-9 h-9 items-center justify-center rounded-full border transition-all ${
+              scrolled
+                ? "border-[#E7E3D8] text-[#0B1B2B]/65 hover:text-[#0B1B2B] hover:border-[#0B1B2B]"
+                : "border-white/20 text-white/75 hover:text-white hover:border-white/45"
+            }`}
+            data-testid="nav-instagram"
+          >
+            <Instagram size={15} />
+          </a>
           <button
             onClick={onCTA}
             className={`hidden md:inline-flex items-center gap-2 text-[13px] font-medium px-5 py-2.5 rounded-full transition-all ${
@@ -102,6 +116,15 @@ export default function Navigation({ onCTA }) {
           >
             Start a project <ArrowRight size={14} />
           </button>
+          <a
+            href="https://www.instagram.com/brivomarketing/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[14px] text-[#0B1B2B]/75 mt-1"
+            data-testid="mobile-nav-instagram"
+          >
+            <Instagram size={15} /> @brivomarketing
+          </a>
         </div>
       )}
     </motion.nav>
