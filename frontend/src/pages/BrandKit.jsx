@@ -162,32 +162,102 @@ export default function BrandKit() {
 
       {/* Hero */}
       <section className="max-w-[1280px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-12">
-        <div className="eyebrow-accent mb-4">SOCIAL MEDIA BLITZ · DOWNLOAD PACK</div>
-        <h1 className="font-display font-[400] leading-[1.02] tracking-[-0.02em] text-[clamp(2.4rem,6vw,4.6rem)]">
-          The Brivo<br />
-          <em style={{ fontStyle: "italic" }} className="text-[#B8864C] font-[500]">brand kit.</em>
-        </h1>
-        <p className="mt-6 max-w-2xl text-[#4E5C6E] text-[16px] md:text-[17px] leading-[1.65]">
-          Logo lockups, avatars, covers, and post templates — pre-sized for every platform you'll ever need.
-          Download the raw .jpgs or copy a direct link to drop straight into a scheduling tool.
-        </p>
+        <div className="grid md:grid-cols-[1.1fr,0.9fr] gap-12 items-start">
+          {/* Left: copy */}
+          <div>
+            <div className="eyebrow-accent mb-4">SOCIAL MEDIA BLITZ · DOWNLOAD PACK · VOL. 01</div>
+            <h1 className="font-display font-[400] leading-[1.02] tracking-[-0.02em] text-[clamp(2.4rem,6vw,4.6rem)]">
+              The Brivo<br />
+              <em style={{ fontStyle: "italic" }} className="text-[#B8864C] font-[500]">brand system.</em>
+            </h1>
+            <p className="mt-6 max-w-2xl text-[#4E5C6E] text-[16px] md:text-[17px] leading-[1.65]">
+              Logo lockups, avatars, covers, post templates, a voice guide, and a weekly social playbook —
+              pre-sized for every platform you'll ever need. Download the full 13-page PDF lookbook or
+              grab individual .jpgs with a copy-ready link for your scheduler.
+            </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a
-            href="/kit-assets/brivo-brand-kit.pdf"
-            download="brivo-brand-kit.pdf"
-            className="inline-flex items-center gap-2 bg-[#B8864C] hover:bg-[#C99661] text-white px-6 py-3 rounded-full text-[14px] font-medium transition-colors shadow-lg shadow-[#B8864C]/20"
-            data-testid="brand-kit-hero-pdf"
-          >
-            <FileDown size={15} /> Download full kit · PDF
-          </a>
-          <span className="text-[12px] text-[#8190A1]">
-            11 pages · 16 MB · all assets bundled with URLs
-          </span>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <a
+                href="/kit-assets/brivo-brand-kit.pdf"
+                download="brivo-brand-kit.pdf"
+                className="inline-flex items-center gap-2 bg-[#B8864C] hover:bg-[#C99661] text-white px-6 py-3 rounded-full text-[14px] font-medium transition-colors shadow-lg shadow-[#B8864C]/25 hover:shadow-[#B8864C]/40 hover:-translate-y-[1px]"
+                data-testid="brand-kit-hero-pdf"
+                style={{ transition: "transform .2s, box-shadow .2s, background-color .2s" }}
+              >
+                <FileDown size={15} /> Download the lookbook · PDF
+              </a>
+              <span className="text-[12px] text-[#8190A1]">
+                13 pages · 4 MB · all assets bundled with URLs
+              </span>
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 max-w-md gap-3 text-center">
+              {[
+                { n: "13", l: "Pages" },
+                { n: "10", l: "Assets" },
+                { n: "7",  l: "Platforms" },
+              ].map((s) => (
+                <div key={s.l} className="rounded-xl border border-[#E7E3D8] bg-white/60 backdrop-blur-sm py-3">
+                  <div className="font-display text-[26px] font-[500] text-[#0B1B2B] leading-none">{s.n}</div>
+                  <div className="mt-1 text-[10px] tracking-[0.18em] uppercase text-[#8190A1]">{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: PDF preview stack */}
+          <div className="relative" data-testid="brand-kit-pdf-preview">
+            <div className="relative aspect-[11/8.5] max-w-[520px] mx-auto">
+              {/* Back pages peeking */}
+              <img
+                src="/kit-assets/brand-kit-page-back.png"
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl rotate-[5deg] translate-x-[6%] translate-y-[4%] opacity-90"
+              />
+              <img
+                src="/kit-assets/brand-kit-page-ig.png"
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl rotate-[-3deg] translate-x-[-4%] translate-y-[2%] opacity-95"
+              />
+              {/* Cover on top */}
+              <a
+                href="/kit-assets/brivo-brand-kit.pdf"
+                download="brivo-brand-kit.pdf"
+                className="relative block rounded-lg overflow-hidden shadow-2xl ring-1 ring-[#0B1B2B]/10 hover:-translate-y-1 transition-transform"
+                style={{ transitionDuration: ".3s" }}
+                data-testid="brand-kit-preview-cover"
+              >
+                <img
+                  src="/kit-assets/brand-kit-cover.png"
+                  alt="Brivo brand kit — cover"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-[#0B1B2B]/90 backdrop-blur text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
+                  <FileDown size={10} /> 13 pages
+                </div>
+              </a>
+            </div>
+
+            {/* Small thumb strip */}
+            <div className="mt-6 flex items-center justify-center gap-2 opacity-90">
+              {["index", "color", "ig", "back"].map((t) => (
+                <img
+                  key={t}
+                  src={`/kit-assets/brand-kit-page-${t}.png`}
+                  alt=""
+                  aria-hidden
+                  className="h-14 w-auto rounded border border-[#E7E3D8] shadow-sm hover:-translate-y-[2px] transition-transform"
+                  style={{ transitionDuration: ".2s" }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Palette + typography quick-reference */}
-        <div className="mt-10 grid md:grid-cols-2 gap-6">
+        <div className="mt-16 grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6">
             <div className="eyebrow mb-4">Palette</div>
             <div className="grid grid-cols-5 gap-3">
