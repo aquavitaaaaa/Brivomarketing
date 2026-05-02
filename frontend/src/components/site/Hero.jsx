@@ -3,7 +3,7 @@ import { ArrowRight, Play, Star } from "lucide-react";
 import HeroTechOverlay, { LivePulseBadge } from "@/components/site/HeroTechOverlay";
 
 const HERO_BG =
-  "https://images.unsplash.com/photo-1510655083999-4b632cd36e87?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwzfHxjaXR5JTIwZHVza3xlbnwwfHx8b3JhbmdlfDE3Nzc2ODAyODN8MA&ixlib=rb-4.1.0&q=85";
+  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?crop=entropy&cs=srgb&fm=jpg&w=2400&q=85";
 
 const fadeUp = {
   hidden: { y: 32, opacity: 0 },
