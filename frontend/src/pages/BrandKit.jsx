@@ -187,7 +187,7 @@ export default function BrandKit() {
                 <FileDown size={15} /> Download the lookbook · PDF
               </a>
               <span className="text-[12px] text-[#8190A1]">
-                13 pages · 4 MB · all assets bundled with URLs
+                13 pages · 5 MB · all assets bundled with URLs
               </span>
             </div>
 
