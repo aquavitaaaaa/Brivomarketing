@@ -209,3 +209,16 @@ export const leadImport = (leads) =>
 export const outreachJobs = () =>
   axios.get(`${API}/admin/outreach/jobs`, { headers: authHeaders() }).then((r) => r.data);
 
+export const leadAnalytics = () =>
+  axios.get(`${API}/admin/leads/analytics`, { headers: authHeaders() }).then((r) => r.data);
+
+export const leadAutoQualify = (limit = 20, min_score = 60) =>
+  axios.post(`${API}/admin/leads/auto-qualify`, { limit, min_score }, {
+    headers: authHeaders(), timeout: 90000,
+  }).then((r) => r.data);
+
+export const leadQualify = (id) =>
+  axios.post(`${API}/admin/leads/${id}/qualify`, {}, {
+    headers: authHeaders(), timeout: 60000,
+  }).then((r) => r.data);
+

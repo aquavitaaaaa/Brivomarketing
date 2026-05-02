@@ -494,3 +494,177 @@ async def pipeline_stats(db) -> dict:
     out["total"] = await db.leads.count_documents({})
     out["outreach_sent_today"] = await _outreach_count_today(db, "reddit")
     return out
+
+
+# =============================================================== AUTO-QUALIFIER
+
+async def llm_qualify(db, lead: dict) -> dict:
+    """Second-pass LLM scoring. Re-scores fit (0..100), tags vertical + urgency,
+    returns {score, vertical, urgency, fit_summary, recommendation}.
+    Falls back to a heuristic when the LLM is unavailable.
+    """
+    # Heuristic fallback (always available)
+    fallback = {
+        "score": int(lead.get("signal_score") or 50),
+        "vertical": "unknown",
+        "urgency": "medium",
+        "fit_summary": "Heuristic scoring only — LLM unavailable.",
+        "recommendation": "review",
+        "qualified_at": _now_iso(),
+        "qualifier": "fallback",
+    }
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        api_key = os.environ.get("EMERGENT_LLM_KEY")
+        if not api_key:
+            return fallback
+        system = (
+            "You are a B2B sales qualifier for an AI marketing studio. "
+            "Score how good a fit a prospect is on a 0..100 scale. "
+            "Higher = more likely to buy a marketing/web retainer. "
+            "Reasons to up-score: clear pain, budget signals, ownership, urgency. "
+            "Reasons to down-score: hobbyist, no business, vague rant, B2C consumer. "
+            "Output VALID JSON ONLY with keys: score (int), vertical (string), "
+            "urgency (low|medium|high), fit_summary (1 sentence), "
+            "recommendation (dispatch|review|skip)."
+        )
+        user = (
+            f"Source: {lead.get('source')}\n"
+            f"Title: {lead.get('title','')}\n"
+            f"Body: {lead.get('snippet','')}\n"
+            f"Author handle: {lead.get('platform_handle','?')}\n"
+            f"Initial heuristic score: {lead.get('signal_score', 50)}/100"
+        )
+        llm = LlmChat(
+            api_key=api_key,
+            session_id=f"qualify-{lead['id']}",
+            system_message=system,
+        ).with_model("gemini", "gemini-2.5-flash")
+        raw = await llm.send_message(UserMessage(text=user))
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1:
+            try:
+                obj = json.loads(raw[s:e+1])
+                score = int(obj.get("score", fallback["score"]))
+                score = max(0, min(100, score))
+                return {
+                    "score": score,
+                    "vertical": str(obj.get("vertical") or "unknown")[:60],
+                    "urgency": str(obj.get("urgency") or "medium")[:10],
+                    "fit_summary": str(obj.get("fit_summary") or "")[:300],
+                    "recommendation": str(obj.get("recommendation") or "review")[:20],
+                    "qualified_at": _now_iso(),
+                    "qualifier": "llm",
+                }
+            except json.JSONDecodeError:
+                pass
+        return fallback
+    except Exception as e:
+        logger.warning("llm_qualify fallback (%s)", e)
+        return fallback
+
+
+async def qualify_lead(db, lead_id: str) -> dict:
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise ValueError("lead not found")
+    q = await llm_qualify(db, lead)
+    await db.leads.update_one(
+        {"id": lead_id},
+        {"$set": {
+            "signal_score": q["score"],
+            "qualifier": q,
+            "updated_at": _now_iso(),
+        }},
+    )
+    return q
+
+
+async def auto_qualify_all_discovered(db, limit: int = 20, min_score: int = 60) -> dict:
+    """Run the qualifier on every `discovered` lead. Auto-promote high scorers
+    above `min_score` straight to dispatch eligibility (stage stays discovered;
+    the dispatch loop already picks highest-score first).
+    Returns counts + list of qualified leads."""
+    cur = db.leads.find({"stage": "discovered"}, {"_id": 0}).limit(limit)
+    leads = await cur.to_list(length=limit)
+    qualified = []
+    for lead in leads:
+        try:
+            q = await qualify_lead(db, lead["id"])
+            qualified.append({"id": lead["id"], "title": lead.get("title", ""), **q})
+        except Exception:
+            logger.exception("auto_qualify failed for %s", lead.get("id"))
+    high = [q for q in qualified if q["score"] >= min_score]
+    return {"processed": len(qualified), "high_fit": len(high), "results": qualified}
+
+
+# =============================================================== ANALYTICS
+
+async def outreach_analytics(db) -> dict:
+    """Funnel + reply rate + best-time signals for the dashboard."""
+    total_leads = await db.leads.count_documents({})
+    total_contacted = await db.leads.count_documents({"stage": {"$in": ["contacted", "replied", "qualified", "booked"]}})
+    total_replied = await db.leads.count_documents({"stage": {"$in": ["replied", "qualified", "booked"]}})
+    total_booked = await db.leads.count_documents({"stage": "booked"})
+
+    reply_rate = round((total_replied / total_contacted) * 100, 1) if total_contacted else 0.0
+    book_rate = round((total_booked / total_replied) * 100, 1) if total_replied else 0.0
+
+    # Outreach jobs in last 7 days
+    seven_days = (_now() - timedelta(days=7)).isoformat()
+    sent = await db.outreach_jobs.count_documents({
+        "status": {"$in": ["sent", "running"]},
+        "created_at": {"$gte": seven_days},
+    })
+    failed = await db.outreach_jobs.count_documents({
+        "status": "failed",
+        "created_at": {"$gte": seven_days},
+    })
+    queued = await db.outreach_jobs.count_documents({
+        "status": "queued",
+        "created_at": {"$gte": seven_days},
+    })
+
+    # Top sources
+    top_sources_cur = db.leads.aggregate([
+        {"$group": {"_id": "$source", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5},
+    ])
+    top_sources = [
+        {"source": d["_id"] or "unknown", "count": d["count"]}
+        async for d in top_sources_cur
+    ]
+
+    # Top subreddits
+    top_subs_cur = db.leads.aggregate([
+        {"$match": {"subreddit": {"$exists": True, "$ne": None}}},
+        {"$group": {"_id": "$subreddit", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5},
+    ])
+    top_subs = [
+        {"subreddit": d["_id"], "count": d["count"]}
+        async for d in top_subs_cur
+    ]
+
+    return {
+        "funnel": {
+            "leads": total_leads,
+            "contacted": total_contacted,
+            "replied": total_replied,
+            "booked": total_booked,
+        },
+        "rates": {
+            "reply_rate_pct": reply_rate,
+            "book_rate_pct": book_rate,
+        },
+        "outreach_7d": {
+            "sent": sent,
+            "failed": failed,
+            "queued": queued,
+        },
+        "top_sources": top_sources,
+        "top_subreddits": top_subs,
+    }
+

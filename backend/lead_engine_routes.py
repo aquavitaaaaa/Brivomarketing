@@ -68,15 +68,9 @@ async def list_leads(
     return {"leads": await cur.to_list(length=limit)}
 
 
-@router.get("/admin/leads/{lead_id}")
-async def get_lead(lead_id: str, admin=Depends(get_current_admin)):
-    db = router.db  # type: ignore[attr-defined]
-    doc = await db.leads.find_one({"id": lead_id}, {"_id": 0})
-    if not doc:
-        raise HTTPException(404, "Lead not found")
-    return doc
-
-
+# NOTE: these literal routes MUST be declared before the dynamic /{lead_id} route
+# below, otherwise FastAPI will route 'auto-qualify' / 'analytics' / 'discover-now'
+# / 'import' as a lead_id.
 @router.post("/admin/leads/discover-now")
 async def discover_now(payload: dict | None = None, admin=Depends(get_current_admin)):
     db = router.db  # type: ignore[attr-defined]
@@ -86,6 +80,51 @@ async def discover_now(payload: dict | None = None, admin=Depends(get_current_ad
     inserted = await lead_engine.discovery_tick(db, subreddits=subs)
     stats = await lead_engine.pipeline_stats(db)
     return {"new_leads": inserted, "pipeline": stats}
+
+
+@router.post("/admin/leads/import")
+async def import_leads(payload: LeadImport, admin=Depends(get_current_admin)):
+    """Bulk-import leads from an array of {url, title, snippet, author, source}.
+
+    Used for cold-list uploads (e.g. CSV of LinkedIn profiles or scraped sites).
+    """
+    db = router.db  # type: ignore[attr-defined]
+    inserted = 0
+    for raw in payload.leads:
+        if not raw.get("source") or not raw.get("source_id"):
+            # generate a stable source_id from url if missing
+            raw.setdefault("source", "import")
+            raw.setdefault("source_id", raw.get("url") or lead_engine._new_id())
+        rec = await lead_engine.upsert_lead(db, raw)
+        if rec:
+            inserted += 1
+    return {"inserted": inserted, "submitted": len(payload.leads)}
+
+
+@router.post("/admin/leads/auto-qualify")
+async def auto_qualify(payload: dict | None = None, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    limit = 20
+    min_score = 60
+    if payload:
+        limit = int(payload.get("limit") or 20)
+        min_score = int(payload.get("min_score") or 60)
+    return await lead_engine.auto_qualify_all_discovered(db, limit=limit, min_score=min_score)
+
+
+@router.get("/admin/leads/analytics")
+async def get_analytics(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    return await lead_engine.outreach_analytics(db)
+
+
+@router.get("/admin/leads/{lead_id}")
+async def get_lead(lead_id: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    doc = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Lead not found")
+    return doc
 
 
 @router.post("/admin/leads/{lead_id}/dispatch")
@@ -122,23 +161,14 @@ async def update_stage(lead_id: str, payload: StageUpdate, admin=Depends(get_cur
     return {"ok": True, "stage": payload.stage}
 
 
-@router.post("/admin/leads/import")
-async def import_leads(payload: LeadImport, admin=Depends(get_current_admin)):
-    """Bulk-import leads from an array of {url, title, snippet, author, source}.
-
-    Used for cold-list uploads (e.g. CSV of LinkedIn profiles or scraped sites).
-    """
+@router.post("/admin/leads/{lead_id}/qualify")
+async def qualify_lead_endpoint(lead_id: str, admin=Depends(get_current_admin)):
     db = router.db  # type: ignore[attr-defined]
-    inserted = 0
-    for raw in payload.leads:
-        if not raw.get("source") or not raw.get("source_id"):
-            # generate a stable source_id from url if missing
-            raw.setdefault("source", "import")
-            raw.setdefault("source_id", raw.get("url") or lead_engine._new_id())
-        rec = await lead_engine.upsert_lead(db, raw)
-        if rec:
-            inserted += 1
-    return {"inserted": inserted, "submitted": len(payload.leads)}
+    try:
+        q = await lead_engine.qualify_lead(db, lead_id)
+        return {"qualifier": q}
+    except ValueError:
+        raise HTTPException(404, "Lead not found")
 
 
 @router.get("/admin/outreach/jobs")
