@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Play, Star, Instagram } from "lucide-react";
 import HeroTechOverlay, { LivePulseBadge } from "@/components/site/HeroTechOverlay";
 import HeroShowcase from "@/components/site/HeroShowcase";
+import useMagneticHover from "@/hooks/useMagneticHover";
 
 const fadeUp = {
   hidden: { y: 32, opacity: 0 },
@@ -13,6 +14,7 @@ const fadeUp = {
 };
 
 export default function Hero({ onCTA }) {
+  const magneticRef = useMagneticHover({ strength: 0.25, radius: 150 });
   return (
     <section
       id="top"
@@ -116,6 +118,7 @@ export default function Hero({ onCTA }) {
             className="mt-10 flex flex-wrap items-center gap-4"
           >
             <button
+              ref={magneticRef}
               onClick={onCTA}
               className="group relative inline-flex items-center gap-3 bg-[#B8864C] hover:bg-[#C99661] text-white px-8 py-4 rounded-full text-[14px] font-medium tracking-wide transition-all overflow-hidden"
               style={{

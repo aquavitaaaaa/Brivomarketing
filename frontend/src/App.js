@@ -19,6 +19,10 @@ import Testimonials from "@/components/site/Testimonials";
 import Insights from "@/components/site/Insights";
 import Partners from "@/components/site/Partners";
 import BigCtaCard from "@/components/site/BigCtaCard";
+import BeforeAfterSlider from "@/components/site/BeforeAfterSlider";
+import LiveWinsFeed from "@/components/site/LiveWinsFeed";
+import Manifesto from "@/components/site/Manifesto";
+import AwardsBar from "@/components/site/AwardsBar";
 import Footer from "@/components/site/Footer";
 import InquiryDialog from "@/components/site/InquiryDialog";
 import ChatWidget from "@/components/site/ChatWidget";
@@ -55,13 +59,17 @@ const Home = () => {
       <Navigation onCTA={() => openInquiry("", "nav-cta")} />
       <Hero onCTA={() => openInquiry("", "hero-cta")} />
       <TrustBar />
+      <AwardsBar />
       <ScrollReveal>
         <StatsBar />
       </ScrollReveal>
+      <LiveWinsFeed />
       <PressShelf />
       <Services onSelect={(s) => openInquiry(s, "service-card")} />
       <Differentiators />
+      <Manifesto />
       <Process />
+      <BeforeAfterSlider />
       <Portfolio
         onOpen={(p) => {
           setActiveCase(p);
