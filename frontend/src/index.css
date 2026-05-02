@@ -147,6 +147,118 @@ html, body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── HERO TECH OVERLAY ANIMATIONS ─────────────────────────── */
+@keyframes particleDrift {
+  0%, 100% { transform: translate(0, 0); opacity: 0.6; }
+  25%      { transform: translate(0.6%, -1.2%); opacity: 0.95; }
+  50%      { transform: translate(-0.4%, -0.8%); opacity: 0.7; }
+  75%      { transform: translate(0.3%, -1.6%); opacity: 0.9; }
+}
+@keyframes linePulse {
+  0%, 100% { stroke-opacity: 0.08; }
+  50%      { stroke-opacity: 0.45; }
+}
+@keyframes signalShift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-3%); }
+}
+
+/* Soft glow orbs (depth + warmth in the hero) */
+.hero-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.hero-orb-1 {
+  width: 540px; height: 540px;
+  background: radial-gradient(circle, rgba(212,169,113,0.55), transparent 70%);
+  top: 10%; left: 55%;
+  animation: orbDrift1 18s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(184,134,76,0.45), transparent 70%);
+  bottom: 5%; left: 10%;
+  animation: orbDrift2 22s ease-in-out infinite;
+}
+.hero-orb-3 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(255,200,140,0.35), transparent 70%);
+  top: 50%; right: 8%;
+  animation: orbDrift3 26s ease-in-out infinite;
+}
+@keyframes orbDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-30px, 20px) scale(1.08); }
+}
+@keyframes orbDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, -25px) scale(0.94); }
+}
+@keyframes orbDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-20px, -30px) scale(1.06); }
+}
+
+/* Slow scanning beam — a single warm sweep that cycles */
+.hero-scan-beam {
+  position: absolute;
+  top: -10%;
+  left: -20%;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(245,215,164,0.04) 48%,
+    rgba(245,215,164,0.10) 50%,
+    rgba(245,215,164,0.04) 52%,
+    transparent 65%,
+    transparent 100%
+  );
+  filter: blur(12px);
+  animation: scanSweep 14s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes scanSweep {
+  0%   { transform: translateX(0); opacity: 0; }
+  10%  { opacity: 0.9; }
+  60%  { transform: translateX(380%); opacity: 0.9; }
+  70%  { transform: translateX(380%); opacity: 0; }
+  100% { transform: translateX(380%); opacity: 0; }
+}
+
+/* Slow Ken-Burns drift on hero bg image — subtle "alive" feel */
+@keyframes heroBgDrift {
+  0%, 100% { transform: scale(1.08) translate(0, 0); }
+  50%      { transform: scale(1.12) translate(-1%, -0.8%); }
+}
+
+/* "forward." gold word — slow shimmer for upbeat tech feel */
+.hero-shimmer {
+  background: linear-gradient(
+    100deg,
+    #D4A971 0%,
+    #F2D6A5 30%,
+    #FFE9C2 50%,
+    #F2D6A5 70%,
+    #D4A971 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: heroShimmer 6s ease-in-out infinite;
+}
+@keyframes heroShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
 /* Horizontal hairline divider */
 .hair { border-top: 1px solid var(--brivo-border); }
 

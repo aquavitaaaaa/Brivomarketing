@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Star } from "lucide-react";
+import HeroTechOverlay, { LivePulseBadge } from "@/components/site/HeroTechOverlay";
 
 const HERO_BG =
   "https://images.unsplash.com/photo-1510655083999-4b632cd36e87?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwzfHxjaXR5JTIwZHVza3xlbnwwfHx8b3JhbmdlfDE3Nzc2ODAyODN8MA&ixlib=rb-4.1.0&q=85";
@@ -20,53 +21,56 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] w-full overflow-hidden bg-[#0B1B2B] text-white"
       data-testid="hero-section"
     >
-      {/* ── BACKGROUND IMAGE ─────────────────────────────────────── */}
-      <motion.div
-        initial={{ scale: 1.08, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0 z-0"
-      >
+      {/* ── BACKGROUND IMAGE w/ slow ken-burns ───────────────── */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src={HERO_BG}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            animation: "heroBgDrift 28s ease-in-out infinite",
+            transformOrigin: "center",
+          }}
           draggable="false"
         />
 
-        {/* Gradient overlay — dark at bottom, warm wash top, for legibility + mood */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B1B2B]/55 via-[#0B1B2B]/60 to-[#0B1B2B]/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(184,134,76,0.25),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(11,27,43,0.9),transparent_60%)]" />
+        {/* Slightly lighter overlay so the city's warm tones shine through more */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B1B2B]/35 via-[#0B1B2B]/45 to-[#0B1B2B]/85" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(212,169,113,0.20),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(11,27,43,0.85),transparent_55%)]" />
 
-        {/* Film grain for premium editorial feel */}
+        {/* Film grain — editorial feel */}
         <div
-          className="absolute inset-0 opacity-[0.08] mix-blend-overlay pointer-events-none"
+          className="absolute inset-0 opacity-[0.07] mix-blend-overlay pointer-events-none"
           style={{
             backgroundImage:
               "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/></svg>\")",
           }}
         />
-      </motion.div>
+      </div>
 
-      {/* ── CONTENT ─────────────────────────────────────────────── */}
+      {/* ── TECH MOTION OVERLAY (particles + constellation + beam) ── */}
+      <HeroTechOverlay />
+
+      {/* ── CONTENT ─────────────────────────────────────────── */}
       <div className="relative z-10 min-h-[100vh] flex flex-col px-6 md:px-10 lg:px-16 pt-36 md:pt-40 pb-14">
-        {/* Top micro-row */}
+        {/* Top row: status chip + live pulse */}
         <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="show"
           custom={0}
-          className="flex items-center gap-4 mb-14"
+          className="flex flex-wrap items-center gap-3 mb-14"
         >
           <span className="inline-flex items-center gap-2 border border-white/20 bg-white/5 backdrop-blur-md rounded-full px-4 py-1.5 text-[11px] tracking-[0.22em] uppercase text-white/85 font-medium">
             <span className="relative inline-block w-1.5 h-1.5">
-              <span className="absolute inset-0 rounded-full bg-[#B8864C]" />
-              <span className="absolute inset-0 rounded-full bg-[#B8864C] animate-ping opacity-70" />
+              <span className="absolute inset-0 rounded-full bg-[#D4A971]" />
+              <span className="absolute inset-0 rounded-full bg-[#D4A971] animate-ping opacity-70" />
             </span>
             Accepting 3 engagements for Q2
           </span>
+          <LivePulseBadge className="hidden sm:inline-flex" />
         </motion.div>
 
         {/* Main headline */}
@@ -78,13 +82,16 @@ export default function Hero({ onCTA }) {
             custom={1}
             className="font-display font-[400] leading-[0.98] tracking-[-0.025em] text-white text-[clamp(3rem,9vw,8.2rem)]"
             data-testid="hero-title"
+            style={{
+              textShadow: "0 4px 40px rgba(0,0,0,0.35)",
+            }}
           >
             Marketing that moves
             <br />
             your business{" "}
             <em
               style={{ fontStyle: "italic" }}
-              className="text-[#D4A971] font-[500]"
+              className="text-[#E8C28A] font-[500] hero-shimmer"
             >
               forward.
             </em>
@@ -95,7 +102,8 @@ export default function Hero({ onCTA }) {
             initial="hidden"
             animate="show"
             custom={2}
-            className="mt-10 max-w-2xl text-white/80 text-[17px] md:text-[19px] leading-[1.65] font-light"
+            className="mt-10 max-w-2xl text-white/85 text-[17px] md:text-[19px] leading-[1.65] font-light"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.35)" }}
           >
             A modern performance studio for established brands. We design
             thoughtful websites and build measurable marketing systems — with the
@@ -111,17 +119,19 @@ export default function Hero({ onCTA }) {
           >
             <button
               onClick={onCTA}
-              className="group inline-flex items-center gap-3 bg-[#B8864C] hover:bg-[#C99661] text-white px-8 py-4 rounded-full text-[14px] font-medium tracking-wide transition-all"
+              className="group relative inline-flex items-center gap-3 bg-[#B8864C] hover:bg-[#C99661] text-white px-8 py-4 rounded-full text-[14px] font-medium tracking-wide transition-all overflow-hidden"
               style={{
                 boxShadow:
                   "0 20px 50px -15px rgba(184,134,76,0.55), 0 0 0 1px rgba(255,255,255,0.08)",
               }}
               data-testid="hero-cta"
             >
-              Start a project
+              {/* Subtle shine on hover */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[linear-gradient(105deg,transparent_30%,rgba(255,255,255,0.25)_50%,transparent_70%)] -translate-x-full group-hover:translate-x-full" style={{ transitionProperty: "transform, opacity", transitionDuration: "900ms" }} />
+              <span className="relative">Start a project</span>
               <ArrowRight
                 size={16}
-                className="transition-transform group-hover:translate-x-1"
+                className="relative transition-transform group-hover:translate-x-1"
               />
             </button>
 
@@ -145,7 +155,6 @@ export default function Hero({ onCTA }) {
           transition={{ delay: 1.1, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="mt-16 md:mt-20 grid md:grid-cols-12 gap-8 items-end pt-10 border-t border-white/15"
         >
-          {/* Reviews */}
           <div className="md:col-span-4">
             <div className="flex items-center gap-1 mb-2">
               {[...Array(5)].map((_, i) => (
@@ -159,12 +168,11 @@ export default function Hero({ onCTA }) {
                 4.9 on Clutch
               </span>
             </div>
-            <div className="text-white/60 text-[13px] leading-relaxed max-w-[260px]">
+            <div className="text-white/65 text-[13px] leading-relaxed max-w-[260px]">
               180+ established brands partner with us across 27 industries.
             </div>
           </div>
 
-          {/* Hairline stats */}
           {[
             { label: "Revenue generated", value: "$120M+" },
             { label: "Average ROAS", value: "4.2x" },
