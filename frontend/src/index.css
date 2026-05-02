@@ -237,11 +237,208 @@ html, body {
   50%      { transform: scale(1.12) translate(-1%, -0.8%); }
 }
 
-/* ─── CUSTOM HERO MESH GRADIENT ────────────────────────────────
-   Premium animated mesh-gradient background. No stock photo.
-   Multiple warm gradient blobs drift + merge against deep navy.
-   Inspired by Apple/Linear/Stripe — but tuned to our brand palette.
+/* ─── HERO: AURORA + 3D HORIZON GRID ─────────────────────────
+   Cutting-edge cross-generational background.
+   Reads as "silk aurora meets receding horizon" — sophisticated
+   for older audiences, dynamic and tech-forward for younger.
+   Evokes forward motion, infinite possibility, precision.
    ============================================================ */
+.hero-aurora-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, #152A44 0%, #0B1B2B 45%, #050E1A 100%);
+}
+
+/* Deep base shadow — anchors the whole composition */
+.hero-aurora-base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(21, 42, 68, 0.6) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(7, 14, 26, 0.9) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Aurora silk ribbons: flowing morphing gradient blobs ── */
+.hero-aurora-layer {
+  position: absolute;
+  inset: 0;
+  filter: blur(40px) saturate(1.15);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.hero-aurora-ribbon {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.55;
+  will-change: transform;
+}
+.hero-aurora-ribbon-1 {
+  width: 70vw; height: 42vw;
+  max-width: 1100px; max-height: 700px;
+  background: radial-gradient(ellipse at 30% 40%, #D4A971 0%, #B8864C 25%, transparent 65%);
+  top: -12%; left: -10%;
+  animation: auroraDrift1 28s ease-in-out infinite;
+}
+.hero-aurora-ribbon-2 {
+  width: 60vw; height: 38vw;
+  max-width: 950px; max-height: 620px;
+  background: radial-gradient(ellipse at 50% 50%, #F5D7A4 0%, #C99661 30%, transparent 70%);
+  top: 20%; right: -15%;
+  opacity: 0.45;
+  animation: auroraDrift2 34s ease-in-out infinite;
+}
+.hero-aurora-ribbon-3 {
+  width: 55vw; height: 32vw;
+  max-width: 900px; max-height: 520px;
+  background: radial-gradient(ellipse at 50% 50%, #5A7FB5 0%, #2F4F7F 35%, transparent 70%);
+  top: 45%; left: 20%;
+  opacity: 0.40;
+  animation: auroraDrift3 26s ease-in-out infinite;
+}
+.hero-aurora-ribbon-4 {
+  width: 45vw; height: 28vw;
+  max-width: 720px; max-height: 450px;
+  background: radial-gradient(ellipse at 50% 50%, #FFE3B0 0%, #D4A971 30%, transparent 70%);
+  top: 10%; left: 35%;
+  opacity: 0.35;
+  animation: auroraDrift4 22s ease-in-out infinite;
+}
+
+@keyframes auroraDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%      { transform: translate(5%, 3%) scale(1.08) rotate(6deg); }
+  66%      { transform: translate(-3%, 6%) scale(0.96) rotate(-4deg); }
+}
+@keyframes auroraDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%      { transform: translate(-6%, 4%) scale(1.10) rotate(-8deg); }
+}
+@keyframes auroraDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(4%, -5%) scale(1.06); }
+}
+@keyframes auroraDrift4 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  50%      { transform: translate(6%, 8%) scale(1.14); opacity: 0.55; }
+}
+
+/* ── 3D horizon grid — receding perspective floor ── */
+.hero-horizon {
+  position: absolute;
+  bottom: -2%;
+  left: 50%;
+  width: 220%;
+  height: 58%;
+  transform: translateX(-50%) perspective(900px) rotateX(62deg);
+  transform-origin: bottom center;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, black 35%, transparent 95%);
+  -webkit-mask-image: linear-gradient(to top, black 35%, transparent 95%);
+}
+.hero-horizon-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(212, 169, 113, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 169, 113, 0.30) 1px, transparent 1px);
+  background-size: 72px 72px;
+  animation: gridScroll 14s linear infinite;
+}
+@keyframes gridScroll {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 72px, 72px 0; }
+}
+/* Warm horizon glow — sunrise on the grid */
+.hero-horizon-glow {
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 60%;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(255, 215, 160, 0.55) 0%, rgba(212, 169, 113, 0.25) 25%, transparent 60%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+/* The razor-thin horizon line itself — the "vanishing point" */
+.hero-horizon-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 227, 176, 0.9) 50%, transparent 100%);
+  box-shadow: 0 0 20px rgba(255, 215, 160, 0.7), 0 0 40px rgba(212, 169, 113, 0.4);
+}
+
+/* ── Floating bokeh particles — premium atmospheric depth ── */
+.hero-aurora-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-bokeh {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: bokehFloat 12s ease-in-out infinite;
+  filter: blur(1px);
+}
+.hero-bokeh-1 {
+  width: 3px; height: 3px;
+  background: rgba(255, 227, 176, 0.85);
+  box-shadow: 0 0 8px rgba(255, 227, 176, 0.6);
+}
+.hero-bokeh-2 {
+  width: 5px; height: 5px;
+  background: rgba(212, 169, 113, 0.75);
+  box-shadow: 0 0 12px rgba(212, 169, 113, 0.5);
+  filter: blur(1.5px);
+}
+.hero-bokeh-3 {
+  width: 2px; height: 2px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+}
+.hero-bokeh-4 {
+  width: 8px; height: 8px;
+  background: rgba(255, 200, 140, 0.55);
+  box-shadow: 0 0 18px rgba(255, 200, 140, 0.45);
+  filter: blur(3px);
+}
+.hero-bokeh-5 {
+  width: 4px; height: 4px;
+  background: rgba(245, 215, 164, 0.80);
+  box-shadow: 0 0 10px rgba(245, 215, 164, 0.55);
+}
+.hero-bokeh-6 {
+  width: 6px; height: 6px;
+  background: rgba(184, 134, 76, 0.65);
+  box-shadow: 0 0 14px rgba(184, 134, 76, 0.5);
+  filter: blur(2px);
+}
+@keyframes bokehFloat {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  10%  { opacity: 0.9; }
+  50%  { transform: translate(-20px, -40px); opacity: 1; }
+  90%  { opacity: 0.9; }
+  100% { transform: translate(10px, -80px); opacity: 0; }
+}
+
+/* Vignette for content legibility */
+.hero-aurora-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 40%, rgba(11, 27, 43, 0.05) 0%, rgba(11, 27, 43, 0.55) 75%),
+    linear-gradient(180deg, rgba(11, 27, 43, 0.25) 0%, rgba(5, 14, 26, 0.45) 100%);
+  pointer-events: none;
+}
 .hero-mesh-bg {
   position: absolute;
   inset: 0;

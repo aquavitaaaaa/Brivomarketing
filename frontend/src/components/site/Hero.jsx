@@ -18,15 +18,40 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] w-full overflow-hidden bg-[#0B1B2B] text-white"
       data-testid="hero-section"
     >
-      {/* ── CUSTOM MESH GRADIENT BACKGROUND ──────────────────── */}
-      <div className="hero-mesh-bg" aria-hidden="true">
-        <div className="hero-mesh-blob hero-mesh-blob-1" />
-        <div className="hero-mesh-blob hero-mesh-blob-2" />
-        <div className="hero-mesh-blob hero-mesh-blob-3" />
-        <div className="hero-mesh-blob hero-mesh-blob-4" />
-        <div className="hero-mesh-grid" />
-        <div className="hero-mesh-arc" />
-        <div className="hero-mesh-vignette" />
+      {/* ── AURORA + 3D HORIZON GRID (cutting-edge, cross-generational) ── */}
+      <div className="hero-aurora-bg" aria-hidden="true">
+        {/* Deep base */}
+        <div className="hero-aurora-base" />
+
+        {/* Flowing aurora silk ribbons (SVG-filtered soft blobs) */}
+        <div className="hero-aurora-layer">
+          <div className="hero-aurora-ribbon hero-aurora-ribbon-1" />
+          <div className="hero-aurora-ribbon hero-aurora-ribbon-2" />
+          <div className="hero-aurora-ribbon hero-aurora-ribbon-3" />
+          <div className="hero-aurora-ribbon hero-aurora-ribbon-4" />
+        </div>
+
+        {/* 3D perspective horizon grid floor — receding toward vanishing point */}
+        <div className="hero-horizon">
+          <div className="hero-horizon-grid" />
+          <div className="hero-horizon-glow" />
+          <div className="hero-horizon-line" />
+        </div>
+
+        {/* Floating bokeh particles */}
+        <div className="hero-aurora-particles">
+          {[...Array(18)].map((_, i) => (
+            <span key={i} className={`hero-bokeh hero-bokeh-${(i % 6) + 1}`} style={{
+              left: `${(i * 7 + 5) % 95}%`,
+              top: `${(i * 13 + 8) % 85}%`,
+              animationDelay: `${(i * 0.7) % 8}s`,
+              animationDuration: `${8 + (i % 5) * 2}s`,
+            }} />
+          ))}
+        </div>
+
+        {/* Vignette + fine grain for editorial legibility */}
+        <div className="hero-aurora-vignette" />
         <div className="hero-mesh-grain" />
       </div>
 
