@@ -334,6 +334,95 @@ export default function BrandKit() {
         </div>
       </section>
 
+      {/* The Reel — sora-generated cinematic showcase */}
+      <section className="max-w-[1280px] mx-auto px-6 md:px-10 pb-24" data-testid="brand-kit-reel">
+        <div className="flex items-end justify-between mb-8 pb-4 border-b border-[#E7E3D8]">
+          <div>
+            <div className="eyebrow-accent mb-2">THE REEL</div>
+            <h2 className="font-display text-[32px] md:text-[44px] font-[500] leading-none text-[#0B1B2B]">
+              Eight seconds of <em style={{ fontStyle: "italic" }} className="text-[#B8864C]">shock & awe.</em>
+            </h2>
+            <p className="mt-2 text-[14px] text-[#4E5C6E] max-w-xl">
+              Drop it on Reels, TikTok, Shorts, X. Vertical 9:16, ready to post.
+            </p>
+          </div>
+          <a
+            href="/kit-assets/brivo-reel.mp4"
+            download="brivomarketing-reel.mp4"
+            className="hidden md:inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors"
+            data-testid="brand-kit-reel-download"
+          >
+            <FileDown size={13} /> Download .mp4
+          </a>
+        </div>
+
+        <div className="grid md:grid-cols-[0.9fr,1.1fr] gap-10 items-center">
+          {/* Phone mockup containing the reel */}
+          <div className="relative mx-auto" style={{ width: 320 }}>
+            <div
+              className="relative rounded-[42px] overflow-hidden bg-[#0B1B2B] p-2 shadow-2xl ring-1 ring-[#0B1B2B]/20"
+              style={{ aspectRatio: "9 / 19.5" }}
+            >
+              <video
+                src="/kit-assets/brivo-reel.mp4"
+                poster="/kit-assets/brand-kit-cover.png"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover rounded-[34px]"
+                data-testid="brand-kit-reel-video"
+              />
+              {/* notch */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-b-2xl" />
+            </div>
+            {/* gold halo */}
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 blur-3xl opacity-40"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(184,134,76,0.5) 0%, transparent 70%)",
+              }}
+            />
+          </div>
+
+          {/* Right copy */}
+          <div>
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              {[
+                { n: "9:16", l: "Vertical" },
+                { n: "8s", l: "Run-time" },
+                { n: "4K-ready", l: "Sora 2 Pro" },
+              ].map((s) => (
+                <div key={s.l} className="rounded-xl border border-[#E7E3D8] bg-white p-4">
+                  <div className="font-display text-[22px] font-[500] text-[#0B1B2B] leading-none">
+                    {s.n}
+                  </div>
+                  <div className="mt-1 text-[10px] tracking-[0.18em] uppercase text-[#8190A1]">
+                    {s.l}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <ul className="space-y-3 text-[15px] text-[#4E5C6E] leading-[1.6]">
+              <li className="flex gap-3"><span className="text-[#B8864C] font-bold">·</span><span><span className="text-[#0B1B2B] font-medium">Shot 1 —</span> a glassy MacBook materialises in a beam of gold light, luxury site glowing on screen.</span></li>
+              <li className="flex gap-3"><span className="text-[#B8864C] font-bold">·</span><span><span className="text-[#0B1B2B] font-medium">Shot 2 —</span> iPhone whip-pan, SaaS dashboard, KPIs ticking up in gold.</span></li>
+              <li className="flex gap-3"><span className="text-[#B8864C] font-bold">·</span><span><span className="text-[#0B1B2B] font-medium">Shot 3 —</span> client sites flying through space with stat overlays: +412% / +318% / &lt;48h.</span></li>
+              <li className="flex gap-3"><span className="text-[#B8864C] font-bold">·</span><span><span className="text-[#0B1B2B] font-medium">Shot 4 —</span> the BrivoMarketing owl crest rotates into frame · "A brand built to move markets."</span></li>
+            </ul>
+
+            <a
+              href="/kit-assets/brivo-reel.mp4"
+              download="brivomarketing-reel.mp4"
+              className="md:hidden mt-6 inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors"
+            >
+              <FileDown size={13} /> Download .mp4
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Asset sections */}
       <div className="max-w-[1280px] mx-auto px-6 md:px-10 pb-24 space-y-20">
         {SECTIONS.map((section) => (
