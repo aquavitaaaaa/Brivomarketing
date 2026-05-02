@@ -27,6 +27,8 @@ import analytics_utils
 import email_client
 import agents as agents_module
 import social_agent
+import lead_engine
+import lead_engine_routes
 import asyncio
 
 mongo_url = os.environ['MONGO_URL']
@@ -788,6 +790,10 @@ app.include_router(api_router)
 social_agent.attach(db)
 app.include_router(social_agent.router, prefix="/api")
 
+# Mount the autonomous client acquisition (lead engine) routes.
+lead_engine_routes.attach(db)
+app.include_router(lead_engine_routes.router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -855,6 +861,18 @@ async def on_startup():
         asyncio.create_task(_scf.wins_recycler_loop(db))
     except Exception:
         logger.exception("wins_recycler_loop failed to start")
+    # Kick off the autonomous client-acquisition loops
+    try:
+        await db.leads.create_index([("source", 1), ("source_id", 1)], unique=True)
+        await db.leads.create_index("stage")
+        await db.leads.create_index("signal_score")
+        await db.outreach_jobs.create_index("created_at")
+        await db.outreach_jobs.create_index("lead_id")
+    except Exception:
+        pass
+    if os.environ.get("LEAD_ENGINE_ENABLED", "1") == "1":
+        asyncio.create_task(lead_engine.lead_discovery_loop(db))
+        asyncio.create_task(lead_engine.outreach_dispatch_loop(db))
     logger.info("Admin seeded. Ready.")
 
 

@@ -1,0 +1,45 @@
+{
+  "summary": "Full test of the new Autonomous Client Acquisition (Lead) Engine + cross-post LLM fallback regression. 21/21 new pytest cases PASS (/app/backend/tests/test_lead_engine.py). Full regression suite 59/64: the 5 pre-existing failures are all on /api/chat (public visitor chat) returning 502 because EMERGENT_LLM_KEY budget is exhausted — this endpoint does NOT yet have the LLM->fallback pattern that social.generate_post_variants and lead_engine.compose_outreach now use. Frontend smoke of /admin/leads passed end-to-end: 7 pipeline tiles rendered with live counts (Discovered 0, Queued 4, Replied 4, etc.), 8 lead rows listed, Discover Now button triggered a 200 response, lead drawer opened on row click, AI Nurturer reply (fallback template) persisted both prospect and brivo turns and appeared live in the drawer conversation list.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/chat", "issue": "Returns 502 when EMERGENT_LLM_KEY budget exhausted. Unlike /api/admin/social/posts/multi and /api/admin/leads/*/reply which gracefully fall back to deterministic templates, the public chat has no fallback. 5 regression tests in test_agents_and_chat.py and test_brivo_api.py fail because of this. Consider extending the same try/except fallback pattern used in lead_engine.compose_outreach to server.py /api/chat handler."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_lead_engine.py",
+    "/app/test_reports/pytest/lead_engine_results.xml",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Consider adding an LLM->fallback wrapper around the /api/chat public handler in server.py so visitor chat keeps working when the Emergent LLM budget is exhausted (mirror the pattern already in lead_engine.compose_outreach and social.generate_post_variants).",
+    "Budget of EMERGENT_LLM_KEY appears exhausted in this preview env ('Current cost: 1.18, Max budget: 1.00'). Top it up before demoing public chat, or rely on the fallback pattern above."
+  ],
+  "critical_code_review_comments": [
+    "lead_engine.py is well-scoped (~490 lines, one module, three clearly-separated loops). dispatch_one_lead has a nested try-inside-try-inside-try that's hard to audit; consider splitting the 'dispatch via Playwright agent' block into a helper so the happy path is linear.",
+    "lead_engine_routes.py uses `router.db = db` monkey-patch via attach(db). This works but is brittle — a Depends() that returns the db, or app.state.db pattern, is cleaner and prevents 'AttributeError: db' if a route is imported before attach().",
+    "dispatch_one_lead queues a job with channel='reddit' hardcoded (MVP per comment), but _outreach_count_today only counts that channel — when more channels land, the daily cap will need to accumulate across channels or per-channel caps will need to be explicit in the route.",
+    "handle_inbound_reply does not validate lead stage before running (e.g., can nurture a 'booked' or 'negative' lead and re-open it as 'replied'). Low-risk but worth a guard.",
+    "pipeline_stats does not compute 'active' or 'awaiting_reply' buckets and total may diverge from sum(stages) if a lead stage is missing (defensive code is fine; just noting the admin UI shows Total separately).",
+    "/api/admin/leads/import silently tolerates malformed rows (sets source='import' and synthesises source_id from url or uuid). If an import batch fails validation of key fields (e.g., empty leads[]), we return 200 with inserted=0 — consider adding per-row validation errors so admins can see why rows were skipped.",
+    "Lead docs store full conversation history in the `messages` array on the lead doc. Unbounded growth will bloat the doc beyond Mongo's 16MB eventually; move to a `lead_messages` collection keyed by lead_id before a lead can reach 100+ turns."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_lead_engine.py (created — 21 new pytest cases: auth gating, pipeline shape, list+filter+sort, get-by-id, idempotent import, discover-now, stage transitions, dispatch, reply nurture, outreach jobs, cross-post fallback regression)"
+  ],
+  "success_rate": {
+    "backend": "100% on new suite (21/21); 92% on full regression (59/64) — 5 pre-existing LLM-budget failures on /api/chat",
+    "frontend": "100% on tested flows"
+  },
+  "test_credentials": "admin@brivomarketing.com / BrivoOps2026! — confirmed working. Token returned at key 'token' (not 'access_token'). Login endpoint is POST /api/auth/admin/login (not /api/admin/login as written in the review request).",
+  "seed_data_creation": "Created 2 TEST_* leads via /api/admin/leads/import (source=reddit, source_id=TEST_<uuid>). One lead has been stage-transitioned and has a conversation attached via the reply nurturer. Pre-existing test leads from iteration 4 remain (the original 2 reddit-style test leads mentioned in agent-to-agent context).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite now: backend_test.py (20) + test_agents_and_chat.py (9) + test_brivo_api.py (misc) + test_lead_engine.py (21). Run all: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. The 5 failures are ALL /api/chat hitting the Emergent LLM budget cap — not a regression from this iteration. Lead Engine fully working E2E on both API and UI. Playwright social agent is NOT online in preview (as noted); outreach jobs created by /dispatch will stay status='queued' which is expected — the /dispatch endpoint still returns 200 because job insert happens before the agent call. When re-running, remember admin login is POST /api/auth/admin/login and response contains {token, user} (not access_token).",
+  "rca_of_the_issue": "N/A — no bugs encountered in this iteration. Cross-post bug fix verified: /api/admin/social/posts/multi returns 200 with 3 posts (one per platform) having non-empty captions and status=queued, confirming the deterministic fallback in social._fallback_variants is invoked when LLM budget is exhausted. Minor test-script issues found during authoring (wrong login path + wrong token key) were fixed in the test file and do not reflect backend bugs."
+}

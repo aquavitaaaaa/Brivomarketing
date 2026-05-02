@@ -138,10 +138,54 @@ async def generate_post_variants(
         ).with_model(agent["provider"], agent["model"])
         raw = await llm.send_message(UserMessage(text=user_prompt))
     except Exception as e:
-        logger.exception("Caption generation failed")
-        raise RuntimeError(f"AI generation failed: {e}")
+        # Graceful fallback when LLM budget is exhausted, key invalid, or any provider error.
+        # We return a deterministic stub so downstream scheduling/cross-post still succeeds.
+        logger.warning("LLM generation unavailable, returning fallback variants: %s", e)
+        return _fallback_variants(brief, requested, count, reason=str(e))
 
     return _parse_variants(raw, requested, count)
+
+
+def _fallback_variants(brief: str, platforms: List[str], count: int, reason: str = "") -> List[dict]:
+    """Deterministic fallback variants when the LLM is unavailable.
+
+    Generates a basic but on-brand caption per platform using the brief itself
+    so the cross-post pipeline can still queue posts for human review.
+    """
+    brief_short = (brief or "").strip()
+    if len(brief_short) > 220:
+        brief_short = brief_short[:217].rsplit(" ", 1)[0] + "…"
+
+    base_hashtags = {
+        "instagram": "#brivomarketing #aimarketing #growth #performance #marketingstudio",
+        "linkedin": "#aimarketing #growthmarketing #performance",
+        "x": "#aimarketing #growth",
+    }
+    out: List[dict] = []
+    for i in range(max(count, 1)):
+        plat = platforms[i % len(platforms)]
+        if plat == "x":
+            content = f"{brief_short}\n\nMore: brivomarketing.com"
+        elif plat == "linkedin":
+            content = (
+                f"{brief_short}\n\n"
+                "If this resonates, we ship AI-driven marketing systems that book meetings on autopilot. "
+                "Open to a quick chat? — BrivoMarketing"
+            )
+        else:  # instagram
+            content = (
+                f"{brief_short}\n\n"
+                "We build AI marketing systems that bring leads in while you sleep. DM 'AUDIT' for a free teardown."
+            )
+        out.append({
+            "variant": i + 1,
+            "platform": plat,
+            "content": content,
+            "hashtags": base_hashtags.get(plat, ""),
+            "fallback": True,
+            "fallback_reason": reason[:200] if reason else "llm_unavailable",
+        })
+    return out
 
 
 def _parse_variants(raw: str, platforms: List[str], count: int) -> List[dict]:

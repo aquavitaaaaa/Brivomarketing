@@ -173,3 +173,39 @@ export const socialCrossPost = (payload) =>
     headers: authHeaders(), timeout: 120000,
   }).then((r) => r.data);
 
+// ---------- Autonomous Client Acquisition Engine ----------
+export const leadsPipeline = () =>
+  axios.get(`${API}/admin/leads/pipeline`, { headers: authHeaders() }).then((r) => r.data);
+
+export const leadsList = (stage) => {
+  const q = stage ? `?stage=${encodeURIComponent(stage)}` : "";
+  return axios.get(`${API}/admin/leads${q}`, { headers: authHeaders() }).then((r) => r.data);
+};
+
+export const leadGet = (id) =>
+  axios.get(`${API}/admin/leads/${id}`, { headers: authHeaders() }).then((r) => r.data);
+
+export const leadDiscoverNow = (payload = {}) =>
+  axios.post(`${API}/admin/leads/discover-now`, payload, {
+    headers: authHeaders(), timeout: 90000,
+  }).then((r) => r.data);
+
+export const leadDispatch = (id) =>
+  axios.post(`${API}/admin/leads/${id}/dispatch`, {}, {
+    headers: authHeaders(), timeout: 90000,
+  }).then((r) => r.data);
+
+export const leadReply = (id, message) =>
+  axios.post(`${API}/admin/leads/${id}/reply`, { message }, {
+    headers: authHeaders(), timeout: 60000,
+  }).then((r) => r.data);
+
+export const leadStage = (id, stage) =>
+  axios.post(`${API}/admin/leads/${id}/stage`, { stage }, { headers: authHeaders() }).then((r) => r.data);
+
+export const leadImport = (leads) =>
+  axios.post(`${API}/admin/leads/import`, { leads }, { headers: authHeaders() }).then((r) => r.data);
+
+export const outreachJobs = () =>
+  axios.get(`${API}/admin/outreach/jobs`, { headers: authHeaders() }).then((r) => r.data);
+
