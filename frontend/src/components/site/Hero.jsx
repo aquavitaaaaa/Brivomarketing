@@ -18,29 +18,36 @@ export default function Hero({ onCTA }) {
       className="relative min-h-[100vh] w-full overflow-hidden bg-[#0B1B2B] text-white"
       data-testid="hero-section"
     >
-      {/* ── AURORA + 3D HORIZON GRID (cutting-edge, cross-generational) ── */}
+      {/* ── CINEMATIC HERO IMAGE + AURORA OVERLAY ───────────────── */}
       <div className="hero-aurora-bg" aria-hidden="true">
-        {/* Deep base */}
-        <div className="hero-aurora-base" />
+        {/* Custom-generated navy + gold cinematic background */}
+        <div className="hero-image-layer">
+          <img
+            src="/hero-bg-0.jpg"
+            alt=""
+            className="hero-image-bg"
+            loading="eager"
+            decoding="async"
+          />
+          <div className="hero-image-tint" />
+        </div>
 
-        {/* Flowing aurora silk ribbons (SVG-filtered soft blobs) */}
+        {/* Subtle aurora ribbons layered on top for extra depth + motion */}
         <div className="hero-aurora-layer">
           <div className="hero-aurora-ribbon hero-aurora-ribbon-1" />
-          <div className="hero-aurora-ribbon hero-aurora-ribbon-2" />
-          <div className="hero-aurora-ribbon hero-aurora-ribbon-3" />
           <div className="hero-aurora-ribbon hero-aurora-ribbon-4" />
         </div>
 
-        {/* 3D perspective horizon grid floor — receding toward vanishing point */}
+        {/* 3D perspective horizon grid floor — kept for cross-generational tech edge */}
         <div className="hero-horizon">
           <div className="hero-horizon-grid" />
           <div className="hero-horizon-glow" />
           <div className="hero-horizon-line" />
         </div>
 
-        {/* Floating bokeh particles */}
+        {/* Floating bokeh particles — atmospheric depth */}
         <div className="hero-aurora-particles">
-          {[...Array(18)].map((_, i) => (
+          {[...Array(14)].map((_, i) => (
             <span key={i} className={`hero-bokeh hero-bokeh-${(i % 6) + 1}`} style={{
               left: `${(i * 7 + 5) % 95}%`,
               top: `${(i * 13 + 8) % 85}%`,
@@ -50,7 +57,7 @@ export default function Hero({ onCTA }) {
           ))}
         </div>
 
-        {/* Vignette + fine grain for editorial legibility */}
+        {/* Vignette + grain for editorial legibility */}
         <div className="hero-aurora-vignette" />
         <div className="hero-mesh-grain" />
       </div>

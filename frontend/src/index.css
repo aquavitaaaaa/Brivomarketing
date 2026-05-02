@@ -251,13 +251,29 @@ html, body {
     radial-gradient(ellipse at 50% 0%, #152A44 0%, #0B1B2B 45%, #050E1A 100%);
 }
 
-/* Deep base shadow — anchors the whole composition */
-.hero-aurora-base {
+/* ── Cinematic custom-generated hero image ── */
+.hero-image-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.hero-image-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.88;
+  animation: heroBgDrift 30s ease-in-out infinite;
+  will-change: transform;
+}
+.hero-image-tint {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(21, 42, 68, 0.6) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(7, 14, 26, 0.9) 0%, transparent 60%);
+    linear-gradient(90deg, rgba(11, 27, 43, 0.70) 0%, rgba(11, 27, 43, 0.30) 45%, rgba(11, 27, 43, 0.15) 100%),
+    linear-gradient(180deg, rgba(11, 27, 43, 0.15) 0%, rgba(5, 14, 26, 0.45) 100%);
   pointer-events: none;
 }
 
