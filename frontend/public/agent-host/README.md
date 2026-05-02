@@ -17,7 +17,7 @@ Linux box on a residential LAN). The agent:
 Open Terminal and run:
 
 ```bash
-curl -fsSL https://work-earn-rewards.preview.emergentagent.com/agent-host/install.sh | bash
+curl -fsSL https://admin-panel-launch.preview.emergentagent.com/agent-host/install.sh | bash
 ```
 
 The installer will:

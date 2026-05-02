@@ -2,10 +2,10 @@
 # BrivoMarketing Auto-Poster — installer for Linux (systemd).
 #
 # Usage on the Linux box that should host the agent:
-#   curl -fsSL https://work-earn-rewards.preview.emergentagent.com/agent-host/install-linux.sh | bash
+#   curl -fsSL https://admin-panel-launch.preview.emergentagent.com/agent-host/install-linux.sh | bash
 set -euo pipefail
 
-BACKEND_URL="${BRIVO_BACKEND_URL:-https://work-earn-rewards.preview.emergentagent.com}"
+BACKEND_URL="${BRIVO_BACKEND_URL:-https://admin-panel-launch.preview.emergentagent.com}"
 APP_HOME="$HOME/.local/share/brivo-agent"
 SERVICE_NAME="brivo-agent"
 PAIR_CODE="${1:-}"
