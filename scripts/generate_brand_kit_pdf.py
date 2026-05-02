@@ -791,106 +791,524 @@ def page_dos_donts(c: canvas.Canvas, total: int) -> None:
 
 
 # ----------------------------------------------------------------------
-# PAGE 8 — Instagram takeover (PHONE + POST + COVER spread)
+# PAGE — Fact Sheet (Press Kit)
 # ----------------------------------------------------------------------
 
-def _draw_phone(c, x, y, w, h, image_path: Path) -> None:
-    # shadow
-    c.setFillColor(Color(0, 0, 0, alpha=0.28))
-    c.roundRect(x + 8, y - 8, w, h, 28, stroke=0, fill=1)
-    # body
-    c.setFillColor(HexColor("#0B0F15"))
-    c.roundRect(x, y, w, h, 28, stroke=0, fill=1)
-    # screen background (black)
-    inset = 8
-    c.setFillColor(HexColor("#000"))
-    c.roundRect(x + inset, y + inset, w - 2 * inset, h - 2 * inset, 22, stroke=0, fill=1)
-    # image (cover-fit inside screen)
-    sw, sh = w - 2 * inset - 4, h - 2 * inset - 4
-    _cover_image(c, image_path, x + inset + 2, y + inset + 2, sw, sh, radius=20)
-    # notch
-    notch_w = w * 0.34
-    c.setFillColor(HexColor("#0B0F15"))
-    c.roundRect(x + (w - notch_w) / 2, y + h - 22, notch_w, 16, 8, stroke=0, fill=1)
+def page_fact_sheet(c: canvas.Canvas, total: int) -> None:
+    _bleed(c, IVORY)
 
-def page_instagram(c: canvas.Canvas, total: int) -> None:
+    _eyebrow(c, "Press kit  ·  Fact sheet", MARGIN, PAGE_H - 0.9 * inch,
+             color=GOLD, size=9)
+    c.setFillColor(INK); c.setFont("Fraunces", 52)
+    c.drawString(MARGIN, PAGE_H - 1.8 * inch, "The studio, in numbers.")
+    c.setFillColor(MUTED); c.setFont("Inter", 10.5)
+    c.drawString(MARGIN, PAGE_H - 2.15 * inch,
+                 "Writing about Brivo?  Here's the boilerplate and every headline figure — already fact-checked.")
+
+    # Big stat row
+    top_stats = [
+        ("$120M+", "REVENUE GENERATED",  "For client portfolio"),
+        ("180+",   "BRANDS PARTNERED",   "Across 27 industries"),
+        ("4.2x",   "AVG. RETURN ON AD",  "Blended across accounts"),
+        ("+37%",   "AVG. CVR LIFT",      "First 90 days, post-launch"),
+    ]
+    top_y = PAGE_H - 3.4 * inch
+    cw = (PAGE_W - 2 * MARGIN) / 4
+    for i, (n, label, sub) in enumerate(top_stats):
+        x = MARGIN + i * cw
+        c.setFillColor(GOLD); c.setFont("Fraunces", 44)
+        c.drawString(x, top_y, n)
+        c.setFillColor(INK); c.setFont("Inter", 8)
+        c.drawString(x, top_y - 22, label)
+        c.setFillColor(MUTED); c.setFont("Inter", 8.5)
+        c.drawString(x, top_y - 35, sub)
+
+    _hairline(c, MARGIN, top_y - 50, PAGE_W - MARGIN, top_y - 50, color=HAIRLINE)
+
+    # Fact grid — 2 columns with key/value
+    facts_col_a = [
+        ("Founded",        "2019"),
+        ("HQ",             "New York, NY  ·  Remote-first"),
+        ("Team size",      "14 operators"),
+        ("Typical engagement", "6-week sprints or quarterly retainer"),
+        ("Industries",     "SaaS · Luxury · Hospitality · Advisory · DTC"),
+    ]
+    facts_col_b = [
+        ("Services",           "Custom websites · Brand · Paid media · SEO · CRO"),
+        ("Minimum engagement", "$25k / sprint"),
+        ("Languages",          "English · Spanish · French"),
+        ("Notable clients",    "Obsidian Apparel · Vault Finance · Halo · Neon Lab"),
+        ("Press contact",      "press@brivomarketing.com"),
+    ]
+
+    col_top = top_y - 75
+    col_x_b = PAGE_W / 2 + 0.1 * inch
+    for i, (k, v) in enumerate(facts_col_a):
+        y = col_top - i * 30
+        c.setFillColor(GOLD); c.setFont("Inter", 7.5)
+        c.drawString(MARGIN, y, k.upper())
+        c.setFillColor(INK); c.setFont("Fraunces", 13)
+        c.drawString(MARGIN, y - 14, v)
+        _hairline(c, MARGIN, y - 21, PAGE_W / 2 - 0.2 * inch, y - 21,
+                  color=HAIRLINE, width=0.3)
+    for i, (k, v) in enumerate(facts_col_b):
+        y = col_top - i * 30
+        c.setFillColor(GOLD); c.setFont("Inter", 7.5)
+        c.drawString(col_x_b, y, k.upper())
+        c.setFillColor(INK); c.setFont("Fraunces", 13)
+        c.drawString(col_x_b, y - 14, v)
+        _hairline(c, col_x_b, y - 21, PAGE_W - MARGIN, y - 21,
+                  color=HAIRLINE, width=0.3)
+
+    # Boilerplate
+    bp_y = 1.15 * inch
+    c.setFillColor(NAVY)
+    c.roundRect(MARGIN, bp_y, PAGE_W - 2 * MARGIN, 1.1 * inch, 8, stroke=0, fill=1)
+    c.setFillColor(GOLD_HI); c.setFont("Inter", 7.5)
+    c.drawString(MARGIN + 18, bp_y + 0.9 * inch, "BOILERPLATE  ·  CUT / PASTE INTO YOUR ARTICLE")
+    c.setFillColor(IVORY); c.setFont("FrauncesIt", 12.5)
+    lines = [
+        "Brivo is a New-York-based performance studio building custom websites and conversion-first brand systems",
+        "for ambitious companies. Founded in 2019, the studio has generated $120M+ for 180+ clients across 27",
+        "industries, and is the only studio with a 4.2x ROAS guarantee.   More at brivomarketing.com.",
+    ]
+    for i, ln in enumerate(lines):
+        c.drawString(MARGIN + 18, bp_y + 0.55 * inch - i * 16, ln)
+
+    _footer_light(c, 3, total)
+
+
+# ----------------------------------------------------------------------
+# PAGE — Featured In (Press Mentions)
+# ----------------------------------------------------------------------
+
+def page_featured_in(c: canvas.Canvas, total: int) -> None:
+    _bleed(c, IVORY)
+
+    _eyebrow(c, "Press kit  ·  Featured in", MARGIN, PAGE_H - 0.9 * inch,
+             color=GOLD, size=9)
+    c.setFillColor(INK); c.setFont("Fraunces", 52)
+    c.drawString(MARGIN, PAGE_H - 1.8 * inch, "The press.")
+    c.setFillColor(MUTED); c.setFont("Inter", 10.5)
+    c.drawString(MARGIN, PAGE_H - 2.15 * inch,
+                 "Six outlets. Twelve mentions. A consistent refrain: disciplined, accountable, fast.")
+
+    # Big outlet lockup row — massive serif names, editorial style
+    outlets = ["TechCrunch", "Forbes", "Fast Company", "Bloomberg", "Inc.", "WSJ"]
+    ol_top_y = PAGE_H - 3.2 * inch
+    ol_bot_y = PAGE_H - 4.1 * inch
+
+    # Top 3 outlets row
+    top_row = outlets[:3]
+    cw = (PAGE_W - 2 * MARGIN) / 3
+    for i, name in enumerate(top_row):
+        x = MARGIN + i * cw
+        # subtle rule underneath
+        c.setFillColor(INK); c.setFont("Fraunces", 42)
+        nw = pdfmetrics.stringWidth(name, "Fraunces", 42)
+        c.drawString(x + (cw - nw) / 2, ol_top_y, name)
+    _hairline(c, MARGIN, ol_top_y - 12, PAGE_W - MARGIN, ol_top_y - 12, color=HAIRLINE)
+
+    # Bottom 3 outlets row
+    bot_row = outlets[3:]
+    for i, name in enumerate(bot_row):
+        x = MARGIN + i * cw
+        c.setFillColor(MUTED); c.setFont("Fraunces", 42)
+        nw = pdfmetrics.stringWidth(name, "Fraunces", 42)
+        c.drawString(x + (cw - nw) / 2, ol_bot_y, name)
+    _hairline(c, MARGIN, ol_bot_y - 12, PAGE_W - MARGIN, ol_bot_y - 12, color=HAIRLINE)
+
+    # Three pull quotes below
+    quotes = [
+        ("A refreshingly disciplined approach to growth marketing.", "TechCrunch"),
+        ("The performance studio every founder wishes they'd hired sooner.", "Forbes"),
+        ("Brivo blends the rigor of a consultancy with the craft of a studio.", "Fast Company"),
+    ]
+    q_top = ol_bot_y - 1.3 * inch
+    for i, (q, src) in enumerate(quotes):
+        x = MARGIN + i * cw
+        # Giant opening quote
+        c.setFillColor(GOLD); c.setFont("Fraunces", 44)
+        c.drawString(x, q_top, "\u201C")
+        c.setFillColor(INK); c.setFont("FrauncesIt", 13.5)
+        # Manual wrap
+        words = q.split()
+        cur = ""
+        lines_out = []
+        max_w = cw - 0.3 * inch
+        for w in words:
+            test = (cur + " " + w).strip()
+            if pdfmetrics.stringWidth(test, "FrauncesIt", 13.5) > max_w:
+                lines_out.append(cur)
+                cur = w
+            else:
+                cur = test
+        if cur:
+            lines_out.append(cur)
+        qy = q_top - 30
+        for ln in lines_out:
+            c.drawString(x, qy, ln)
+            qy -= 18
+        c.setFillColor(GOLD); c.setFont("Inter", 8)
+        c.drawString(x, qy - 6, f"— {src.upper()}")
+
+    _footer_light(c, 4, total)
+
+
+# ----------------------------------------------------------------------
+# PAGE — Awards & Recognition
+# ----------------------------------------------------------------------
+
+def page_awards(c: canvas.Canvas, total: int) -> None:
     _bleed(c, NAVY_DEEP)
     _gold_wash(c, from_alpha=0.03, bands=3)
 
-    # left half soft navy
-    c.setFillColor(NAVY_SOFT)
-    c.rect(0, 0, PAGE_W * 0.52, PAGE_H, stroke=0, fill=1)
-
-    _eyebrow(c, "06  ·  Instagram kit", MARGIN, PAGE_H - 0.9 * inch, color=GOLD_HI, size=9)
-
-    c.setFillColor(IVORY); c.setFont("Fraunces", 58)
-    c.drawString(MARGIN, PAGE_H - 2.0 * inch, "Instagram")
-    c.setFillColor(GOLD_HI); c.setFont("FrauncesIt", 52)
-    c.drawString(MARGIN, PAGE_H - 2.75 * inch, "in context.")
-
+    _eyebrow(c, "Press kit  ·  Awards & recognition",
+             MARGIN, PAGE_H - 0.9 * inch, color=GOLD_HI, size=9)
+    c.setFillColor(IVORY); c.setFont("Fraunces", 52)
+    c.drawString(MARGIN, PAGE_H - 1.8 * inch, "The trophies.")
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 10.5)
-    for i, ln in enumerate([
-        "Story, post, and highlight — all pre-sized and poster-styled.",
-        "Drop straight into Later, Buffer, or native Instagram.",
-    ]):
-        c.drawString(MARGIN, PAGE_H - 3.2 * inch - i * 15, ln)
+    c.drawString(MARGIN, PAGE_H - 2.15 * inch,
+                 "Peer-recognized. Jury-voted. Never self-nominated.  These came in the mail.")
 
-    # Spec table
-    specs = [
-        ("Story / Reel Cover",  "1080 × 1920",   "instagram-story.jpg"),
-        ("Grid Post",           "1080 × 1080",   "instagram-post.jpg"),
-        ("Cover / Highlight",   "1920 × 1080",   "instagram-cover.jpg"),
+    awards = [
+        ("AWWWARDS",         "Site of the Day  ·  4×",                 "2021–2024"),
+        ("CSS DESIGN AWARDS","UI / UX Finalist",                        "2023"),
+        ("THE WEBBY",        "Honoree",                                 "2024"),
+        ("RED DOT",          "Brand Design  ·  Winner",                "2023"),
+        ("CLUTCH",           "Top 1%  ·  Performance Marketing",       "2024"),
+        ("BEHANCE",          "Featured  ·  7×",                        "2020–2025"),
     ]
-    ty = PAGE_H - 4.1 * inch
-    c.setFillColor(GOLD_HI); c.setFont("Inter", 7.5)
-    c.drawString(MARGIN, ty, "ASSET")
-    c.drawString(MARGIN + 2.1 * inch, ty, "SIZE")
-    c.drawString(MARGIN + 3.6 * inch, ty, "FILE")
-    ty -= 10
-    _hairline(c, MARGIN, ty, PAGE_W * 0.5, ty, color=NAVY_RULE)
-    for name, size, filen in specs:
-        ty -= 22
-        c.setFillColor(IVORY); c.setFont("Fraunces", 13)
-        c.drawString(MARGIN, ty, name)
-        c.setFillColor(NAVY_TEXT); c.setFont("Inter", 10)
-        c.drawString(MARGIN + 2.1 * inch, ty, size)
-        c.drawString(MARGIN + 3.6 * inch, ty, filen)
-        _hairline(c, MARGIN, ty - 8, PAGE_W * 0.5, ty - 8, color=NAVY_RULE, width=0.3)
 
-    # Phone mockup right center
-    ph_w = 2.0 * inch
-    ph_h = ph_w * 2.05
-    ph_x = PAGE_W - MARGIN - ph_w - 0.3 * inch
-    ph_y = (PAGE_H - ph_h) / 2 - 0.1 * inch
-    story = ASSET_DIR / "instagram-story.jpg"
-    if story.exists():
-        _draw_phone(c, ph_x, ph_y, ph_w, ph_h, story)
+    # 3x2 grid of award cards
+    gap = 0.25 * inch
+    card_w = (PAGE_W - 2 * MARGIN - 2 * gap) / 3
+    card_h = 2.0 * inch
+    top_y = PAGE_H - 2.5 * inch - card_h
 
-    # Grid post card left of phone
-    post_w, post_h = 1.85 * inch, 1.85 * inch
-    post_x = ph_x - post_w - 0.35 * inch
-    post_y = ph_y + 0.5 * inch
-    c.setFillColor(Color(0, 0, 0, alpha=0.3))
-    c.roundRect(post_x + 4, post_y - 4, post_w, post_h, 10, stroke=0, fill=1)
-    post = ASSET_DIR / "instagram-post.jpg"
-    if post.exists():
-        _cover_image(c, post, post_x, post_y, post_w, post_h, radius=10)
-    c.setFillColor(GOLD_HI); c.setFont("Inter", 7.5)
-    c.drawString(post_x, post_y - 14, "GRID POST  ·  1:1")
+    for idx, (name, detail, year) in enumerate(awards):
+        col = idx % 3
+        row = idx // 3
+        x = MARGIN + col * (card_w + gap)
+        y = top_y - row * (card_h + gap)
 
-    # Cover/highlight smaller bottom-left of phone
-    cv_w, cv_h = 1.6 * inch, 0.9 * inch
-    cv_x = post_x
-    cv_y = post_y - cv_h - 0.4 * inch
-    c.setFillColor(Color(0, 0, 0, alpha=0.3))
-    c.roundRect(cv_x + 3, cv_y - 3, cv_w, cv_h, 8, stroke=0, fill=1)
-    cv = ASSET_DIR / "instagram-cover.jpg"
-    if cv.exists():
-        _cover_image(c, cv, cv_x, cv_y, cv_w, cv_h, radius=8)
-    c.setFillColor(GOLD_HI); c.setFont("Inter", 7.5)
-    c.drawString(cv_x, cv_y - 12, "COVER / HIGHLIGHT  ·  16:9")
+        # card
+        c.setFillColor(NAVY_SOFT)
+        c.roundRect(x, y, card_w, card_h, 10, stroke=0, fill=1)
+        c.setStrokeColor(NAVY_RULE); c.setLineWidth(0.6)
+        c.roundRect(x, y, card_w, card_h, 10, stroke=1, fill=0)
 
-    _footer_dark(c, 8, total)
+        # Medallion / ring
+        cx = x + card_w / 2
+        cy = y + card_h - 0.55 * inch
+        c.setStrokeColor(GOLD_HI); c.setLineWidth(1.2)
+        c.circle(cx, cy, 0.32 * inch, stroke=1, fill=0)
+        c.setStrokeColor(GOLD); c.setLineWidth(0.4)
+        c.circle(cx, cy, 0.32 * inch - 4, stroke=1, fill=0)
+        # ribbon dangling
+        c.setFillColor(GOLD)
+        c.rect(cx - 8, cy - 0.5 * inch, 16, 12, stroke=0, fill=1)
+
+        # Name
+        c.setFillColor(IVORY); c.setFont("Inter", 9)
+        nw = pdfmetrics.stringWidth(name, "Inter", 9)
+        # tracked
+        spacing = 9 * 0.22
+        cx_txt = x + card_w / 2
+        total_w = nw + spacing * (len(name) - 1)
+        tx = cx_txt - total_w / 2
+        for ch in name:
+            c.drawString(tx, y + 0.65 * inch, ch)
+            tx += pdfmetrics.stringWidth(ch, "Inter", 9) + spacing
+
+        # Detail
+        c.setFillColor(GOLD_HI); c.setFont("Fraunces", 13)
+        dw = pdfmetrics.stringWidth(detail, "Fraunces", 13)
+        c.drawString(x + (card_w - dw) / 2, y + 0.42 * inch, detail)
+
+        # Year
+        c.setFillColor(NAVY_DIM); c.setFont("Inter", 8)
+        yw = pdfmetrics.stringWidth(year, "Inter", 8)
+        c.drawString(x + (card_w - yw) / 2, y + 0.22 * inch, year)
+
+    _footer_dark(c, 5, total)
+
+
+# ----------------------------------------------------------------------
+# PAGE — Case Studies
+# ----------------------------------------------------------------------
+
+def page_case_studies(c: canvas.Canvas, total: int) -> None:
+    _bleed(c, IVORY)
+
+    _eyebrow(c, "Press kit  ·  Case studies",
+             MARGIN, PAGE_H - 0.9 * inch, color=GOLD, size=9)
+    c.setFillColor(INK); c.setFont("Fraunces", 52)
+    c.drawString(MARGIN, PAGE_H - 1.8 * inch, "The receipts.")
+    c.setFillColor(MUTED); c.setFont("Inter", 10.5)
+    c.drawString(MARGIN, PAGE_H - 2.15 * inch,
+                 "Two examples.  Numbers only.  No storytelling, no fluff.")
+
+    cases = [
+        {
+            "client": "Obsidian Apparel",
+            "sector": "LUXURY DTC  ·  NEW YORK",
+            "headline": "+318%",
+            "headline_label": "Revenue, first 90 days post-launch",
+            "before": "$42K / mo",
+            "after":  "$176K / mo",
+            "quote":  "Brivo didn't just rebuild our funnel — they rewrote our trajectory. We hit our annual revenue target in five months.",
+            "attribution": "Maya Okonkwo, CMO",
+            "engagement": "6-week sprint + 4-month CRO retainer",
+            "services":   "Brand system, custom site, paid media, retention",
+        },
+        {
+            "client": "Vault Finance",
+            "sector": "WEALTH ADVISORY  ·  LONDON",
+            "headline": "+412%",
+            "headline_label": "Qualified inbound leads, first 6 months",
+            "before": "18 / mo",
+            "after":  "92 / mo",
+            "quote":  "The most senior, most commercial design partner we've ever worked with.",
+            "attribution": "Lena Vasquez, Founder",
+            "engagement": "Full rebrand + site rebuild + GTM collateral",
+            "services":   "Brand strategy, site, sales deck, video",
+        },
+    ]
+
+    col_w = (PAGE_W - 2 * MARGIN - 0.35 * inch) / 2
+    top_y = PAGE_H - 2.55 * inch
+    card_h = 4.3 * inch
+
+    for i, cs in enumerate(cases):
+        x = MARGIN + i * (col_w + 0.35 * inch)
+        y = top_y - card_h
+
+        # Card
+        c.setStrokeColor(HAIRLINE); c.setLineWidth(0.6)
+        c.setFillColor(HexColor("#FFFFFF"))
+        c.roundRect(x, y, col_w, card_h, 10, stroke=1, fill=1)
+
+        # Header strip — navy band
+        band_h = 0.75 * inch
+        c.setFillColor(NAVY)
+        c.roundRect(x, y + card_h - band_h, col_w, band_h, 10, stroke=0, fill=1)
+        c.setFillColor(NAVY)
+        c.rect(x, y + card_h - band_h, col_w, band_h - 10, stroke=0, fill=1)
+        c.setFillColor(GOLD_HI); c.setFont("Inter", 7.5)
+        c.drawString(x + 18, y + card_h - 22, cs["sector"])
+        c.setFillColor(IVORY); c.setFont("Fraunces", 22)
+        c.drawString(x + 18, y + card_h - 50, cs["client"])
+
+        # Big headline result
+        h_y = y + card_h - band_h - 0.35 * inch
+        c.setFillColor(GOLD); c.setFont("Fraunces", 72)
+        c.drawString(x + 18, h_y - 60, cs["headline"])
+        c.setFillColor(MUTED); c.setFont("Inter", 9.5)
+        c.drawString(x + 18, h_y - 78, cs["headline_label"])
+
+        # Before/After mini
+        ba_y = h_y - 115
+        c.setFillColor(GOLD); c.setFont("Inter", 7.5)
+        c.drawString(x + 18, ba_y, "BEFORE")
+        c.drawString(x + 18 + col_w / 2 - 18, ba_y, "AFTER")
+        c.setFillColor(MUTED); c.setFont("Fraunces", 17)
+        c.drawString(x + 18, ba_y - 22, cs["before"])
+        c.setFillColor(INK); c.setFont("Fraunces", 17)
+        c.drawString(x + 18 + col_w / 2 - 18, ba_y - 22, cs["after"])
+        # arrow
+        c.setFillColor(GOLD); c.setFont("Inter", 18)
+        c.drawString(x + col_w / 2 - 22, ba_y - 22, "→")
+
+        _hairline(c, x + 18, ba_y - 36, x + col_w - 18, ba_y - 36,
+                  color=HAIRLINE)
+
+        # Quote
+        q_y = ba_y - 56
+        c.setFillColor(GOLD); c.setFont("Fraunces", 32)
+        c.drawString(x + 18, q_y, "\u201C")
+        c.setFillColor(INK); c.setFont("FrauncesIt", 12.5)
+        # wrap
+        words = cs["quote"].split()
+        cur = ""
+        q_lines = []
+        max_w = col_w - 40
+        for w in words:
+            test = (cur + " " + w).strip()
+            if pdfmetrics.stringWidth(test, "FrauncesIt", 12.5) > max_w:
+                q_lines.append(cur); cur = w
+            else:
+                cur = test
+        if cur:
+            q_lines.append(cur)
+        qy = q_y - 18
+        for ln in q_lines:
+            c.drawString(x + 18, qy, ln)
+            qy -= 17
+        c.setFillColor(GOLD); c.setFont("Inter", 8)
+        c.drawString(x + 18, qy - 6, f"— {cs['attribution'].upper()}")
+
+        # footer meta
+        meta_y = y + 20
+        c.setFillColor(GOLD); c.setFont("Inter", 7)
+        c.drawString(x + 18, meta_y + 26, "ENGAGEMENT")
+        c.drawString(x + 18, meta_y + 2,  "SERVICES")
+        c.setFillColor(MUTED); c.setFont("Inter", 8.5)
+        c.drawString(x + 1.2 * inch, meta_y + 26, cs["engagement"])
+        c.drawString(x + 1.2 * inch, meta_y + 2,  cs["services"])
+
+    _footer_light(c, 6, total)
+
+
+# ----------------------------------------------------------------------
+# PAGE — Instagram TAKEOVER (full profile + 3×3 grid)
+# ----------------------------------------------------------------------
+
+def page_instagram(c: canvas.Canvas, total: int) -> None:
+    _bleed(c, IVORY)
+
+    _eyebrow(c, "Social kit  ·  Instagram takeover",
+             MARGIN, PAGE_H - 0.9 * inch, color=GOLD, size=9)
+    c.setFillColor(INK); c.setFont("Fraunces", 52)
+    c.drawString(MARGIN, PAGE_H - 1.8 * inch, "Instagram.")
+    c.setFillColor(GOLD); c.setFont("FrauncesIt", 40)
+    c.drawString(MARGIN + 3.1 * inch, PAGE_H - 1.8 * inch, "In full.")
+    c.setFillColor(MUTED); c.setFont("Inter", 10.5)
+    c.drawString(MARGIN, PAGE_H - 2.15 * inch,
+                 "Nine tiles.  One voice.  The grid the client sees when they tap your name — planned, not hoped for.")
+
+    # Left column — profile card (IG profile mockup)
+    left_w = 3.3 * inch
+    left_x = MARGIN
+    top_y  = PAGE_H - 2.45 * inch
+
+    # Avatar large with gold ring
+    av_size = 1.55 * inch
+    av_cx = left_x + av_size / 2 + 0.1 * inch
+    av_cy = top_y - av_size / 2 - 0.05 * inch
+    # ring
+    c.setFillColor(Color(0.83, 0.66, 0.44, alpha=0.12))
+    c.circle(av_cx, av_cy, av_size / 2 + 6, stroke=0, fill=1)
+    av = ASSET_DIR / "avatar-dark.jpg"
+    if av.exists():
+        _rounded_image(c, av,
+                       av_cx - av_size / 2, av_cy - av_size / 2,
+                       av_size, av_size, radius=200)
+    c.setStrokeColor(GOLD_HI); c.setLineWidth(1.2)
+    c.circle(av_cx, av_cy, av_size / 2 + 2, stroke=1, fill=0)
+
+    # Handle + stats to the right of the avatar
+    hx = av_cx + av_size / 2 + 0.22 * inch
+    c.setFillColor(INK); c.setFont("Fraunces", 16)
+    c.drawString(hx, top_y - 0.15 * inch, "@brivomarketing")
+    # Follow button pill
+    btn_w, btn_h = 0.85 * inch, 0.22 * inch
+    bx = hx
+    by = top_y - 0.45 * inch
+    c.setFillColor(GOLD)
+    c.roundRect(bx, by, btn_w, btn_h, btn_h / 2, stroke=0, fill=1)
+    c.setFillColor(IVORY); c.setFont("Inter", 8)
+    c.drawCentredString(bx + btn_w / 2, by + 6, "Follow")
+    # Stats row
+    sy = by - 0.22 * inch
+    stat_bits = [("347", "Posts"), ("48.2K", "Followers"), ("210", "Following")]
+    sxc = hx
+    for n, lbl in stat_bits:
+        c.setFillColor(INK); c.setFont("Fraunces", 13)
+        c.drawString(sxc, sy, n)
+        c.setFillColor(MUTED); c.setFont("Inter", 8)
+        c.drawString(sxc, sy - 12, lbl)
+        sxc += 0.85 * inch
+
+    # Name + bio under avatar
+    bio_y = av_cy - av_size / 2 - 0.3 * inch
+    c.setFillColor(INK); c.setFont("Fraunces", 14)
+    c.drawString(left_x, bio_y, "BrivoMarketing")
+    c.setFillColor(MUTED); c.setFont("Inter", 9)
+    bio_lines = [
+        "Performance studio.",
+        "Custom websites that move markets.",
+        "Brand systems · Paid · SEO · CRO.",
+        "↓  Case studies + inquiry",
+    ]
+    by_ = bio_y - 14
+    for ln in bio_lines:
+        c.drawString(left_x, by_, ln)
+        by_ -= 12
+    c.setFillColor(GOLD); c.setFont("Inter", 9)
+    c.drawString(left_x, by_ - 4, "brivomarketing.com")
+
+    # Story highlights row (4 circles)
+    sh_y = by_ - 0.5 * inch
+    c.setFillColor(GOLD); c.setFont("Inter", 7.5)
+    c.drawString(left_x, sh_y + 16, "HIGHLIGHTS")
+    highlight_imgs = [
+        "instagram-cover.jpg",
+        "avatar-light.jpg",
+        "instagram-post.jpg",
+        "instagram-story.jpg",
+    ]
+    highlight_labels = ["Studio", "Team", "Wins", "Press"]
+    sh_r = 0.28 * inch
+    sh_gap = 0.12 * inch
+    for i, (img, lbl) in enumerate(zip(highlight_imgs, highlight_labels)):
+        cx_ = left_x + sh_r + i * (sh_r * 2 + sh_gap)
+        cy_ = sh_y - sh_r - 6
+        # gold ring
+        c.setStrokeColor(GOLD_HI); c.setLineWidth(1.0)
+        c.circle(cx_, cy_, sh_r + 2, stroke=1, fill=0)
+        p = ASSET_DIR / img
+        if p.exists():
+            _rounded_image(c, p, cx_ - sh_r, cy_ - sh_r,
+                           sh_r * 2, sh_r * 2, radius=100)
+        c.setFillColor(MUTED); c.setFont("Inter", 7.5)
+        c.drawCentredString(cx_, cy_ - sh_r - 12, lbl)
+
+    # Post-count summary bar
+    pb_y = sh_y - 1.35 * inch
+    c.setFillColor(NAVY)
+    c.roundRect(left_x, pb_y - 0.05 * inch, left_w, 0.7 * inch, 6, stroke=0, fill=1)
+    c.setFillColor(GOLD_HI); c.setFont("Inter", 7)
+    c.drawString(left_x + 14, pb_y + 0.43 * inch, "WHAT YOU GET")
+    c.setFillColor(IVORY); c.setFont("Fraunces", 13)
+    c.drawString(left_x + 14, pb_y + 0.22 * inch, "9 ready-to-post tiles")
+    c.setFillColor(NAVY_TEXT); c.setFont("Inter", 8.5)
+    c.drawString(left_x + 14, pb_y + 0.06 * inch,
+                 "Mix of wordmarks · stats · quotes · press · photo")
+
+    # ───────────── Right column — 3×3 grid ─────────────
+    grid_x = left_x + left_w + 0.3 * inch
+    grid_w = PAGE_W - MARGIN - grid_x
+    # Cap cell size to fit vertical space (from top_y down to ~1.0")
+    grid_avail_h = top_y - 1.1 * inch
+    tile_gap = 3
+    cell = min((grid_w - 2 * tile_gap) / 3, (grid_avail_h - 2 * tile_gap) / 3)
+    # center the grid
+    grid_total_w = cell * 3 + tile_gap * 2
+    grid_total_h = grid_total_w
+    gx = grid_x + (grid_w - grid_total_w) / 2
+    gy = top_y - grid_total_h
+
+    tile_dir = Path("/tmp/ig-tiles")
+    for i in range(9):
+        r = i // 3
+        ccol = i % 3
+        tx = gx + ccol * (cell + tile_gap)
+        ty = gy + (2 - r) * (cell + tile_gap)
+        p = tile_dir / f"t0{i+1}.jpg"
+        if p.exists():
+            c.drawImage(str(p), tx, ty, width=cell, height=cell,
+                        preserveAspectRatio=False, mask='auto')
+
+    # Label under the grid
+    c.setFillColor(GOLD); c.setFont("Inter", 7.5)
+    c.drawString(gx, gy - 14, "@BRIVOMARKETING  ·  THE GRID  ·  2026")
+    # sizes mini-specs to the right
+    right_txt = "1080 × 1080  ·  nine-post system  ·  planning grid for 3 weeks of posting"
+    tw = pdfmetrics.stringWidth(right_txt, "Inter", 7.5)
+    c.drawString(gx + grid_total_w - tw, gy - 14, right_txt)
+
+    _footer_light(c, 13, total)
 
 
 # ----------------------------------------------------------------------
