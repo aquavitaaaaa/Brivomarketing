@@ -25,17 +25,17 @@ export default function Navigation({ onCTA }) {
     <motion.nav
       initial={{ y: -30, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-[#FBFAF6]/90 backdrop-blur-xl border-b border-[#E7E3D8]"
+          ? "bg-[#FBFAF6]/92 backdrop-blur-xl border-b border-[#E7E3D8]"
           : "bg-transparent"
       }`}
       data-testid="main-nav"
     >
       <div className="px-6 md:px-10 lg:px-16 h-20 flex items-center justify-between">
         <a href="#top" data-testid="brand-logo">
-          <Logo size={36} />
+          <Logo size={36} mono={!scrolled} />
         </a>
 
         <div className="hidden md:flex items-center gap-9">
@@ -43,7 +43,11 @@ export default function Navigation({ onCTA }) {
             <a
               key={l.label}
               href={l.href}
-              className="text-[14px] text-[#0B1B2B]/75 hover:text-[#0B1B2B] link-underline transition-colors"
+              className={`text-[14px] link-underline transition-colors ${
+                scrolled
+                  ? "text-[#0B1B2B]/75 hover:text-[#0B1B2B]"
+                  : "text-white/80 hover:text-white"
+              }`}
               data-testid={`nav-link-${l.label.toLowerCase()}`}
             >
               {l.label}
@@ -54,7 +58,11 @@ export default function Navigation({ onCTA }) {
         <div className="flex items-center gap-3">
           <button
             onClick={onCTA}
-            className="hidden md:inline-flex items-center gap-2 bg-[#0B1B2B] text-white text-[13px] font-medium px-5 py-2.5 rounded-full hover:bg-[#14283F] transition-all"
+            className={`hidden md:inline-flex items-center gap-2 text-[13px] font-medium px-5 py-2.5 rounded-full transition-all ${
+              scrolled
+                ? "bg-[#0B1B2B] text-white hover:bg-[#14283F]"
+                : "bg-[#B8864C] text-white hover:bg-[#C99661]"
+            }`}
             data-testid="nav-cta-start-project"
           >
             Start a project
@@ -62,7 +70,7 @@ export default function Navigation({ onCTA }) {
           </button>
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden text-[#0B1B2B]"
+            className={`md:hidden ${scrolled ? "text-[#0B1B2B]" : "text-white"}`}
             aria-label="menu"
             data-testid="mobile-menu-toggle"
           >
