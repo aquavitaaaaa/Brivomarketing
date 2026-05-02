@@ -2,14 +2,14 @@
 # BrivoMarketing Auto-Poster — one-click installer for macOS.
 #
 # Usage on the Mac you want to host the agent:
-#   curl -fsSL https://web-polish-social.preview.emergentagent.com/agent-host/install.sh | bash
+#   curl -fsSL https://campaign-media-hub.preview.emergentagent.com/agent-host/install.sh | bash
 #
 # Or, with backend already provisioned and a pair code in hand:
 #   curl -fsSL https://.../install.sh | bash -s -- --code 123456 --name "Mac mini"
 
 set -euo pipefail
 
-BACKEND_URL="${BRIVO_BACKEND_URL:-https://web-polish-social.preview.emergentagent.com}"
+BACKEND_URL="${BRIVO_BACKEND_URL:-https://campaign-media-hub.preview.emergentagent.com}"
 APP_HOME="$HOME/Library/Application Support/BrivoAgent"
 LAUNCHD_PLIST="$HOME/Library/LaunchAgents/com.brivomarketing.agent.plist"
 LAUNCHD_LABEL="com.brivomarketing.agent"

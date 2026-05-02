@@ -1,7 +1,7 @@
 # BrivoMarketing Auto-Poster -- one-click installer for Windows.
 #
 # Run from PowerShell (NOT Command Prompt):
-#   irm https://web-polish-social.preview.emergentagent.com/agent-host/install.ps1 | iex
+#   irm https://campaign-media-hub.preview.emergentagent.com/agent-host/install.ps1 | iex
 #
 # Or with the pair code prefilled:
 #   $env:BRIVO_CODE="123456"; $env:BRIVO_NAME="ASUS"; irm .../install.ps1 | iex
@@ -10,7 +10,7 @@
 param(
     [string]$Code     = $env:BRIVO_CODE,
     [string]$Name     = $env:BRIVO_NAME,
-    [string]$Backend  = $(if ($env:BRIVO_BACKEND_URL) { $env:BRIVO_BACKEND_URL } else { "https://web-polish-social.preview.emergentagent.com" })
+    [string]$Backend  = $(if ($env:BRIVO_BACKEND_URL) { $env:BRIVO_BACKEND_URL } else { "https://campaign-media-hub.preview.emergentagent.com" })
 )
 
 $ErrorActionPreference = "Stop"
