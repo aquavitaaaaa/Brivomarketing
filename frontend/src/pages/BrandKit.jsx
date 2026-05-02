@@ -21,10 +21,14 @@ const SECTIONS = [
   {
     id: "avatars",
     title: "Profile avatars",
-    subtitle: "1:1 monogram badges. Works on every social platform profile photo.",
+    subtitle: "Owl-first profile badges. Built to read at 40px — the size most platforms display on mobile.",
     items: [
-      { slug: "avatar-dark",  label: "Avatar — Dark",  dims: "1024×1024", note: "Instagram, X, LinkedIn, YouTube, Facebook", bg: "dark"  },
-      { slug: "avatar-light", label: "Avatar — Light", dims: "1024×1024", note: "Optional alternate for light profiles",     bg: "light" },
+      { slug: "avatar-owl-icon",  label: "Owl Icon — Primary",   dims: "1080×1080", note: "Instagram, X, TikTok, YouTube — the one to use", bg: "dark"  },
+      { slug: "avatar-owl-dark",  label: "Owl + Wordmark — Dark", dims: "1080×1080", note: "For press kits and larger placements",           bg: "dark"  },
+      { slug: "avatar-owl-light", label: "Owl + Wordmark — Light", dims: "1080×1080", note: "LinkedIn company page, ivory surfaces",         bg: "light" },
+      { slug: "avatar-owl-gold",  label: "Owl + Wordmark — Gold", dims: "1080×1080", note: "Accent / feature collaborations",                bg: "light" },
+      { slug: "avatar-dark",      label: "Monogram — Dark (legacy)",  dims: "1024×1024", note: "BM letterform version",                     bg: "dark"  },
+      { slug: "avatar-light",     label: "Monogram — Light (legacy)", dims: "1024×1024", note: "BM letterform version",                     bg: "light" },
     ],
   },
   {
