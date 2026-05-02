@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Download, ArrowLeft, Check, FileDown, Instagram, Twitter, Youtube, Linkedin, Facebook } from "lucide-react";
+import Logo from "../components/site/Logo";
 
 /**
  * Brand Kit — public download page for all social media assets.
@@ -136,26 +137,35 @@ export default function BrandKit() {
     <div className="min-h-screen bg-[#FBFAF6] text-[#0B1B2B]">
       {/* Top bar */}
       <header className="border-b border-[#E7E3D8] bg-white/70 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-3.5 flex items-center justify-between gap-4">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-[13px] text-[#4E5C6E] hover:text-[#0B1B2B] transition-colors"
-            data-testid="brand-kit-back"
+            className="flex items-center gap-3 group"
+            data-testid="brand-kit-logo-link"
           >
-            <ArrowLeft size={14} /> Back to brivomarketing.com
+            <Logo size={40} />
+            <span className="hidden md:inline-flex items-center gap-1.5 ml-3 pl-4 border-l border-[#E7E3D8] text-[10px] tracking-[0.24em] uppercase text-[#8190A1] font-medium">
+              <span className="inline-block w-1 h-1 rounded-full bg-[#B8864C]" />
+              Press Kit · Vol. 01
+            </span>
           </Link>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="hidden md:inline-flex items-center gap-1.5 text-[12.5px] text-[#4E5C6E] hover:text-[#0B1B2B] transition-colors"
+              data-testid="brand-kit-back"
+            >
+              <ArrowLeft size={13} /> brivomarketing.com
+            </Link>
             <a
               href="/kit-assets/brivo-brand-kit.pdf"
               download="brivo-brand-kit.pdf"
-              className="hidden sm:inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors shadow-sm"
               data-testid="brand-kit-pdf-download"
             >
-              <FileDown size={13} /> Download full kit (PDF)
+              <FileDown size={13} /> <span className="hidden sm:inline">Download full kit</span><span className="sm:hidden">PDF</span>
             </a>
-            <div className="text-[11px] tracking-[0.22em] uppercase text-[#8190A1] font-medium">
-              v1.0
-            </div>
           </div>
         </div>
       </header>
@@ -257,6 +267,26 @@ export default function BrandKit() {
           </div>
         </div>
 
+        {/* Press wall — featured-in ticker */}
+        <div className="mt-20 border-y border-[#E7E3D8] py-8" data-testid="brand-kit-press-wall">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+            <div className="eyebrow-accent md:border-r md:border-[#E7E3D8] md:pr-10 whitespace-nowrap">
+              AS FEATURED IN
+            </div>
+            <div className="flex flex-wrap items-center gap-x-10 gap-y-4 font-display text-[22px] md:text-[26px] font-[500] text-[#0B1B2B]/70">
+              <span>TechCrunch</span>
+              <span className="text-[#B8864C]">·</span>
+              <span>Forbes</span>
+              <span className="text-[#B8864C]">·</span>
+              <span>Fast Company</span>
+              <span className="text-[#B8864C]">·</span>
+              <span>Bloomberg</span>
+              <span className="text-[#B8864C]">·</span>
+              <span>WSJ</span>
+            </div>
+          </div>
+        </div>
+
         {/* Palette + typography quick-reference */}
         <div className="mt-16 grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6">
@@ -329,6 +359,52 @@ export default function BrandKit() {
           </section>
         ))}
       </div>
+
+      {/* Editorial wordmark banner */}
+      <section className="relative overflow-hidden bg-[#0B1B2B] text-white" data-testid="brand-kit-wordmark-banner">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30"
+          style={{
+            background:
+              "radial-gradient(ellipse at 80% 20%, rgba(184,134,76,0.35) 0%, transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(212,169,113,0.25) 0%, transparent 50%)",
+          }}
+        />
+        <div className="relative max-w-[1280px] mx-auto px-6 md:px-10 py-24 md:py-32">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#B8864C]" />
+            <span className="text-[11px] tracking-[0.28em] uppercase text-[#D4A971] font-medium">
+              THE OFFICIAL BRAND SYSTEM · V1.0
+            </span>
+          </div>
+          <h2 className="font-display font-[500] leading-[0.92] tracking-[-0.03em] text-[clamp(4rem,14vw,11rem)]">
+            Brivo<span className="text-[#B8864C]">.</span>
+          </h2>
+          <p
+            className="mt-4 font-display italic text-[clamp(1.4rem,2.6vw,2.2rem)] text-[#F5D7A4] font-[400]"
+            style={{ fontStyle: "italic" }}
+          >
+            A brand built to move markets.
+          </p>
+          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
+            {[
+              { n: "17", l: "Press kit pages" },
+              { n: "+412%", l: "Top client lift" },
+              { n: "< 48h", l: "Kit turnaround" },
+              { n: "100%", l: "Every asset · every URL" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="font-display text-[34px] md:text-[42px] font-[500] text-white leading-none">
+                  {s.n}
+                </div>
+                <div className="mt-1.5 text-[11px] tracking-[0.16em] uppercase text-[#D4A971]/80">
+                  {s.l}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA strip */}
       <section className="bg-[#0B1B2B] text-white py-16">
