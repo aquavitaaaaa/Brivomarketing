@@ -635,8 +635,16 @@ async def chat(payload: ChatRequest, request: Request):
         ).with_model(provider, model)
         reply_text = await llm.send_message(UserMessage(text=composite_text))
     except Exception as e:
-        logger.exception("LLM error")
-        raise HTTPException(status_code=502, detail=f"AI service error: {str(e)}")
+        # Graceful fallback when LLM is unavailable (budget exhausted, key invalid,
+        # provider error). Keep the visitor chat alive with a friendly handoff
+        # instead of returning a 502 that breaks the whole UI.
+        logger.warning("LLM error on /api/chat — using fallback handoff: %s", e)
+        reply_text = (
+            "Thanks for reaching out. Our AI is briefly recharging — "
+            "in the meantime, the fastest path is a free 30-min audit. "
+            "Reply with your email or hit the contact form at brivomarketing.com "
+            "and a real human will follow up within a few hours."
+        )
 
     asst_msg = ChatMessage(session_id=session_id, role="assistant", content=reply_text)
     asst_doc = asst_msg.model_dump()

@@ -185,7 +185,59 @@ backend start).
   next 14 days" AI batch, recent runs feed with click-to-view-screenshot
   modal. Posting handlers shipped for X, Instagram, LinkedIn (real
   Playwright DOM automation in agent.py).
+- 2026-05-02 — **Social Phase 1 Safety + Content Factory** (DONE).
+  `social_safety.py` enforces account warm-up (7-day tiered limits), cadence
+  guardrails (max-posts/day, min-minutes-between, quiet hours), and
+  failure auto-pause (3 consecutive fails → platform paused). `hook_library`
+  + `client_wins` collections seeded. Cross-poster (`/api/admin/social/posts/multi`)
+  with graceful LLM fallback (deterministic stub variants when budget exhausted).
+  Admin UI: Safety Panel, Wins Manager, Cross-poster — all wired.
+- 2026-05-02 — **Autonomous Client Acquisition Engine** (DONE — P0).
+  `lead_engine.py` runs three background loops:
+    1. Lead discovery (every 30 min) — scans Reddit `new.json` across
+       small-business / Entrepreneur / marketing / startups / Restaurants /
+       ecommerce / shopify / FBA / DigitalMarketing / WebDev for 10 buying-
+       signal regex patterns; computes a heuristic 0-100 signal score per lead.
+    2. Outreach dispatch (every minute) — picks the highest-scoring discovered
+       leads, composes a hyper-personalised opener via Gemini (with
+       deterministic fallback when LLM is down), inserts an outreach_jobs doc,
+       attempts to send via the paired Playwright agent (best-effort: stays
+       queued if agent offline). Daily cap (DEFAULT 25/day) + 4-min spacing.
+    3. Reply nurturer — `POST /api/admin/leads/{id}/reply` runs the AI SDR
+       turn-by-turn, qualifies, and either books (Calendly link from
+       `CALENDLY_LINK` env) or escalates.
+  Admin endpoints: `/api/admin/leads/pipeline`, `/leads`, `/leads/{id}`,
+  `/leads/discover-now`, `/leads/{id}/dispatch`, `/leads/{id}/reply`,
+  `/leads/{id}/stage`, `/leads/import`, `/outreach/jobs`.
+  Frontend: `AdminLeadEngine.jsx` at `/admin/leads` — pipeline tiles, stage
+  filters, lead list with score, lead drawer with full conversation, AI
+  Nurturer reply box, manual stage transitions, Quick Import (paste JSON),
+  Outreach Jobs audit log. Linked from main admin nav.
+  Tests: 21/21 PASS in `/app/backend/tests/test_lead_engine.py`.
+- 2026-05-02 — `/api/chat` (public visitor chat) hardened with the same
+  graceful fallback pattern when EMERGENT_LLM_KEY budget is exhausted —
+  visitors now get a friendly "AI is recharging, leave your email" handoff
+  instead of a 502.
+
+## Backlog (Phase 2 → 4)
+- **P1 Phase 2 — Engagement Flywheel**: Auto-DM responder using paired
+  Playwright agent (DM agent already seeded), Comment auto-likes + AI
+  reply, Thread builder (multi-tweet long-form), Auto-repurpose loop
+  (one piece → 5 platforms × 3 formats).
+- **P1 Phase 2.5 — Lead Engine v2**: real LinkedIn + X scraping channels
+  (currently MVP is Reddit-only); per-channel daily caps; bulk-importer
+  CSV upload UI; Calendly OAuth for real booking; webhook for inbound
+  reply detection (currently only the simulate-reply path).
+- **P2 Phase 3 — Growth Engines**: Trend hijacker (Reddit/X trending +
+  cosine-similarity to Brivo niches), RSS/news repurposer, Best-time-to-
+  post AI from analytics, Live engagement dashboard.
+- **P3 Phase 4 — Advanced**: Mention magnet, Drip DM campaigns, BTS
+  auto-capture, UGC mining, Multi-account broadcast, Threads / Reddit
+  posting / YouTube Shorts handlers.
 - P1: Allow regenerating any single brand-kit asset from the UI (admin-only).
 - P1: Add PNG + SVG variants alongside each JPG for higher-quality placement.
 - P2: Scheduler integration — share a single kit-assets link to Later/Buffer.
 - P2: Video reel hero variant via Sora 2 for even more "money" feel.
+- Refactor: move messages out of the lead doc into a `lead_messages`
+  collection before any lead exceeds 100+ turns (Mongo 16MB doc limit).
+- Refactor: move social_agent + lead_engine into `/app/backend/routes/`.
