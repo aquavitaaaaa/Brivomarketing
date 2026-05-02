@@ -161,18 +161,32 @@ def tile_wordmark_poster(out: Path, bg, fg, accent, label: str) -> None:
     d.rectangle((60, 60, SIZE - 60, 62), fill=accent)
     d.rectangle((60, SIZE - 62, SIZE - 60, SIZE - 60), fill=accent)
 
-    font_word = ImageFont.truetype(str(FONTS / "Fraunces.ttf"), 340)
-    font_tag  = ImageFont.truetype(str(FONTS / "FrauncesItalic.ttf"), 50)
+    # Owl crest at top-center
+    owl_path = AS / "owl-logo.jpg"
+    if owl_path.exists():
+        owl = Image.open(owl_path).convert("RGB")
+        owl = center_crop(owl, 220)
+        # circular mask
+        mask = Image.new("L", owl.size, 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, owl.size[0], owl.size[1]), fill=255)
+        ox = (SIZE - 220) // 2
+        oy = 170
+        im.paste(owl, (ox, oy), mask)
+        # gold ring
+        d.ellipse((ox - 4, oy - 4, ox + 224, oy + 224), outline=accent, width=3)
+
+    font_word = ImageFont.truetype(str(FONTS / "Fraunces.ttf"), 110)
+    font_tag  = ImageFont.truetype(str(FONTS / "FrauncesItalic.ttf"), 44)
     font_lbl  = ImageFont.truetype(str(FONTS / "Inter.ttf"), 28)
 
-    bbox = d.textbbox((0, 0), "Brivo.", font=font_word)
+    bbox = d.textbbox((0, 0), "BrivoMarketing.", font=font_word)
     w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    d.text(((SIZE - w) // 2, (SIZE - h) // 2 - 70), "Brivo.", fill=fg, font=font_word)
+    d.text(((SIZE - w) // 2, 470), "BrivoMarketing.", fill=fg, font=font_word)
 
     tag = "A brand built to move markets."
     bbox = d.textbbox((0, 0), tag, font=font_tag)
     w = bbox[2] - bbox[0]
-    d.text(((SIZE - w) // 2, SIZE // 2 + 170), tag, fill=accent, font=font_tag)
+    d.text(((SIZE - w) // 2, 640), tag, fill=accent, font=font_tag)
 
     bbox = d.textbbox((0, 0), label, font=font_lbl)
     w = bbox[2] - bbox[0]

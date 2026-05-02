@@ -177,7 +177,7 @@ export default function BrandKit() {
           <div>
             <div className="eyebrow-accent mb-4">SOCIAL MEDIA BLITZ · DOWNLOAD PACK · VOL. 01</div>
             <h1 className="font-display font-[400] leading-[1.02] tracking-[-0.02em] text-[clamp(2.4rem,6vw,4.6rem)]">
-              The Brivo<br />
+              The BrivoMarketing<br />
               <em style={{ fontStyle: "italic" }} className="text-[#B8864C] font-[500]">brand system.</em>
             </h1>
             <p className="mt-6 max-w-2xl text-[#4E5C6E] text-[16px] md:text-[17px] leading-[1.65]">
@@ -371,17 +371,37 @@ export default function BrandKit() {
           }}
         />
         <div className="relative max-w-[1280px] mx-auto px-6 md:px-10 py-24 md:py-32">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-8">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#B8864C]" />
             <span className="text-[11px] tracking-[0.28em] uppercase text-[#D4A971] font-medium">
               THE OFFICIAL BRAND SYSTEM · V1.0
             </span>
           </div>
-          <h2 className="font-display font-[500] leading-[0.92] tracking-[-0.03em] text-[clamp(4rem,14vw,11rem)]">
-            Brivo<span className="text-[#B8864C]">.</span>
-          </h2>
+
+          {/* Owl crest + wordmark lockup */}
+          <div className="flex items-center gap-6 md:gap-10 flex-wrap">
+            <div
+              className="relative flex-shrink-0 rounded-full overflow-hidden"
+              style={{
+                width: 140,
+                height: 140,
+                boxShadow: "0 0 0 2px rgba(184,134,76,0.55), 0 0 60px rgba(184,134,76,0.35)",
+              }}
+            >
+              <img
+                src="/owl-logo.jpg"
+                alt="BrivoMarketing owl crest"
+                className="w-full h-full object-cover"
+                draggable="false"
+              />
+            </div>
+            <h2 className="font-display font-[500] leading-[0.9] tracking-[-0.03em] text-[clamp(3rem,9vw,8rem)]">
+              BrivoMarketing<span className="text-[#B8864C]">.</span>
+            </h2>
+          </div>
+
           <p
-            className="mt-4 font-display italic text-[clamp(1.4rem,2.6vw,2.2rem)] text-[#F5D7A4] font-[400]"
+            className="mt-6 font-display italic text-[clamp(1.4rem,2.6vw,2.2rem)] text-[#F5D7A4] font-[400]"
             style={{ fontStyle: "italic" }}
           >
             A brand built to move markets.

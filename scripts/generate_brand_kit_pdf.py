@@ -153,7 +153,7 @@ def _footer_light(c, page_num: int, total: int) -> None:
     y = 0.42 * inch
     _hairline(c, MARGIN, y + 14, PAGE_W - MARGIN, y + 14, color=HAIRLINE)
     c.setFillColor(MUTED); c.setFont("Inter", 8)
-    c.drawString(MARGIN, y, "BRIVO  ·  PERFORMANCE STUDIO  ·  brivomarketing.com")
+    c.drawString(MARGIN, y, "BRIVOMARKETING  ·  PERFORMANCE STUDIO  ·  brivomarketing.com")
     c.setFillColor(DIM); c.setFont("Inter", 8)
     right = f"VOL. 01  ·  THE BRAND SYSTEM  ·  {page_num:02d} / {total:02d}"
     w = pdfmetrics.stringWidth(right, "Inter", 8)
@@ -163,7 +163,7 @@ def _footer_dark(c, page_num: int, total: int) -> None:
     y = 0.42 * inch
     _hairline(c, MARGIN, y + 14, PAGE_W - MARGIN, y + 14, color=NAVY_RULE)
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 8)
-    c.drawString(MARGIN, y, "BRIVO  ·  PERFORMANCE STUDIO  ·  brivomarketing.com")
+    c.drawString(MARGIN, y, "BRIVOMARKETING  ·  PERFORMANCE STUDIO  ·  brivomarketing.com")
     c.setFillColor(NAVY_DIM); c.setFont("Inter", 8)
     right = f"VOL. 01  ·  THE BRAND SYSTEM  ·  {page_num:02d} / {total:02d}"
     w = pdfmetrics.stringWidth(right, "Inter", 8)
@@ -201,20 +201,20 @@ def page_cover(c: canvas.Canvas) -> None:
     _hairline(c, MARGIN, PAGE_H - 0.55 * inch, PAGE_W - MARGIN,
               PAGE_H - 0.55 * inch, color=NAVY_RULE, width=0.6)
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 8)
-    c.drawString(MARGIN, PAGE_H - 0.42 * inch, "BRIVO — PERFORMANCE STUDIO")
+    c.drawString(MARGIN, PAGE_H - 0.42 * inch, "BRIVOMARKETING — PERFORMANCE STUDIO")
     right = "THE BRAND SYSTEM / VOLUME 01 / 2026"
     w = pdfmetrics.stringWidth(right, "Inter", 8)
     c.drawString(PAGE_W - MARGIN - w, PAGE_H - 0.42 * inch, right)
 
-    # Top-left: REAL horizontal logo (the actual Brivo brand asset)
+    # Top-left: REAL horizontal logo (the actual BrivoMarketing brand asset)
     logo_dark = ASSET_DIR / "logo-horizontal-dark.jpg"
     if logo_dark.exists():
         _draw_logo(c, logo_dark,
                    MARGIN + 1.5 * inch, PAGE_H - 1.05 * inch,
                    2.8 * inch, 0.75 * inch)
 
-    # Top-right: HERO AVATAR badge — the official Brivo badge as the shock mark
-    avatar = ASSET_DIR / "avatar-dark.jpg"
+    # Top-right: HERO OWL LOGO — the BrivoMarketing owl crest as the shock mark
+    avatar = ASSET_DIR / "owl-logo.jpg"
     av_size = 1.5 * inch
     av_cx   = PAGE_W - MARGIN - av_size / 2 - 0.75 * inch
     av_cy   = PAGE_H - 1.1 * inch
@@ -246,19 +246,19 @@ def page_cover(c: canvas.Canvas) -> None:
     _eyebrow(c, "The official brand system  —  V 1.0",
              MARGIN, PAGE_H - 2.3 * inch, color=GOLD_HI, size=10)
 
-    # MASSIVE wordmark — sized to fit 9.4" usable width
+    # MASSIVE wordmark — sized to fit 9.4" usable width (BrivoMarketing is longer)
     c.setFillColor(IVORY)
-    c.setFont("Fraunces", 218)
-    c.drawString(MARGIN - 10, PAGE_H - 5.0 * inch, "Brivo.")
+    c.setFont("Fraunces", 108)
+    c.drawString(MARGIN - 4, PAGE_H - 4.5 * inch, "BrivoMarketing.")
 
     # Gold italic tagline
     c.setFillColor(GOLD_HI)
     c.setFont("FrauncesIt", 40)
-    c.drawString(MARGIN, PAGE_H - 5.7 * inch, "A brand built to move markets.")
+    c.drawString(MARGIN, PAGE_H - 5.2 * inch, "A brand built to move markets.")
 
     # Sub-tagline
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 11)
-    c.drawString(MARGIN, PAGE_H - 6.1 * inch,
+    c.drawString(MARGIN, PAGE_H - 5.6 * inch,
                  "Logo lockups · Color · Typography · Voice · Social playbook  —  every file pre-sized, every URL copy-ready.")
 
     # Stat ticker strip at bottom
@@ -268,12 +268,12 @@ def page_cover(c: canvas.Canvas) -> None:
     _hairline(c, MARGIN, ticker_y - 6, PAGE_W - MARGIN, ticker_y - 6,
               color=NAVY_RULE, width=0.5)
     stats = [
-        ("13",  "PAGES"),
-        ("10",  "ASSETS"),
-        ("7",   "PLATFORMS"),
-        ("5",   "PALETTE COLORS"),
-        ("2",   "TYPEFACES"),
-        ("1",   "FILE"),
+        ("17", "PAGES"),
+        ("14", "ASSETS"),
+        ("7",  "PLATFORMS"),
+        ("5",  "PALETTE COLORS"),
+        ("2",  "TYPEFACES"),
+        ("1",  "FILE"),
     ]
     sw = (PAGE_W - 2 * MARGIN) / len(stats)
     for i, (n, lbl) in enumerate(stats):
@@ -305,7 +305,7 @@ def page_inventory(c: canvas.Canvas, total: int) -> None:
     c.drawString(MARGIN, PAGE_H - 2.45 * inch, "In one file.")
 
     c.setFillColor(MUTED); c.setFont("Inter", 10.5)
-    intro = ("Ten finished social assets. A 13-page lookbook. A voice guide. "
+    intro = ("Fourteen finished social assets. A 17-page press kit. A voice guide. "
              "A weekly posting playbook. Every file pre-sized, every URL")
     c.drawString(MARGIN, PAGE_H - 2.9 * inch, intro)
     c.drawString(MARGIN, PAGE_H - 3.07 * inch,
@@ -335,7 +335,7 @@ def page_inventory(c: canvas.Canvas, total: int) -> None:
         ("twitter-header.jpg",        "X Header"),
         ("linkedin-cover.jpg",        "LinkedIn"),
         ("youtube-banner.jpg",        "YouTube"),
-        (None, "13-pg PDF"),
+        (None, "17-pg PDF"),
         (None, "Voice guide"),
         (None, "Playbook"),
     ]
@@ -395,7 +395,7 @@ def page_manifesto(c: canvas.Canvas, total: int) -> None:
     ry = PAGE_H - 2.4 * inch
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 11)
     body = [
-        "Brivo is a performance studio. We build sites that out-earn",
+        "BrivoMarketing is a performance studio. We build sites that out-earn",
         "their retainer in the first quarter, and brands that look like",
         "they belong on a billboard in SoHo and a homepage on TechCrunch.",
         "",
@@ -404,8 +404,8 @@ def page_manifesto(c: canvas.Canvas, total: int) -> None:
         "work across advisory, SaaS, hospitality, and luxury retail.",
         "",
         "This document is the system we hand partners, press, and",
-        "collaborators. Everything you need to represent Brivo without",
-        "asking is in here — sized, color-matched, and linked.",
+        "collaborators. Everything you need to represent BrivoMarketing",
+        "without asking is in here — sized, color-matched, and linked.",
     ]
     for ln in body:
         c.drawString(rx, ry, ln)
@@ -803,7 +803,7 @@ def page_fact_sheet(c: canvas.Canvas, total: int) -> None:
     c.drawString(MARGIN, PAGE_H - 1.8 * inch, "The studio, in numbers.")
     c.setFillColor(MUTED); c.setFont("Inter", 10.5)
     c.drawString(MARGIN, PAGE_H - 2.15 * inch,
-                 "Writing about Brivo?  Here's the boilerplate and every headline figure — already fact-checked.")
+                 "Writing about BrivoMarketing?  Here's the boilerplate and every headline figure — already fact-checked.")
 
     # Big stat row
     top_stats = [
@@ -868,7 +868,7 @@ def page_fact_sheet(c: canvas.Canvas, total: int) -> None:
     c.drawString(MARGIN + 18, bp_y + 0.9 * inch, "BOILERPLATE  ·  CUT / PASTE INTO YOUR ARTICLE")
     c.setFillColor(IVORY); c.setFont("FrauncesIt", 12.5)
     lines = [
-        "Brivo is a New-York-based performance studio building custom websites and conversion-first brand systems",
+        "BrivoMarketing is a New-York-based performance studio building custom websites and conversion-first brand systems",
         "for ambitious companies. Founded in 2019, the studio has generated $120M+ for 180+ clients across 27",
         "industries, and is the only studio with a 4.2x ROAS guarantee.   More at brivomarketing.com.",
     ]
@@ -922,7 +922,7 @@ def page_featured_in(c: canvas.Canvas, total: int) -> None:
     quotes = [
         ("A refreshingly disciplined approach to growth marketing.", "TechCrunch"),
         ("The performance studio every founder wishes they'd hired sooner.", "Forbes"),
-        ("Brivo blends the rigor of a consultancy with the craft of a studio.", "Fast Company"),
+        ("BrivoMarketing blends the rigor of a consultancy with the craft of a studio.", "Fast Company"),
     ]
     q_top = ol_bot_y - 1.3 * inch
     for i, (q, src) in enumerate(quotes):
@@ -1057,7 +1057,7 @@ def page_case_studies(c: canvas.Canvas, total: int) -> None:
             "headline_label": "Revenue, first 90 days post-launch",
             "before": "$42K / mo",
             "after":  "$176K / mo",
-            "quote":  "Brivo didn't just rebuild our funnel — they rewrote our trajectory. We hit our annual revenue target in five months.",
+            "quote":  "BrivoMarketing didn't just rebuild our funnel — they rewrote our trajectory. We hit our annual revenue target in five months.",
             "attribution": "Maya Okonkwo, CMO",
             "engagement": "6-week sprint + 4-month CRO retainer",
             "services":   "Brand system, custom site, paid media, retention",
@@ -1625,7 +1625,7 @@ def page_back_cover(c: canvas.Canvas) -> None:
     _hairline(c, MARGIN, PAGE_H - 0.55 * inch, PAGE_W - MARGIN,
               PAGE_H - 0.55 * inch, color=NAVY_RULE)
     c.setFillColor(NAVY_TEXT); c.setFont("Inter", 8)
-    c.drawString(MARGIN, PAGE_H - 0.42 * inch, "BRIVO — END OF VOLUME 01")
+    c.drawString(MARGIN, PAGE_H - 0.42 * inch, "BRIVOMARKETING — END OF VOLUME 01")
     right = "THANK YOU FOR READING  ·  HELLO@BRIVOMARKETING.COM"
     w = pdfmetrics.stringWidth(right, "Inter", 8)
     c.drawString(PAGE_W - MARGIN - w, PAGE_H - 0.42 * inch, right)
@@ -1660,8 +1660,8 @@ def page_back_cover(c: canvas.Canvas) -> None:
     c.linkURL("https://brivomarketing.com/#inquiry",
               (bx, by, bx + btn_w, by + btn_h), relative=0)
 
-    # Avatar on right
-    av = ASSET_DIR / "avatar-dark.jpg"
+    # Owl crest on right (BrivoMarketing mark)
+    av = ASSET_DIR / "owl-logo.jpg"
     if av.exists():
         _rounded_image(c, av,
                        PAGE_W - 2.3 * inch, PAGE_H / 2 - 0.7 * inch,
@@ -1682,7 +1682,7 @@ def page_back_cover(c: canvas.Canvas) -> None:
                  "brivomarketing.com   ·   @brivomarketing   ·   hello@brivomarketing.com")
     c.setFillColor(NAVY_DIM); c.setFont("Inter", 7.5)
     c.drawString(MARGIN, 0.48 * inch,
-                 "© 2026 Brivo Marketing LLC.   ·   This document is v1.0 of the Brivo Brand System.")
+                 "© 2026 BrivoMarketing LLC.   ·   This document is v1.0 of the BrivoMarketing Brand System.")
 
 
 # ----------------------------------------------------------------------
@@ -1694,10 +1694,10 @@ def build() -> None:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
 
     c = canvas.Canvas(str(OUT_PATH), pagesize=(PAGE_W, PAGE_H))
-    c.setTitle("Brivo — The Brand System (Volume 01)")
-    c.setAuthor("Brivo Marketing")
+    c.setTitle("BrivoMarketing — The Brand System (Volume 01)")
+    c.setAuthor("BrivoMarketing")
     c.setSubject("Social media blitz  ·  Brand kit  ·  v1.0")
-    c.setKeywords("Brivo, brand kit, social media, marketing, performance studio")
+    c.setKeywords("BrivoMarketing, brand kit, social media, marketing, performance studio")
 
     total = 17
     page_cover(c);                    c.showPage()
