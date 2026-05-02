@@ -156,6 +156,18 @@ backend start).
   lockups dark/light). Page renders palette + type reference + per-asset
   download + copy-link buttons. Linked from footer under "Studio".
   Assets live in `/app/frontend/public/kit-assets/`.
+- 2026-02 — Upgraded `/brand-kit` from a 13-page kit into a full 17-page
+  **Press Kit** (8.1 MB). New sections wired into
+  `/app/scripts/generate_brand_kit_pdf.py`: Fact Sheet, Featured In
+  (TechCrunch / Forbes / Fast Company / Bloomberg / WSJ), Awards, and
+  Case Studies (+318% Obsidian / +412% Vault / +227% Meridian). Instagram
+  takeover now a real 3×3 grid built from `/app/scripts/prepare_ig_tiles.py`
+  (9 tiles: wordmark posters, stat plates, testimonial quotes, real IG
+  post/cover/story crops, "As featured in" tile). Frontend hero copy,
+  counters, CTA label, PDF cover pill, and thumbnail strip all updated to
+  reflect the 17-page press kit and showcase Awards + Case Studies + IG
+  grid pages. Visual audit via `analyze_file_tool` passed: every page
+  flagged "visually striking", zero bland or placeholder pages.
 
 ## Roadmap
 - P1: Allow regenerating any single brand-kit asset from the UI (admin-only).

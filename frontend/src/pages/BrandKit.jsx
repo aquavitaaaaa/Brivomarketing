@@ -171,9 +171,10 @@ export default function BrandKit() {
               <em style={{ fontStyle: "italic" }} className="text-[#B8864C] font-[500]">brand system.</em>
             </h1>
             <p className="mt-6 max-w-2xl text-[#4E5C6E] text-[16px] md:text-[17px] leading-[1.65]">
-              Logo lockups, avatars, covers, post templates, a voice guide, and a weekly social playbook —
-              pre-sized for every platform you'll ever need. Download the full 13-page PDF lookbook or
-              grab individual .jpgs with a copy-ready link for your scheduler.
+              A full press kit — manifesto, fact sheet, featured-in, awards, case studies, logo system,
+              palette, typography, Instagram takeover, voice guide, and a weekly playbook —
+              pre-sized for every platform you'll ever need. Download the 17-page PDF or grab
+              individual .jpgs with a copy-ready link for your scheduler.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -187,14 +188,14 @@ export default function BrandKit() {
                 <FileDown size={15} /> Download the lookbook · PDF
               </a>
               <span className="text-[12px] text-[#8190A1]">
-                13 pages · 5 MB · all assets bundled with URLs
+                17 pages · 8 MB · full press kit with URLs
               </span>
             </div>
 
             <div className="mt-6 grid grid-cols-3 max-w-md gap-3 text-center">
               {[
-                { n: "13", l: "Pages" },
-                { n: "10", l: "Assets" },
+                { n: "17", l: "Pages" },
+                { n: "14", l: "Assets" },
                 { n: "7",  l: "Platforms" },
               ].map((s) => (
                 <div key={s.l} className="rounded-xl border border-[#E7E3D8] bg-white/60 backdrop-blur-sm py-3">
@@ -235,14 +236,14 @@ export default function BrandKit() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-[#0B1B2B]/90 backdrop-blur text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
-                  <FileDown size={10} /> 13 pages
+                  <FileDown size={10} /> 17 pages
                 </div>
               </a>
             </div>
 
             {/* Small thumb strip */}
             <div className="mt-6 flex items-center justify-center gap-2 opacity-90">
-              {["index", "color", "ig", "back"].map((t) => (
+              {["index", "awards", "case", "ig", "color", "back"].map((t) => (
                 <img
                   key={t}
                   src={`/kit-assets/brand-kit-page-${t}.png`}

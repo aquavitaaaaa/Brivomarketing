@@ -1699,10 +1699,14 @@ def build() -> None:
     c.setSubject("Social media blitz  ·  Brand kit  ·  v1.0")
     c.setKeywords("Brivo, brand kit, social media, marketing, performance studio")
 
-    total = 13
+    total = 17
     page_cover(c);                    c.showPage()
     page_inventory(c, total);         c.showPage()
     page_manifesto(c, total);         c.showPage()
+    page_fact_sheet(c, total);        c.showPage()
+    page_featured_in(c, total);       c.showPage()
+    page_awards(c, total);            c.showPage()
+    page_case_studies(c, total);      c.showPage()
     page_logo_system(c, total);       c.showPage()
     page_color(c, total);             c.showPage()
     page_type(c, total);              c.showPage()
