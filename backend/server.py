@@ -26,6 +26,7 @@ import bland_client
 import analytics_utils
 import email_client
 import agents as agents_module
+import social_agent
 import asyncio
 
 mongo_url = os.environ['MONGO_URL']
@@ -783,6 +784,10 @@ async def get_chat_session(
 # =====================================================================
 app.include_router(api_router)
 
+# Mount the social-agent router (admin endpoints + agent pair + WebSocket).
+social_agent.attach(db)
+app.include_router(social_agent.router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -818,6 +823,18 @@ async def on_startup():
         pass
     await seed_admin(db)
     await agents_module.seed_default_agents(db)
+    # social agent indexes
+    try:
+        await db.social_agents.create_index("id", unique=True)
+        await db.social_posts.create_index("scheduled_at")
+        await db.social_posts.create_index("status")
+        await db.social_jobs.create_index("created_at")
+        await db.pair_codes.create_index("code")
+        await db.pair_codes.create_index("expires_at", expireAfterSeconds=0)
+    except Exception:
+        pass
+    # Kick off the auto-poster scheduler in the background
+    asyncio.create_task(social_agent.scheduler_loop(db))
     logger.info("Admin seeded. Ready.")
 
 

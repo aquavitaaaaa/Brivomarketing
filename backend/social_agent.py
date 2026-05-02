@@ -1,0 +1,502 @@
+"""
+BrivoMarketing Social Auto-Poster — agent dispatch system.
+
+Lets the user pair a self-hosted Mac (or any machine) running our Playwright
+agent (see /app/agent_host/agent.py + install.sh) with our backend over a
+single outbound WebSocket. We queue posting jobs in Mongo and stream them to
+the agent on demand. The agent runs the actual posting in a real logged-in
+Chromium browser and reports the result back over the same socket.
+
+Key concepts:
+  - social_agents       — registered host machines (id, name, status, last_heartbeat)
+  - social_posts        — content to post (caption + media + platforms + scheduled_at)
+  - social_jobs         — per-platform run record (one post fans out to N jobs)
+  - pair_codes          — one-time codes that exchange for a long-lived agent JWT
+
+Endpoints
+---------
+Admin (Bearer JWT)
+  POST /api/admin/social/agents/pair-code      -> generates a 6-digit pair code
+  GET  /api/admin/social/agents                 -> list paired hosts
+  DELETE /api/admin/social/agents/{id}          -> revoke an agent
+  GET  /api/admin/social/posts                  -> list posts (queued/published/failed)
+  POST /api/admin/social/posts                  -> create + schedule a post
+  POST /api/admin/social/posts/generate         -> AI-generate a batch of posts
+  POST /api/admin/social/posts/{id}/run-now     -> dispatch immediately
+  DELETE /api/admin/social/posts/{id}           -> cancel
+  GET  /api/admin/social/jobs                   -> recent run logs
+
+Agent (no admin token — uses agent JWT)
+  POST /api/agent/pair                          -> redeem pair code, returns JWT
+  WS   /api/agent/ws?token=...                  -> bidirectional command channel
+
+Scheduler:
+  background loop runs every 30s, finds queued jobs that are due, dispatches
+  to an online agent over the WS.
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import os
+import random
+import secrets
+import string
+import uuid
+from datetime import datetime, timezone, timedelta
+from typing import Optional
+
+import jwt
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
+from auth import get_current_admin
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+# -------------------------------------------------------------------- config
+AGENT_JWT_ALG = "HS256"
+AGENT_JWT_TTL_DAYS = 365  # long-lived: it's a paired device
+PAIR_CODE_TTL_MIN = 10
+SUPPORTED_PLATFORMS = ["x", "instagram", "linkedin"]
+
+
+def _agent_secret() -> str:
+    return os.environ["JWT_SECRET"]  # reuse JWT_SECRET; agent tokens carry role=agent
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _now_dt() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _new_id() -> str:
+    return str(uuid.uuid4())
+
+
+def _new_pair_code() -> str:
+    return "".join(random.choices(string.digits, k=6))
+
+
+def _make_agent_token(agent_id: str, name: str) -> str:
+    payload = {
+        "sub": agent_id,
+        "name": name,
+        "role": "agent",
+        "exp": _now_dt() + timedelta(days=AGENT_JWT_TTL_DAYS),
+        "iat": _now_dt(),
+    }
+    return jwt.encode(payload, _agent_secret(), algorithm=AGENT_JWT_ALG)
+
+
+def _decode_agent_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, _agent_secret(), algorithms=[AGENT_JWT_ALG])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
+    if payload.get("role") != "agent":
+        raise HTTPException(403, "Not an agent token")
+    return payload
+
+
+# ------------------------------------------------------------ in-memory state
+# Map agent_id -> live WebSocket connection
+LIVE_AGENTS: dict[str, WebSocket] = {}
+# Map job_id -> asyncio.Future awaiting agent reply
+PENDING_JOBS: dict[str, asyncio.Future] = {}
+
+
+# ----------------------------------------------------------------- pydantic
+class PostCreate(BaseModel):
+    caption: str = Field(..., min_length=1, max_length=4000)
+    image_url: Optional[str] = None
+    video_url: Optional[str] = None
+    platforms: list[str] = Field(default_factory=lambda: ["x"])
+    scheduled_at: Optional[str] = None  # ISO 8601; null = run immediately when picked up
+    theme: Optional[str] = None  # "receipts" / "teardown" / etc.
+
+    model_config = {"extra": "ignore"}
+
+
+class GenerateBatch(BaseModel):
+    days: int = Field(7, ge=1, le=30)
+    platforms: list[str] = Field(default_factory=lambda: ["x", "instagram", "linkedin"])
+    posts_per_day: int = Field(1, ge=1, le=4)
+
+
+class PairRedeem(BaseModel):
+    code: str
+    name: str = "Mac Mini"
+
+
+# ============================================================== ADMIN ROUTES
+
+@router.post("/admin/social/agents/pair-code")
+async def admin_create_pair_code(req: dict | None = None, admin=Depends(get_current_admin)):
+    """Returns a new 6-digit code. Lasts 10 minutes."""
+    db = router.db  # type: ignore[attr-defined]
+    code = _new_pair_code()
+    expires = _now_dt() + timedelta(minutes=PAIR_CODE_TTL_MIN)
+    await db.pair_codes.insert_one({
+        "code": code,
+        "created_by": admin["email"],
+        "created_at": _now(),
+        "expires_at": expires.isoformat(),
+        "used": False,
+    })
+    return {"code": code, "expires_at": expires.isoformat()}
+
+
+@router.get("/admin/social/agents")
+async def admin_list_agents(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    cursor = db.social_agents.find({}, {"_id": 0}).sort("paired_at", -1)
+    agents = await cursor.to_list(length=200)
+    for a in agents:
+        a["online"] = a["id"] in LIVE_AGENTS
+    return {"agents": agents}
+
+
+@router.delete("/admin/social/agents/{agent_id}")
+async def admin_revoke_agent(agent_id: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    await db.social_agents.update_one({"id": agent_id}, {"$set": {"revoked": True}})
+    ws = LIVE_AGENTS.pop(agent_id, None)
+    if ws:
+        try:
+            await ws.close(code=4401, reason="revoked")
+        except Exception:
+            pass
+    return {"ok": True}
+
+
+@router.get("/admin/social/posts")
+async def admin_list_posts(
+    status: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    admin=Depends(get_current_admin),
+):
+    db = router.db  # type: ignore[attr-defined]
+    q: dict = {}
+    if status:
+        q["status"] = status
+    cursor = db.social_posts.find(q, {"_id": 0}).sort("scheduled_at", 1).limit(limit)
+    return {"posts": await cursor.to_list(length=limit)}
+
+
+@router.post("/admin/social/posts")
+async def admin_create_post(payload: PostCreate, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    platforms = [p for p in payload.platforms if p in SUPPORTED_PLATFORMS]
+    if not platforms:
+        raise HTTPException(400, "No supported platform in request")
+    doc = {
+        "id": _new_id(),
+        "caption": payload.caption,
+        "image_url": payload.image_url,
+        "video_url": payload.video_url,
+        "platforms": platforms,
+        "scheduled_at": payload.scheduled_at or _now(),
+        "theme": payload.theme,
+        "status": "queued",
+        "created_at": _now(),
+        "created_by": admin["email"],
+    }
+    await db.social_posts.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.post("/admin/social/posts/generate")
+async def admin_generate_batch(payload: GenerateBatch, admin=Depends(get_current_admin)):
+    """Generate `days * posts_per_day` posts using the brand-kit cadence."""
+    db = router.db  # type: ignore[attr-defined]
+    from social_content import generate_post_batch  # local import to avoid cycles
+
+    created = await generate_post_batch(
+        db=db,
+        days=payload.days,
+        platforms=[p for p in payload.platforms if p in SUPPORTED_PLATFORMS],
+        posts_per_day=payload.posts_per_day,
+        admin_email=admin["email"],
+    )
+    return {"created": len(created), "posts": created}
+
+
+@router.post("/admin/social/posts/{post_id}/run-now")
+async def admin_run_now(post_id: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    post = await db.social_posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(404, "Post not found")
+    await db.social_posts.update_one(
+        {"id": post_id}, {"$set": {"scheduled_at": _now(), "status": "queued"}}
+    )
+    return {"ok": True}
+
+
+@router.delete("/admin/social/posts/{post_id}")
+async def admin_cancel_post(post_id: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    res = await db.social_posts.update_one(
+        {"id": post_id, "status": {"$in": ["queued", "scheduled"]}},
+        {"$set": {"status": "cancelled", "cancelled_at": _now()}},
+    )
+    if res.matched_count == 0:
+        raise HTTPException(404, "Post not found or not cancellable")
+    return {"ok": True}
+
+
+@router.get("/admin/social/jobs")
+async def admin_list_jobs(limit: int = Query(50, ge=1, le=200), admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    cursor = db.social_jobs.find({}, {"_id": 0}).sort("created_at", -1).limit(limit)
+    return {"jobs": await cursor.to_list(length=limit)}
+
+
+@router.get("/admin/social/dashboard")
+async def admin_dashboard(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    queued = await db.social_posts.count_documents({"status": "queued"})
+    published = await db.social_posts.count_documents({"status": "published"})
+    failed = await db.social_posts.count_documents({"status": "failed"})
+    agents_total = await db.social_agents.count_documents({"revoked": {"$ne": True}})
+    online = len(LIVE_AGENTS)
+    last_jobs = await db.social_jobs.find({}, {"_id": 0}).sort("created_at", -1).limit(5).to_list(5)
+    return {
+        "queued": queued,
+        "published": published,
+        "failed": failed,
+        "agents_total": agents_total,
+        "agents_online": online,
+        "recent_jobs": last_jobs,
+    }
+
+
+# ============================================================ AGENT PAIRING
+
+@router.post("/agent/pair")
+async def agent_pair(payload: PairRedeem):
+    db = router.db  # type: ignore[attr-defined]
+    code_doc = await db.pair_codes.find_one({"code": payload.code, "used": False})
+    if not code_doc:
+        raise HTTPException(400, "Invalid or used code")
+    expires_at = datetime.fromisoformat(code_doc["expires_at"])
+    if expires_at < _now_dt():
+        raise HTTPException(400, "Code expired")
+
+    agent_id = _new_id()
+    await db.social_agents.insert_one({
+        "id": agent_id,
+        "name": payload.name,
+        "paired_at": _now(),
+        "paired_by": code_doc["created_by"],
+        "last_heartbeat": None,
+        "platform": "darwin",  # the agent updates this on first hello
+        "revoked": False,
+    })
+    await db.pair_codes.update_one(
+        {"_id": code_doc["_id"]},
+        {"$set": {"used": True, "used_at": _now(), "agent_id": agent_id}},
+    )
+    token = _make_agent_token(agent_id, payload.name)
+    return {"agent_id": agent_id, "token": token, "name": payload.name}
+
+
+# ============================================================ AGENT WEBSOCKET
+
+@router.websocket("/agent/ws")
+async def agent_ws(ws: WebSocket, token: str = Query(...)):
+    """Single bidirectional command channel.
+
+    Messages from agent -> backend:
+      { "type": "hello", "version": "1.0", "platforms": ["x"] }
+      { "type": "heartbeat" }
+      { "type": "job_result", "job_id": "...", "ok": true,
+        "posted_url": "...", "screenshot_b64": "..." }
+
+    Messages from backend -> agent:
+      { "type": "job", "id": "...", "kind": "post_x",
+        "caption": "...", "image_url": "...", "video_url": "..." }
+      { "type": "ping" }
+    """
+    db = router.db  # type: ignore[attr-defined]
+    try:
+        payload = _decode_agent_token(token)
+    except HTTPException:
+        await ws.close(code=4401)
+        return
+
+    agent_id = payload["sub"]
+    rec = await db.social_agents.find_one({"id": agent_id, "revoked": {"$ne": True}})
+    if not rec:
+        await ws.close(code=4403)
+        return
+
+    await ws.accept()
+    LIVE_AGENTS[agent_id] = ws
+    await db.social_agents.update_one(
+        {"id": agent_id},
+        {"$set": {"last_heartbeat": _now(), "online_since": _now()}},
+    )
+    logger.info("Agent %s (%s) connected", rec.get("name"), agent_id)
+
+    try:
+        while True:
+            raw = await ws.receive_text()
+            try:
+                msg = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+            kind = msg.get("type")
+
+            if kind == "hello":
+                await db.social_agents.update_one(
+                    {"id": agent_id},
+                    {"$set": {
+                        "version": msg.get("version"),
+                        "capabilities": msg.get("platforms", []),
+                        "platform": msg.get("platform", "darwin"),
+                        "last_heartbeat": _now(),
+                    }},
+                )
+
+            elif kind == "heartbeat":
+                await db.social_agents.update_one(
+                    {"id": agent_id}, {"$set": {"last_heartbeat": _now()}}
+                )
+
+            elif kind == "job_result":
+                jid = msg.get("job_id")
+                fut = PENDING_JOBS.pop(jid, None)
+                if fut and not fut.done():
+                    fut.set_result(msg)
+                # also persist
+                await db.social_jobs.update_one(
+                    {"id": jid},
+                    {"$set": {
+                        "status": "succeeded" if msg.get("ok") else "failed",
+                        "completed_at": _now(),
+                        "posted_url": msg.get("posted_url"),
+                        "error": msg.get("error"),
+                        "screenshot_b64": msg.get("screenshot_b64"),
+                    }},
+                )
+
+    except WebSocketDisconnect:
+        logger.info("Agent %s disconnected", agent_id)
+    except Exception as e:
+        logger.exception("Agent ws error: %s", e)
+    finally:
+        LIVE_AGENTS.pop(agent_id, None)
+        await db.social_agents.update_one(
+            {"id": agent_id}, {"$set": {"online_since": None}}
+        )
+
+
+# ================================================================ DISPATCHER
+
+async def dispatch_job_to_agent(agent_id: str, job: dict, timeout_s: int = 180) -> dict:
+    """Send a job over WS and await the agent's reply (with timeout)."""
+    ws = LIVE_AGENTS.get(agent_id)
+    if ws is None:
+        raise RuntimeError("Agent offline")
+    fut: asyncio.Future = asyncio.get_event_loop().create_future()
+    PENDING_JOBS[job["id"]] = fut
+    await ws.send_text(json.dumps({"type": "job", **job}))
+    try:
+        return await asyncio.wait_for(fut, timeout=timeout_s)
+    except asyncio.TimeoutError:
+        PENDING_JOBS.pop(job["id"], None)
+        raise RuntimeError("Agent timed out")
+
+
+async def _pick_agent() -> Optional[str]:
+    """Pick the first online, non-revoked agent. Round-robin would be nicer."""
+    if not LIVE_AGENTS:
+        return None
+    return next(iter(LIVE_AGENTS.keys()))
+
+
+async def _process_due_posts(db) -> None:
+    """Find posts whose scheduled_at <= now and dispatch one job per platform."""
+    now_iso = _now()
+    cursor = db.social_posts.find(
+        {"status": "queued", "scheduled_at": {"$lte": now_iso}},
+        {"_id": 0},
+    ).limit(20)
+    posts = await cursor.to_list(length=20)
+    if not posts:
+        return
+
+    agent_id = await _pick_agent()
+    if not agent_id:
+        logger.info("Posts due but no agent online — skipping cycle")
+        return
+
+    for post in posts:
+        await db.social_posts.update_one(
+            {"id": post["id"]}, {"$set": {"status": "running", "started_at": _now()}}
+        )
+        any_failure = False
+        any_success = False
+        for platform in post["platforms"]:
+            job_id = _new_id()
+            job_doc = {
+                "id": job_id,
+                "post_id": post["id"],
+                "agent_id": agent_id,
+                "kind": f"post_{platform}",
+                "platform": platform,
+                "caption": post["caption"],
+                "image_url": post.get("image_url"),
+                "video_url": post.get("video_url"),
+                "status": "running",
+                "created_at": _now(),
+            }
+            await db.social_jobs.insert_one(job_doc)
+            job_doc.pop("_id", None)
+            try:
+                result = await dispatch_job_to_agent(agent_id, job_doc, timeout_s=240)
+                if result.get("ok"):
+                    any_success = True
+                else:
+                    any_failure = True
+            except Exception as e:
+                any_failure = True
+                await db.social_jobs.update_one(
+                    {"id": job_id},
+                    {"$set": {"status": "failed", "error": str(e), "completed_at": _now()}},
+                )
+
+        new_status = "published" if any_success and not any_failure else (
+            "partial" if any_success else "failed"
+        )
+        await db.social_posts.update_one(
+            {"id": post["id"]},
+            {"$set": {"status": new_status, "completed_at": _now()}},
+        )
+
+
+async def scheduler_loop(db) -> None:
+    """Run forever — every 30s look for due posts."""
+    logger.info("Social scheduler loop started")
+    while True:
+        try:
+            await _process_due_posts(db)
+        except Exception:
+            logger.exception("scheduler tick failed")
+        await asyncio.sleep(30)
+
+
+# Allow server.py to attach the db once it's created.
+def attach(db) -> None:
+    router.db = db  # type: ignore[attr-defined]

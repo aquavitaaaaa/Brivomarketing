@@ -102,3 +102,38 @@ export const fetchCalls = () =>
   axios
     .get(`${API}/admin/calls`, { headers: authHeaders() })
     .then((r) => r.data);
+
+// ---------- Social Auto-Poster ----------
+export const socialDashboard = () =>
+  axios.get(`${API}/admin/social/dashboard`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialAgents = () =>
+  axios.get(`${API}/admin/social/agents`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialCreatePairCode = () =>
+  axios.post(`${API}/admin/social/agents/pair-code`, {}, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialRevokeAgent = (id) =>
+  axios.delete(`${API}/admin/social/agents/${id}`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialPosts = (status) =>
+  axios.get(`${API}/admin/social/posts`, {
+    headers: authHeaders(), params: status ? { status } : {},
+  }).then((r) => r.data);
+
+export const socialCreatePost = (payload) =>
+  axios.post(`${API}/admin/social/posts`, payload, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialGenerateBatch = (payload) =>
+  axios.post(`${API}/admin/social/posts/generate`, payload, {
+    headers: authHeaders(), timeout: 120000,
+  }).then((r) => r.data);
+
+export const socialRunNow = (id) =>
+  axios.post(`${API}/admin/social/posts/${id}/run-now`, {}, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialCancelPost = (id) =>
+  axios.delete(`${API}/admin/social/posts/${id}`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialJobs = () =>
+  axios.get(`${API}/admin/social/jobs`, { headers: authHeaders() }).then((r) => r.data);

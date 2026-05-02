@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import { LogOut, BarChart3, Inbox, PhoneCall, Radio, MessageSquare, Bot } from "lucide-react";
+import { useNavigate, Navigate, Link } from "react-router-dom";
+import { LogOut, BarChart3, Inbox, PhoneCall, Radio, MessageSquare, Bot, Send } from "lucide-react";
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import LeadsTab from "@/components/admin/LeadsTab";
@@ -83,6 +83,13 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              to="/admin/social"
+              className="hidden md:inline-flex items-center gap-2 border border-[#CCFF00]/40 text-[#CCFF00] hover:bg-[#CCFF00]/10 font-mono text-[10px] uppercase tracking-[0.25em] px-4 py-2 transition-colors"
+              data-testid="admin-social-link"
+            >
+              <Send size={13} /> Auto-Poster
+            </Link>
             <span className="hidden md:inline font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
               {admin?.email}
             </span>

@@ -31,6 +31,7 @@ import ScrollReveal from "@/components/site/ScrollReveal";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminSocial from "@/pages/AdminSocial";
 import BrandKit from "@/pages/BrandKit";
 import { trackEvent } from "@/lib/api";
 
@@ -113,6 +114,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/social" element={<AdminSocial />} />
         <Route path="/brand-kit" element={<BrandKit />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
