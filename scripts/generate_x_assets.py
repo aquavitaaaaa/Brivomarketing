@@ -283,45 +283,88 @@ def build_x_avatar(out_name: str = "x-avatar.jpg") -> Path:
 # ---------------------------------------------------------------------------
 
 def build_x_header(out_name: str = "x-header.jpg") -> Path:
+    """X header with real NYC skyline photo + enhanced owl composited on top."""
     W, H = 1500, 500
 
-    # Cinematic layered backdrop (silk drape + gold bokeh + amber glow)
-    canvas = cinematic_background((W, H))
+    # 1) Load NYC skyline source (2400x3200 portrait) and crop the skyline
+    # band, then resize to target. We take y=600..1400 (800px tall strip)
+    # which keeps the buildings + golden-hour sky + a sliver of reflection.
+    skyline = Image.open(ROOT / "scripts" / "sources" / "nyc-skyline.jpg").convert("RGB")
+    sw, sh = skyline.size
+    if sh > sw:
+        # Portrait source -> crop skyline band (y = 0.19*H .. 0.44*H)
+        crop_top = int(sh * 0.19)
+        crop_bot = int(sh * 0.44)
+        band = skyline.crop((0, crop_top, sw, crop_bot))
+        skyline = band.resize((W, H), Image.LANCZOS)
+    else:
+        # Landscape source -> resize width to W then crop a 500-tall strip
+        # biased to the BOTTOM half where the skyline + its reflection live.
+        new_h = int(sh * W / sw)
+        skyline = skyline.resize((W, new_h), Image.LANCZOS)
+        # Take strip from ~42% down so we capture full skyline + waterline
+        crop_top = max(0, min(new_h - H, int(new_h * 0.42)))
+        skyline = skyline.crop((0, crop_top, W, crop_top + H))
 
-    # Deeper amber glow disc pinned behind the owl anchor
+    # 2) Gentle grade — preserve the golden hour mood, boost a touch of contrast
+    from PIL import ImageEnhance
+    skyline = ImageEnhance.Contrast(skyline).enhance(1.12)
+    skyline = ImageEnhance.Brightness(skyline).enhance(1.02)
+    skyline = ImageEnhance.Color(skyline).enhance(1.05)
+
+    canvas = skyline.convert("RGB")
+
+    # 3) LIGHT overall darkening (keeps skyline crisp) + localised chyron
+    #    behind the wordmark so it stays readable.
+    darken = Image.new("RGBA", (W, H), (0, 0, 0, 40))  # ~15% global wash
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), darken).convert("RGB")
+
+    # Chyron — a soft semi-transparent rectangle behind the wordmark zone.
+    # This is the trick: text is legible without drowning the skyline.
+    chyron = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    cdraw = ImageDraw.Draw(chyron)
+    # Vertical gradient rectangle from left edge in, fading to the right
+    for x in range(420, 1060):
+        # Softer in the middle, feather at left and right
+        edge = min(1, (x - 420) / 70, (1060 - x) / 70)
+        a = int(165 * edge)
+        cdraw.line([(x, 120), (x, 340)], fill=(8, 10, 16, a), width=1)
+    chyron = chyron.filter(ImageFilter.GaussianBlur(22))
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), chyron).convert("RGB")
+
+    # 4) Amber radial glow where the owl will be placed (right side)
+    owl_cx, owl_cy = int(W * 0.80), H // 2
     glow = Image.new("RGB", (W, H), (0, 0, 0))
     gd = ImageDraw.Draw(glow)
-    owl_cx, owl_cy = int(W * 0.78), H // 2
-    for i in range(36):
-        r = int(320 - i * 7)
+    for i in range(42):
+        r = int(340 - i * 7)
         if r <= 0:
             break
-        alpha = (1 - i / 36) ** 2
+        alpha = (1 - i / 42) ** 2
         color = (
-            int(min(255, GOLD_BRIGHT[0] * 0.75 * alpha)),
-            int(min(255, GOLD_BRIGHT[1] * 0.55 * alpha)),
+            int(min(255, GOLD_BRIGHT[0] * 0.85 * alpha)),
+            int(min(255, GOLD_BRIGHT[1] * 0.60 * alpha)),
             int(min(255, GOLD_BRIGHT[2] * 0.30 * alpha)),
         )
         gd.ellipse((owl_cx - r, owl_cy - r, owl_cx + r, owl_cy + r),
                    fill=color)
-    glow = glow.filter(ImageFilter.GaussianBlur(55))
-    canvas = Image.blend(canvas, glow, 0.48)
+    glow = glow.filter(ImageFilter.GaussianBlur(60))
+    canvas = Image.blend(canvas, glow, 0.28)
 
-    # Owl — bumped to 420px diameter for more presence on the rich bg
-    owl_d = 420
+    # 5) Owl — bold 440px with triple gold ring
+    owl_d = 440
     owl = prepare_owl_circle(owl_d)
     owl_x = owl_cx - owl_d // 2
     owl_y = owl_cy - owl_d // 2
     canvas.paste(owl, (owl_x, owl_y), owl)
 
-    # Triple gold ring — outer thick bright, middle deep, inner hairline
     draw = ImageDraw.Draw(canvas)
-    r_outer = owl_d // 2 + 14
+    r_outer = owl_d // 2 + 16
     r_mid = owl_d // 2 + 6
     r_inner = owl_d // 2 + 1
     draw.ellipse((owl_cx - r_outer, owl_cy - r_outer,
                   owl_cx + r_outer, owl_cy + r_outer),
-                 outline=GOLD_BRIGHT, width=8)
+                 outline=GOLD_BRIGHT, width=9)
     draw.ellipse((owl_cx - r_mid, owl_cy - r_mid,
                   owl_cx + r_mid, owl_cy + r_mid),
                  outline=GOLD_DEEP, width=2)
@@ -329,27 +372,23 @@ def build_x_header(out_name: str = "x-header.jpg") -> Path:
                   owl_cx + r_inner, owl_cy + r_inner),
                  outline=GOLD_BRIGHT, width=1)
 
-    # Gold hairline rules top + bottom
+    # 6) Gold hairline frame top + bottom
     draw.line([(40, 18), (W - 40, 18)], fill=GOLD, width=1)
     draw.line([(40, H - 18), (W - 40, H - 18)], fill=GOLD, width=1)
 
-    # Top-right small-caps label
+    # 7) Top labels
     f_label = load_inter(18)
     label = "E S T .   M M X X I V   ·   N Y C"
     lbox = draw.textbbox((0, 0), label, font=f_label)
     lw = lbox[2] - lbox[0]
     draw.text((W - 60 - lw, 34), label, font=f_label, fill=GOLD_BRIGHT)
 
-    # Top-left small-caps label (appears above profile pic zone, stays visible
-    # on desktop above where the circle sits)
     f_label2 = load_inter(16)
     draw.text((56, 34),
               "T H E   A I   P E R F O R M A N C E   S T U D I O",
               font=f_label2, fill=GOLD)
 
-    # ----- Central wordmark block -----
-    # Wordmark — Fraunces 150, pushed to x=440 so X's profile-pic overlay
-    # (which ends around x=197) has a clean 243px buffer.
+    # 8) Wordmark block at x=440 (safe from X's profile pic overlay)
     f_word = load_fraunces(150)
     word = "BRIVO"
     wbox = draw.textbbox((0, 0), word, font=f_word)
@@ -358,31 +397,29 @@ def build_x_header(out_name: str = "x-header.jpg") -> Path:
     wx = 440
     wy = 130
 
-    # Drop-shadow pass for wordmark readability over the rich bg
-    for dx, dy in [(4, 5), (-1, 3), (3, 1)]:
-        draw.text((wx + dx, wy + dy), word, font=f_word, fill=(6, 9, 14))
+    # Multi-pass drop shadow for photo-grade legibility
+    for dx, dy in [(6, 7), (4, 5), (2, 3), (-1, 3)]:
+        draw.text((wx + dx, wy + dy), word, font=f_word, fill=(4, 6, 10))
     draw.text((wx, wy), word, font=f_word, fill=IVORY)
 
-    # Gold hairline under the wordmark
+    # Gold hairline under wordmark
     draw.line([(wx + 6, wy + wh + 18), (wx + ww - 6, wy + wh + 18)],
               fill=GOLD_BRIGHT, width=2)
 
     # Tagline
     f_tag = load_inter(22)
     tag = "A I   P E R F O R M A N C E   S T U D I O"
-    # Tagline shadow for legibility
-    draw.text((wx + 8, wy + wh + 32), tag, font=f_tag, fill=(6, 9, 14))
+    draw.text((wx + 8, wy + wh + 32), tag, font=f_tag, fill=(4, 6, 10))
     draw.text((wx + 6, wy + wh + 30), tag, font=f_tag, fill=GOLD_BRIGHT)
 
     # Italic descriptor
     f_desc = load_fraunces(26, italic=True)
     desc = "Custom sites. Voice agents. Pipeline that moves."
-    draw.text((wx + 8, wy + wh + 72), desc, font=f_desc,
-              fill=(6, 9, 14))
+    draw.text((wx + 8, wy + wh + 72), desc, font=f_desc, fill=(4, 6, 10))
     draw.text((wx + 6, wy + wh + 70), desc, font=f_desc,
               fill=(232, 235, 242))
 
-    # CTA pill — bottom-right
+    # 9) CTA pill — bottom-right with amber halo
     f_cta = load_inter(20)
     cta = "brivomarketing.com"
     cbox = draw.textbbox((0, 0), cta, font=f_cta)
@@ -393,15 +430,15 @@ def build_x_header(out_name: str = "x-header.jpg") -> Path:
     pill_h = ch + pill_pad_y * 2
     pill_x = W - 60 - pill_w
     pill_y = H - 60 - pill_h
-    # Soft glow under pill
-    glow_pill = Image.new("RGBA", (pill_w + 40, pill_h + 40), (0, 0, 0, 0))
+
+    glow_pill = Image.new("RGBA", (pill_w + 48, pill_h + 48), (0, 0, 0, 0))
     ImageDraw.Draw(glow_pill).rounded_rectangle(
-        (20, 20, pill_w + 20, pill_h + 20),
+        (24, 24, pill_w + 24, pill_h + 24),
         radius=pill_h // 2,
-        fill=(GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], 120),
+        fill=(GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], 150),
     )
-    glow_pill = glow_pill.filter(ImageFilter.GaussianBlur(14))
-    canvas.paste(glow_pill, (pill_x - 20, pill_y - 20), glow_pill)
+    glow_pill = glow_pill.filter(ImageFilter.GaussianBlur(18))
+    canvas.paste(glow_pill, (pill_x - 24, pill_y - 24), glow_pill)
     draw = ImageDraw.Draw(canvas)
     draw.rounded_rectangle(
         (pill_x, pill_y, pill_x + pill_w, pill_y + pill_h),
