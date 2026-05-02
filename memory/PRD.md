@@ -129,3 +129,26 @@ backend start).
   operator skeleton + full admin dashboard UI. Removed Lenis smooth-scroll.
   Wired InquiryDialog + RoiCalculator to Mongo-backed endpoints. 20/20 pytest
   pass, 0 frontend regressions (see `/app/test_reports/iteration_3.json`).
+- 2026-02 — Landing page visual redesign: cyberpunk → editorial light theme
+  (ivory/navy/gold, Fraunces + Inter). All site components rewritten. Instagram
+  integration added across nav, hero, mobile menu, footer.
+- 2026-02 — Hero redesigned as an Apple/Tesla-style product showcase:
+  `HeroShowcase.jsx` renders a floating MacBook + iPhone that auto-rotate
+  through 5 Gemini-generated UI mockups (SaaS dashboard, luxury e-commerce,
+  creative agency, fine dining, wellness mobile) every 4.2s. Background toned
+  down to a subtle stage so devices are the star. Headline: "Custom websites,
+  built to move markets."
+- 2026-02 — Instagram nav icon shifted to gold treatment so it pops against
+  both the dark hero and light scrolled nav.
+- 2026-02 — Shipped `/brand-kit` social media blitz download page. 10 Gemini-
+  generated assets (avatars dark/light, Instagram story/post/cover,
+  X/Twitter header, YouTube banner, LinkedIn cover, horizontal logo
+  lockups dark/light). Page renders palette + type reference + per-asset
+  download + copy-link buttons. Linked from footer under "Studio".
+  Assets live in `/app/frontend/public/kit-assets/`.
+
+## Roadmap
+- P1: Allow regenerating any single brand-kit asset from the UI (admin-only).
+- P1: Add PNG + SVG variants alongside each JPG for higher-quality placement.
+- P2: Scheduler integration — share a single kit-assets link to Later/Buffer.
+- P2: Video reel hero variant via Sora 2 for even more "money" feel.

@@ -63,8 +63,8 @@ export default function Navigation({ onCTA }) {
             aria-label="Instagram"
             className={`hidden md:inline-flex w-9 h-9 items-center justify-center rounded-full border transition-all ${
               scrolled
-                ? "border-[#E7E3D8] text-[#0B1B2B]/65 hover:text-[#0B1B2B] hover:border-[#0B1B2B]"
-                : "border-white/20 text-white/75 hover:text-white hover:border-white/45"
+                ? "border-[#D4A971] text-[#B8864C] hover:text-white hover:bg-[#B8864C] hover:border-[#B8864C]"
+                : "border-[#D4A971]/60 text-[#E8C28A] hover:text-[#0B1B2B] hover:bg-[#E8C28A] hover:border-[#E8C28A]"
             }`}
             data-testid="nav-instagram"
           >
