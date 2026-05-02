@@ -218,6 +218,17 @@ backend start).
   graceful fallback pattern when EMERGENT_LLM_KEY budget is exhausted —
   visitors now get a friendly "AI is recharging, leave your email" handoff
   instead of a 502.
+- 2026-05-02 — **Tesla-style Admin redesign + AI Auto-Qualifier + Outreach
+  Analytics** (DONE — P0). New X11-Gray (#bebebe) chassis with embedded
+  black "screen" panels, telemetry strip with live AI status + clock,
+  battery-style score bars on every lead, big tabular telemetry numbers.
+  AdminLogin, AdminDashboard, and AdminLeadEngine fully redesigned.
+  New endpoints:
+    - `POST /api/admin/leads/{id}/qualify` — single-lead LLM rescore
+    - `POST /api/admin/leads/auto-qualify` — batch rescore all `discovered`
+    - `GET  /api/admin/leads/analytics`    — funnel + rates + 7d outreach
+  Route ordering fix: literal routes declared before /{lead_id} dynamic.
+  34/34 backend tests pass.
 
 ## Backlog (Phase 2 → 4)
 - **P1 Phase 2 — Engagement Flywheel**: Auto-DM responder using paired
