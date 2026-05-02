@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Download, ArrowLeft, Check, Instagram, Twitter, Youtube, Linkedin, Facebook } from "lucide-react";
+import { Download, ArrowLeft, Check, FileDown, Instagram, Twitter, Youtube, Linkedin, Facebook } from "lucide-react";
 
 /**
  * Brand Kit — public download page for all social media assets.
@@ -144,8 +144,18 @@ export default function BrandKit() {
           >
             <ArrowLeft size={14} /> Back to brivomarketing.com
           </Link>
-          <div className="text-[11px] tracking-[0.22em] uppercase text-[#8190A1] font-medium">
-            Brand Kit · v1.0
+          <div className="flex items-center gap-4">
+            <a
+              href="/kit-assets/brivo-brand-kit.pdf"
+              download="brivo-brand-kit.pdf"
+              className="hidden sm:inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors"
+              data-testid="brand-kit-pdf-download"
+            >
+              <FileDown size={13} /> Download full kit (PDF)
+            </a>
+            <div className="text-[11px] tracking-[0.22em] uppercase text-[#8190A1] font-medium">
+              v1.0
+            </div>
           </div>
         </div>
       </header>
@@ -161,6 +171,20 @@ export default function BrandKit() {
           Logo lockups, avatars, covers, and post templates — pre-sized for every platform you'll ever need.
           Download the raw .jpgs or copy a direct link to drop straight into a scheduling tool.
         </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href="/kit-assets/brivo-brand-kit.pdf"
+            download="brivo-brand-kit.pdf"
+            className="inline-flex items-center gap-2 bg-[#B8864C] hover:bg-[#C99661] text-white px-6 py-3 rounded-full text-[14px] font-medium transition-colors shadow-lg shadow-[#B8864C]/20"
+            data-testid="brand-kit-hero-pdf"
+          >
+            <FileDown size={15} /> Download full kit · PDF
+          </a>
+          <span className="text-[12px] text-[#8190A1]">
+            11 pages · 16 MB · all assets bundled with URLs
+          </span>
+        </div>
 
         {/* Palette + typography quick-reference */}
         <div className="mt-10 grid md:grid-cols-2 gap-6">
