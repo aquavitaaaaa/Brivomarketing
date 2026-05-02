@@ -172,15 +172,18 @@ backend start).
 ## Roadmap
 - 2026-02 — Built **Social Auto-Poster** end-to-end: Mac-host browser-automation
   architecture (Playwright + persistent Chromium profile + outbound WebSocket
-  to backend), one-click `install.sh` + launchd daemon at
-  `/app/agent_host/install.sh`, agent script at `/app/agent_host/agent.py`,
-  publicly served at `/agent-host/install.sh` and `/agent-host/agent.py`.
-  Backend: `social_agent.py` (pair codes, agent JWT, WebSocket, job dispatcher,
+  to backend), one-click installers for **macOS / Windows / Linux** at
+  `/app/agent_host/install.sh`, `install.ps1`, `install-linux.sh`. Agent
+  script at `/app/agent_host/agent.py` (publicly served at
+  `/agent-host/install.{sh,ps1}` and `/agent-host/agent.py`). Backend:
+  `social_agent.py` (pair codes, agent JWT, WebSocket, job dispatcher,
   scheduler loop), `social_content.py` (Gemini caption + Nano Banana image
   factory with brand-kit weekly rhythm + graceful fallback templates when
-  EMERGENT_LLM_KEY budget exceeded). Admin UI at `/admin/social` with pair
-  flow, host status, content queue, "Generate next 14 days" button, recent
-  runs feed. Posting handlers shipped for X, Instagram, LinkedIn (real
+  EMERGENT_LLM_KEY budget exceeded). Admin UI at `/admin/social` with
+  OS-tabbed pair flow (Mac/Win/Linux), host status with per-platform login
+  dots (X / IG / LinkedIn), content queue, manual post composer, "Generate
+  next 14 days" AI batch, recent runs feed with click-to-view-screenshot
+  modal. Posting handlers shipped for X, Instagram, LinkedIn (real
   Playwright DOM automation in agent.py).
 - P1: Allow regenerating any single brand-kit asset from the UI (admin-only).
 - P1: Add PNG + SVG variants alongside each JPG for higher-quality placement.

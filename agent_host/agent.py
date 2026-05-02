@@ -126,6 +126,31 @@ async def _download_media(url: str, dest: Path) -> Path:
     return dest
 
 
+async def _check_session(page: Page, url: str, signed_in_marker: str) -> bool:
+    """Visit `url` and look for an element selector that only appears when
+    logged in. Returns True if logged-in, False otherwise."""
+    try:
+        await page.goto(url, wait_until="domcontentloaded", timeout=15000)
+        await page.wait_for_timeout(1500)
+        return await page.locator(signed_in_marker).count() > 0
+    except Exception:
+        return False
+
+
+async def collect_session_status() -> dict:
+    """Background-check whether the persistent profile is still logged into
+    each platform. Cheap (no DOM mutations, just DOM presence)."""
+    page = await BROWSER.page()
+    out: dict = {}
+    # X — the compose button only shows when logged in
+    out["x"] = await _check_session(page, "https://x.com/home", '[data-testid="SideNav_NewTweet_Button"]')
+    # Instagram — search for the "New post" button on the home shell
+    out["instagram"] = await _check_session(page, "https://www.instagram.com/", 'svg[aria-label="New post"]')
+    # LinkedIn — global nav is only present logged-in
+    out["linkedin"] = await _check_session(page, "https://www.linkedin.com/feed/", 'header.global-nav')
+    return out
+
+
 async def post_x(page: Page, caption: str, media_url: Optional[str]) -> dict:
     """Post a tweet via the logged-in x.com web composer."""
     await page.goto("https://x.com/compose/post", wait_until="domcontentloaded")
@@ -301,20 +326,36 @@ async def run_once(verbose: bool) -> None:
         print(f"→ connecting to {ws_base}")
 
     async with websockets.connect(url, max_size=8 * 1024 * 1024) as ws:
+        # Probe the persistent browser profile for which platforms are logged in
+        try:
+            sessions = await collect_session_status()
+        except Exception:
+            sessions = {}
+
         await ws.send(json.dumps({
             "type": "hello",
             "version": VERSION,
             "platform": platform.platform(),
             "platforms": ["x", "instagram", "linkedin"],
+            "sessions": sessions,
         }))
         if verbose:
-            print("✓ connected")
+            print("✓ connected — sessions:", sessions)
 
         async def heartbeat() -> None:
+            tick = 0
             while True:
                 await asyncio.sleep(HEARTBEAT_S)
+                payload = {"type": "heartbeat"}
+                # Re-probe sessions every ~5 minutes (tick = 15 × 20s)
+                tick += 1
+                if tick % 15 == 0:
+                    try:
+                        payload["sessions"] = await collect_session_status()
+                    except Exception:
+                        pass
                 try:
-                    await ws.send(json.dumps({"type": "heartbeat"}))
+                    await ws.send(json.dumps(payload))
                 except Exception:
                     return
 

@@ -365,13 +365,17 @@ async def agent_ws(ws: WebSocket, token: str = Query(...)):
                         "version": msg.get("version"),
                         "capabilities": msg.get("platforms", []),
                         "platform": msg.get("platform", "darwin"),
+                        "sessions": msg.get("sessions", {}),
                         "last_heartbeat": _now(),
                     }},
                 )
 
             elif kind == "heartbeat":
+                update = {"last_heartbeat": _now()}
+                if msg.get("sessions"):
+                    update["sessions"] = msg["sessions"]
                 await db.social_agents.update_one(
-                    {"id": agent_id}, {"$set": {"last_heartbeat": _now()}}
+                    {"id": agent_id}, {"$set": update}
                 )
 
             elif kind == "job_result":
