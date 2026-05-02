@@ -101,6 +101,118 @@ def add_noise(img: Image.Image, strength: int = 6) -> Image.Image:
 
 
 # ---------------------------------------------------------------------------
+# Cinematic background — navy/gold silk drape + gold bokeh
+# ---------------------------------------------------------------------------
+
+def cinematic_background(size: tuple[int, int]) -> Image.Image:
+    """Navy-to-amber gradient with gold bokeh and silk-drape curves.
+    Deliberately NOT a plain black field."""
+    import math
+    import random
+
+    W, H = size
+    # 1) Base diagonal gradient: deep navy top-left → warmer aubergine-gold bottom-right
+    base = Image.new("RGB", size, NAVY_DEEP)
+    px = base.load()
+    for y in range(H):
+        for x in range(W):
+            t = (x / W) * 0.55 + (y / H) * 0.45
+            # Blend navy_deep -> navy_soft with a hint of warmth
+            r = int(NAVY_DEEP[0] * (1 - t) + (40 + 30 * t) * t)
+            g = int(NAVY_DEEP[1] * (1 - t) + (38 + 18 * t) * t)
+            b = int(NAVY_DEEP[2] * (1 - t) + (55 + 12 * t) * t)
+            px[x, y] = (max(0, min(255, r)),
+                        max(0, min(255, g)),
+                        max(0, min(255, b)))
+
+    # 2) Warm amber radial glow on the right (where the owl will sit)
+    glow = Image.new("RGB", size, (0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    cx, cy = int(W * 0.78), H // 2
+    max_r = int(max(W, H) * 0.7)
+    for i in range(max_r, 0, -4):
+        k = (1 - i / max_r) ** 2
+        color = (
+            int(min(255, GOLD[0] * 0.7 * k)),
+            int(min(255, GOLD[1] * 0.5 * k)),
+            int(min(255, GOLD[2] * 0.25 * k)),
+        )
+        gd.ellipse((cx - i, cy - i, cx + i, cy + i), fill=color)
+    glow = glow.filter(ImageFilter.GaussianBlur(80))
+    base = Image.blend(base, glow, 0.60)
+
+    # 3) Silk-drape curves: soft sweeping bands suggesting fabric in motion
+    drape = Image.new("RGBA", size, (0, 0, 0, 0))
+    dd = ImageDraw.Draw(drape)
+    for i, amp in enumerate([90, 130, 170, 80, 110]):
+        phase = i * 0.9
+        freq = 0.0025 + i * 0.0004
+        shade = 18 + i * 6
+        alpha = 55 - i * 6
+        color = (GOLD[0], GOLD[1] - shade, GOLD[2] - shade, max(10, alpha))
+        pts = []
+        y_center = H * (0.22 + i * 0.16)
+        for x in range(0, W + 8, 8):
+            y = y_center + amp * math.sin(freq * x + phase)
+            pts.append((x, y))
+        # Build a thick stroke by drawing band polygon
+        top = [(x, y - 60 - i * 8) for x, y in pts]
+        bot = [(x, y + 60 + i * 8) for x, y in reversed(pts)]
+        dd.polygon(top + bot, fill=color)
+    drape = drape.filter(ImageFilter.GaussianBlur(40))
+    base = Image.alpha_composite(base.convert("RGBA"), drape).convert("RGB")
+
+    # 4) Gold bokeh — three size tiers for depth
+    bokeh = Image.new("RGBA", size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(bokeh)
+    random.seed(42)
+    # Large soft bokeh
+    for _ in range(14):
+        x = random.randint(-40, W + 40)
+        y = random.randint(-20, H + 20)
+        r = random.randint(60, 140)
+        a = random.randint(28, 60)
+        bd.ellipse((x - r, y - r, x + r, y + r),
+                   fill=(GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], a))
+    # Medium bokeh
+    for _ in range(26):
+        x = random.randint(0, W)
+        y = random.randint(0, H)
+        r = random.randint(22, 50)
+        a = random.randint(45, 90)
+        bd.ellipse((x - r, y - r, x + r, y + r),
+                   fill=(GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], a))
+    bokeh_large = bokeh.filter(ImageFilter.GaussianBlur(14))
+
+    # Sharp tiny sparkles
+    sparkle = Image.new("RGBA", size, (0, 0, 0, 0))
+    sd = ImageDraw.Draw(sparkle)
+    for _ in range(55):
+        x = random.randint(0, W)
+        y = random.randint(0, H)
+        r = random.randint(2, 6)
+        a = random.randint(160, 230)
+        sd.ellipse((x - r, y - r, x + r, y + r),
+                   fill=(255, 235, 180, a))
+    sparkle = sparkle.filter(ImageFilter.GaussianBlur(1.2))
+
+    base_rgba = base.convert("RGBA")
+    base_rgba = Image.alpha_composite(base_rgba, bokeh_large)
+    base_rgba = Image.alpha_composite(base_rgba, sparkle)
+
+    # 5) Left-side darkening for profile-pic safe zone + text legibility
+    shade = Image.new("RGBA", size, (0, 0, 0, 0))
+    sh = ImageDraw.Draw(shade)
+    # Subtle left vignette so profile pic contrasts + text reads
+    for i in range(W // 2):
+        a = int(max(0, 120 - (i / (W / 2)) * 120))
+        sh.line([(i, 0), (i, H)], fill=(5, 8, 12, a))
+    base_rgba = Image.alpha_composite(base_rgba, shade)
+
+    return base_rgba.convert("RGB")
+
+
+# ---------------------------------------------------------------------------
 # X PROFILE AVATAR — 1500x1500, owl dominant
 # ---------------------------------------------------------------------------
 
@@ -173,85 +285,104 @@ def build_x_avatar(out_name: str = "x-avatar.jpg") -> Path:
 def build_x_header(out_name: str = "x-header.jpg") -> Path:
     W, H = 1500, 500
 
-    # Dark radial backdrop with glow pulled to the right of centre where
-    # the owl will sit
-    canvas = radial_gradient((W, H), NAVY_SOFT, NAVY_DEEP,
-                             center=(int(W * 0.78), H // 2),
-                             radius_scale=0.65).convert("RGB")
+    # Cinematic layered backdrop (silk drape + gold bokeh + amber glow)
+    canvas = cinematic_background((W, H))
 
-    # Amber glow disc behind owl
+    # Deeper amber glow disc pinned behind the owl anchor
     glow = Image.new("RGB", (W, H), (0, 0, 0))
     gd = ImageDraw.Draw(glow)
     owl_cx, owl_cy = int(W * 0.78), H // 2
-    for i in range(30):
-        r = int(260 - i * 7)
+    for i in range(36):
+        r = int(320 - i * 7)
         if r <= 0:
             break
-        alpha = (1 - i / 30) ** 2
+        alpha = (1 - i / 36) ** 2
         color = (
-            int(min(255, GOLD[0] * 0.55 * alpha + NAVY_DEEP[0])),
-            int(min(255, GOLD[1] * 0.40 * alpha + NAVY_DEEP[1])),
-            int(min(255, GOLD[2] * 0.22 * alpha + NAVY_DEEP[2])),
+            int(min(255, GOLD_BRIGHT[0] * 0.75 * alpha)),
+            int(min(255, GOLD_BRIGHT[1] * 0.55 * alpha)),
+            int(min(255, GOLD_BRIGHT[2] * 0.30 * alpha)),
         )
         gd.ellipse((owl_cx - r, owl_cy - r, owl_cx + r, owl_cy + r),
                    fill=color)
-    glow = glow.filter(ImageFilter.GaussianBlur(45))
-    canvas = Image.blend(canvas, glow, 0.55)
+    glow = glow.filter(ImageFilter.GaussianBlur(55))
+    canvas = Image.blend(canvas, glow, 0.48)
 
-    # Owl — 380px diameter, right side, centred vertically
-    owl_d = 380
+    # Owl — bumped to 420px diameter for more presence on the rich bg
+    owl_d = 420
     owl = prepare_owl_circle(owl_d)
     owl_x = owl_cx - owl_d // 2
     owl_y = owl_cy - owl_d // 2
     canvas.paste(owl, (owl_x, owl_y), owl)
 
-    # Dual gold rings around owl
+    # Triple gold ring — outer thick bright, middle deep, inner hairline
     draw = ImageDraw.Draw(canvas)
-    outer_r = owl_d // 2 + 10
-    inner_r = owl_d // 2 + 3
-    draw.ellipse((owl_cx - outer_r, owl_cy - outer_r,
-                  owl_cx + outer_r, owl_cy + outer_r),
-                 outline=GOLD_BRIGHT, width=6)
-    draw.ellipse((owl_cx - inner_r, owl_cy - inner_r,
-                  owl_cx + inner_r, owl_cy + inner_r),
+    r_outer = owl_d // 2 + 14
+    r_mid = owl_d // 2 + 6
+    r_inner = owl_d // 2 + 1
+    draw.ellipse((owl_cx - r_outer, owl_cy - r_outer,
+                  owl_cx + r_outer, owl_cy + r_outer),
+                 outline=GOLD_BRIGHT, width=8)
+    draw.ellipse((owl_cx - r_mid, owl_cy - r_mid,
+                  owl_cx + r_mid, owl_cy + r_mid),
                  outline=GOLD_DEEP, width=2)
+    draw.ellipse((owl_cx - r_inner, owl_cy - r_inner,
+                  owl_cx + r_inner, owl_cy + r_inner),
+                 outline=GOLD_BRIGHT, width=1)
 
-    # Gold hairline rules at top + bottom for editorial frame
-    draw.line([(40, 18), (W - 40, 18)], fill=GOLD_DEEP, width=1)
-    draw.line([(40, H - 18), (W - 40, H - 18)], fill=GOLD_DEEP, width=1)
+    # Gold hairline rules top + bottom
+    draw.line([(40, 18), (W - 40, 18)], fill=GOLD, width=1)
+    draw.line([(40, H - 18), (W - 40, H - 18)], fill=GOLD, width=1)
 
     # Top-right small-caps label
     f_label = load_inter(18)
     label = "E S T .   M M X X I V   ·   N Y C"
     lbox = draw.textbbox((0, 0), label, font=f_label)
     lw = lbox[2] - lbox[0]
-    draw.text((W - 60 - lw, 34), label, font=f_label, fill=GOLD)
+    draw.text((W - 60 - lw, 34), label, font=f_label, fill=GOLD_BRIGHT)
+
+    # Top-left small-caps label (appears above profile pic zone, stays visible
+    # on desktop above where the circle sits)
+    f_label2 = load_inter(16)
+    draw.text((56, 34),
+              "T H E   A I   P E R F O R M A N C E   S T U D I O",
+              font=f_label2, fill=GOLD)
 
     # ----- Central wordmark block -----
-    # X's profile pic overlay lives roughly x=73..207 on desktop and can
-    # shift on mobile — we start the wordmark at x=440 for a clean buffer.
-    # Wordmark
-    f_word = load_fraunces(140)
+    # Wordmark — Fraunces 150, pushed to x=440 so X's profile-pic overlay
+    # (which ends around x=197) has a clean 243px buffer.
+    f_word = load_fraunces(150)
     word = "BRIVO"
     wbox = draw.textbbox((0, 0), word, font=f_word)
     ww = wbox[2] - wbox[0]
     wh = wbox[3] - wbox[1]
     wx = 440
-    wy = 140
+    wy = 130
+
+    # Drop-shadow pass for wordmark readability over the rich bg
+    for dx, dy in [(4, 5), (-1, 3), (3, 1)]:
+        draw.text((wx + dx, wy + dy), word, font=f_word, fill=(6, 9, 14))
     draw.text((wx, wy), word, font=f_word, fill=IVORY)
+
+    # Gold hairline under the wordmark
+    draw.line([(wx + 6, wy + wh + 18), (wx + ww - 6, wy + wh + 18)],
+              fill=GOLD_BRIGHT, width=2)
 
     # Tagline
     f_tag = load_inter(22)
     tag = "A I   P E R F O R M A N C E   S T U D I O"
-    draw.text((wx + 6, wy + wh + 26), tag, font=f_tag, fill=GOLD)
+    # Tagline shadow for legibility
+    draw.text((wx + 8, wy + wh + 32), tag, font=f_tag, fill=(6, 9, 14))
+    draw.text((wx + 6, wy + wh + 30), tag, font=f_tag, fill=GOLD_BRIGHT)
 
     # Italic descriptor
     f_desc = load_fraunces(26, italic=True)
     desc = "Custom sites. Voice agents. Pipeline that moves."
-    draw.text((wx + 6, wy + wh + 68), desc, font=f_desc,
-              fill=(200, 205, 215))
+    draw.text((wx + 8, wy + wh + 72), desc, font=f_desc,
+              fill=(6, 9, 14))
+    draw.text((wx + 6, wy + wh + 70), desc, font=f_desc,
+              fill=(232, 235, 242))
 
-    # CTA pill — bottom-right, outside the mobile-cropped zone
+    # CTA pill — bottom-right
     f_cta = load_inter(20)
     cta = "brivomarketing.com"
     cbox = draw.textbbox((0, 0), cta, font=f_cta)
@@ -262,26 +393,25 @@ def build_x_header(out_name: str = "x-header.jpg") -> Path:
     pill_h = ch + pill_pad_y * 2
     pill_x = W - 60 - pill_w
     pill_y = H - 60 - pill_h
+    # Soft glow under pill
+    glow_pill = Image.new("RGBA", (pill_w + 40, pill_h + 40), (0, 0, 0, 0))
+    ImageDraw.Draw(glow_pill).rounded_rectangle(
+        (20, 20, pill_w + 20, pill_h + 20),
+        radius=pill_h // 2,
+        fill=(GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], 120),
+    )
+    glow_pill = glow_pill.filter(ImageFilter.GaussianBlur(14))
+    canvas.paste(glow_pill, (pill_x - 20, pill_y - 20), glow_pill)
+    draw = ImageDraw.Draw(canvas)
     draw.rounded_rectangle(
         (pill_x, pill_y, pill_x + pill_w, pill_y + pill_h),
-        radius=pill_h // 2, fill=GOLD,
+        radius=pill_h // 2, fill=GOLD_BRIGHT,
     )
     draw.text((pill_x + pill_pad_x, pill_y + pill_pad_y - 4),
               cta, font=f_cta, fill=INK)
 
-    # Subtle grain over whole canvas
-    grain = Image.new("L", canvas.size, 0)
-    import random
-    gpx = grain.load()
-    for y in range(0, H, 2):
-        for x in range(0, W, 2):
-            gpx[x, y] = random.randint(0, 10)
-    grain = grain.filter(ImageFilter.GaussianBlur(0.3))
-    black = Image.new("RGB", canvas.size, (0, 0, 0))
-    canvas = Image.composite(black, canvas, grain)
-
     out = ASSETS / out_name
-    canvas.save(out, "JPEG", quality=93, optimize=True, progressive=True)
+    canvas.save(out, "JPEG", quality=94, optimize=True, progressive=True)
     return out
 
 
