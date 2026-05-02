@@ -831,10 +831,30 @@ async def on_startup():
         await db.social_jobs.create_index("created_at")
         await db.pair_codes.create_index("code")
         await db.pair_codes.create_index("expires_at", expireAfterSeconds=0)
+        # Phase 1 indexes
+        await db.social_account_policies.create_index(
+            [("agent_id", 1), ("platform", 1)], unique=True
+        )
+        await db.hook_library.create_index("slug", unique=True)
+        await db.hook_library.create_index("score")
+        await db.client_wins.create_index("last_used_at")
     except Exception:
         pass
+    # Seed hook library + client wins (idempotent)
+    try:
+        import social_content_factory as _scf
+        await _scf.seed_hook_library(db)
+        await _scf.seed_wins(db)
+    except Exception:
+        logger.exception("Phase 1 seeding failed (non-fatal)")
     # Kick off the auto-poster scheduler in the background
     asyncio.create_task(social_agent.scheduler_loop(db))
+    # Kick off the client-win recycler so the queue never goes dry
+    try:
+        import social_content_factory as _scf
+        asyncio.create_task(_scf.wins_recycler_loop(db))
+    except Exception:
+        logger.exception("wins_recycler_loop failed to start")
     logger.info("Admin seeded. Ready.")
 
 

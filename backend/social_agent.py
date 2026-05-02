@@ -52,6 +52,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSock
 from pydantic import BaseModel, Field
 
 from auth import get_current_admin
+import social_safety
+import social_content_factory
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +283,165 @@ async def admin_dashboard(admin=Depends(get_current_admin)):
     }
 
 
+# ================================================= PHASE 1: SAFETY + FACTORY
+
+class PolicyUpdate(BaseModel):
+    agent_id: str
+    platform: str
+    max_posts_per_day: Optional[int] = None
+    min_minutes_between: Optional[int] = None
+    quiet_hours_start: Optional[int] = None
+    quiet_hours_end: Optional[int] = None
+    tz: Optional[str] = None
+    failure_threshold: Optional[int] = None
+
+
+class PauseAction(BaseModel):
+    agent_id: str
+    platform: str
+    reason: Optional[str] = "manual"
+
+
+class CrossPostBrief(BaseModel):
+    brief: str = Field(..., min_length=4, max_length=2000)
+    tone: str = "confident"
+    platforms: list[str] = Field(default_factory=lambda: ["x", "instagram", "linkedin"])
+    image_url: Optional[str] = None
+    scheduled_at: Optional[str] = None   # ISO8601; default = now
+
+
+class WinCreate(BaseModel):
+    title: str
+    metric: str
+    detail: str
+    tags: list[str] = Field(default_factory=list)
+    vertical: Optional[str] = None
+
+
+@router.get("/admin/social/policies")
+async def admin_list_policies(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    return {"policies": await social_safety.list_policies(db)}
+
+
+@router.post("/admin/social/policies/update")
+async def admin_update_policy(payload: PolicyUpdate, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    fields = {k: v for k, v in payload.model_dump().items()
+              if v is not None and k not in ("agent_id", "platform")}
+    if not fields:
+        raise HTTPException(400, "No fields to update")
+    doc = await social_safety.set_policy_override(
+        db, payload.agent_id, payload.platform, **fields
+    )
+    return {"policy": doc}
+
+
+@router.post("/admin/social/policies/pause")
+async def admin_pause(payload: PauseAction, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    doc = await social_safety.pause(db, payload.agent_id, payload.platform, payload.reason or "manual")
+    return {"policy": doc}
+
+
+@router.post("/admin/social/policies/unpause")
+async def admin_unpause(payload: PauseAction, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    doc = await social_safety.unpause(db, payload.agent_id, payload.platform)
+    return {"policy": doc}
+
+
+@router.get("/admin/social/hooks")
+async def admin_list_hooks(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    docs = await db.hook_library.find({}, {"_id": 0}).sort("score", -1).to_list(length=200)
+    return {"hooks": docs}
+
+
+@router.get("/admin/social/wins")
+async def admin_list_wins(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    docs = await db.client_wins.find({}, {"_id": 0}).sort("created_at", -1).to_list(length=200)
+    return {"wins": docs}
+
+
+@router.post("/admin/social/wins")
+async def admin_create_win(payload: WinCreate, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    doc = {
+        "id": _new_id(),
+        **payload.model_dump(),
+        "uses": 0,
+        "last_used_at": None,
+        "created_at": _now(),
+    }
+    await db.client_wins.insert_one(doc)
+    doc.pop("_id", None)
+    return {"win": doc}
+
+
+@router.delete("/admin/social/wins/{win_id}")
+async def admin_delete_win(win_id: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    await db.client_wins.delete_one({"id": win_id})
+    return {"ok": True}
+
+
+@router.post("/admin/social/posts/multi")
+async def admin_cross_post(payload: CrossPostBrief, admin=Depends(get_current_admin)):
+    """Q: single brief -> one platform-tailored post per platform."""
+    db = router.db  # type: ignore[attr-defined]
+    plats = [p for p in payload.platforms if p in SUPPORTED_PLATFORMS] or SUPPORTED_PLATFORMS
+    created = await social_content_factory.multi_platform_from_brief(
+        db,
+        brief=payload.brief,
+        tone=payload.tone,
+        platforms=plats,
+        admin_email=admin.get("email", "admin"),
+        schedule_at_iso=payload.scheduled_at,
+        image_url=payload.image_url,
+    )
+    return {"created": created}
+
+
+@router.post("/admin/social/wins/recycle-now")
+async def admin_recycle_now(admin=Depends(get_current_admin)):
+    """Manually trigger the wins recycler (useful before first post or for tests)."""
+    db = router.db  # type: ignore[attr-defined]
+    win = await social_content_factory.pick_least_recent_win(db)
+    if not win:
+        raise HTTPException(400, "No client wins on file — add one first")
+    post = await social_content_factory.draft_post_from_win(db, win)
+    return {"post": post, "source_win": win["title"]}
+
+
+@router.get("/admin/social/safety-summary")
+async def admin_safety_summary(admin=Depends(get_current_admin)):
+    """Lightweight rollup: per-platform warm-up + ban risk + paused status."""
+    db = router.db  # type: ignore[attr-defined]
+    policies = await social_safety.list_policies(db)
+    agents = await db.social_agents.find({"revoked": {"$ne": True}}, {"_id": 0}).to_list(length=100)
+    by_agent_name = {a["id"]: a.get("name", a["id"][:8]) for a in agents}
+    # Queue floor info
+    from social_content_factory import queue_floor_low, QUEUE_FLOOR, QUEUE_FLOOR_HORIZON_HRS
+    low = await queue_floor_low(db)
+    total_wins = await db.client_wins.count_documents({})
+    total_hooks = await db.hook_library.count_documents({})
+    return {
+        "policies": [{**p, "agent_name": by_agent_name.get(p["agent_id"], "?")} for p in policies],
+        "queue_floor": {
+            "threshold": QUEUE_FLOOR,
+            "horizon_hours": QUEUE_FLOOR_HORIZON_HRS,
+            "currently_low": low,
+        },
+        "totals": {
+            "wins": total_wins,
+            "hooks": total_hooks,
+        },
+    }
+
+
+
 # ============================================================ AGENT PAIRING
 
 @router.post("/agent/pair")
@@ -308,6 +469,11 @@ async def agent_pair(payload: PairRedeem):
         {"$set": {"used": True, "used_at": _now(), "agent_id": agent_id}},
     )
     token = _make_agent_token(agent_id, payload.name)
+    # Kick off the warm-up clock for every supported platform on this host.
+    try:
+        await social_safety.start_warmup(db, agent_id, SUPPORTED_PLATFORMS)
+    except Exception:
+        logger.exception("start_warmup failed (non-fatal)")
     return {"agent_id": agent_id, "token": token, "name": payload.name}
 
 
@@ -452,7 +618,45 @@ async def _process_due_posts(db) -> None:
         )
         any_failure = False
         any_success = False
+        any_deferred = False
+        deferred_until: Optional[str] = None
+        skipped_platforms: list[str] = []
         for platform in post["platforms"]:
+            # ---- Phase 1 safety gate (R/S/T) ----
+            try:
+                ok_gate, reason, defer_until = await social_safety.check_can_post(
+                    db, agent_id, platform
+                )
+            except Exception as e:
+                logger.exception("safety gate error: %s", e)
+                ok_gate, reason, defer_until = True, "gate_bypass_on_error", None
+            if not ok_gate:
+                logger.info("Gate blocked post=%s plat=%s reason=%s defer=%s",
+                            post["id"], platform, reason, defer_until)
+                skipped_platforms.append(platform)
+                # Record a non-dispatched job for auditability
+                await db.social_jobs.insert_one({
+                    "id": _new_id(),
+                    "post_id": post["id"],
+                    "agent_id": agent_id,
+                    "kind": f"post_{platform}",
+                    "platform": platform,
+                    "caption": post["caption"],
+                    "status": "deferred" if defer_until else "blocked",
+                    "reason": reason,
+                    "defer_until": defer_until,
+                    "created_at": _now(),
+                    "completed_at": _now(),
+                })
+                if defer_until:
+                    any_deferred = True
+                    # Track the latest defer time across platforms
+                    if not deferred_until or defer_until > deferred_until:
+                        deferred_until = defer_until
+                else:
+                    any_failure = True
+                continue
+
             job_id = _new_id()
             job_doc = {
                 "id": job_id,
@@ -472,22 +676,46 @@ async def _process_due_posts(db) -> None:
                 result = await dispatch_job_to_agent(agent_id, job_doc, timeout_s=240)
                 if result.get("ok"):
                     any_success = True
+                    await social_safety.record_post_attempt(db, agent_id, platform, True)
                 else:
                     any_failure = True
+                    await social_safety.record_post_attempt(
+                        db, agent_id, platform, False, error=result.get("error")
+                    )
             except Exception as e:
                 any_failure = True
                 await db.social_jobs.update_one(
                     {"id": job_id},
                     {"$set": {"status": "failed", "error": str(e), "completed_at": _now()}},
                 )
+                try:
+                    await social_safety.record_post_attempt(
+                        db, agent_id, platform, False, error=str(e)
+                    )
+                except Exception:
+                    logger.exception("record_post_attempt failed")
 
-        new_status = "published" if any_success and not any_failure else (
-            "partial" if any_success else "failed"
-        )
-        await db.social_posts.update_one(
-            {"id": post["id"]},
-            {"$set": {"status": new_status, "completed_at": _now()}},
-        )
+        # Decide post-level status
+        if any_success and not any_failure and not any_deferred:
+            new_status = "published"
+            update: dict = {"status": new_status, "completed_at": _now()}
+        elif any_success:
+            new_status = "partial"
+            update = {"status": new_status, "completed_at": _now()}
+        elif any_deferred and not any_failure:
+            # Fully deferred — put it back on the queue at the latest defer time
+            new_status = "queued"
+            update = {
+                "status": new_status,
+                "scheduled_at": deferred_until or _now(),
+                "last_deferred_at": _now(),
+                "deferred_reason": "cadence/warmup/quiet",
+                "skipped_platforms": skipped_platforms,
+            }
+        else:
+            new_status = "failed"
+            update = {"status": new_status, "completed_at": _now()}
+        await db.social_posts.update_one({"id": post["id"]}, {"$set": update})
 
 
 async def scheduler_loop(db) -> None:

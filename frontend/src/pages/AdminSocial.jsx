@@ -4,11 +4,15 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Bot, Wifi, WifiOff, Play, X, Sparkles, Copy, Terminal,
   CheckCircle2, AlertTriangle, Clock, RefreshCw, Send, Plus, Apple, Monitor,
+  Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2,
 } from "lucide-react";
 import {
   adminMe, socialDashboard, socialAgents, socialCreatePairCode, socialRevokeAgent,
   socialPosts, socialCreatePost, socialGenerateBatch, socialRunNow, socialCancelPost,
   socialJobs,
+  socialSafetySummary, socialPauseAgent, socialUnpauseAgent,
+  socialListWins, socialCreateWin, socialDeleteWin,
+  socialRecycleNow, socialCrossPost,
 } from "@/lib/api";
 
 const PLATFORM_PILL = {
@@ -436,6 +440,334 @@ function PostsQueue({ posts, onRunNow, onCancel }) {
   );
 }
 
+// ---------- Phase 1: Safety panel ------------------------------------------
+const PLATFORM_LABEL = { x: "X", instagram: "Instagram", linkedin: "LinkedIn" };
+
+function riskColor(score) {
+  if (score >= 70) return "bg-[#9A2424]/10 text-[#9A2424] border-[#9A2424]/30";
+  if (score >= 40) return "bg-[#B8864C]/10 text-[#B8864C] border-[#B8864C]/30";
+  return "bg-[#1E7A36]/10 text-[#1E7A36] border-[#1E7A36]/30";
+}
+
+function SafetyPanel() {
+  const [summary, setSummary] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    try { setSummary(await socialSafetySummary()); } catch { /* 401 etc. */ }
+  }, []);
+
+  useEffect(() => { load(); const t = setInterval(load, 12000); return () => clearInterval(t); }, [load]);
+
+  const togglePause = async (p) => {
+    setBusy(true);
+    try {
+      if (p.paused) {
+        await socialUnpauseAgent(p.agent_id, p.platform);
+        toast.success(`${PLATFORM_LABEL[p.platform]} unpaused`);
+      } else {
+        await socialPauseAgent(p.agent_id, p.platform, "manual");
+        toast.success(`${PLATFORM_LABEL[p.platform]} paused`);
+      }
+      load();
+    } catch { toast.error("Failed"); }
+    finally { setBusy(false); }
+  };
+
+  const recycleNow = async () => {
+    setBusy(true);
+    try {
+      const r = await socialRecycleNow();
+      toast.success(`Drafted post from: ${r.source_win}`);
+      load();
+    } catch (e) { toast.error(e?.response?.data?.detail || "Failed"); }
+    finally { setBusy(false); }
+  };
+
+  if (!summary) return null;
+
+  const policies = summary.policies || [];
+  const qf = summary.queue_floor || {};
+
+  return (
+    <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6" data-testid="safety-panel">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold">
+          <Shield size={14} /> Safety &amp; warm-up
+        </div>
+        <div className="flex items-center gap-2">
+          {qf.currently_low && (
+            <span className="inline-flex items-center gap-1 text-[10.5px] text-[#9A2424] font-semibold uppercase tracking-[0.15em]">
+              <AlertTriangle size={11}/> Queue low — floor {qf.threshold}
+            </span>
+          )}
+          <button
+            onClick={recycleNow} disabled={busy}
+            data-testid="recycle-now"
+            className="inline-flex items-center gap-1.5 text-[11.5px] font-medium border border-[#E7E3D8] hover:border-[#B8864C] text-[#4E5C6E] hover:text-[#B8864C] px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
+          >
+            <Trophy size={12}/> Recycle a win now
+          </button>
+        </div>
+      </div>
+
+      {policies.length === 0 ? (
+        <p className="text-[13px] text-[#8190A1]">
+          No hosts paired yet. Pair a host above — safety policies auto-seed on pairing.
+        </p>
+      ) : (
+        <table className="w-full text-[13px]">
+          <thead>
+            <tr className="text-left text-[10.5px] uppercase tracking-[0.15em] text-[#8190A1] border-b border-[#E7E3D8]">
+              <th className="py-2 pr-4">Host</th>
+              <th className="py-2 pr-4">Platform</th>
+              <th className="py-2 pr-4">Warm-up</th>
+              <th className="py-2 pr-4">Cadence</th>
+              <th className="py-2 pr-4">Risk</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {policies.map((p) => {
+              const warmed = p.warmup_complete;
+              const wDay = p.warmup_day;
+              const wTotal = p.warmup_days_total || 7;
+              return (
+                <tr key={`${p.agent_id}-${p.platform}`} className="border-b border-[#F2EFE6] last:border-none">
+                  <td className="py-2 pr-4 font-medium">{p.agent_name}</td>
+                  <td className="py-2 pr-4 uppercase tracking-wider text-[10.5px] text-[#4E5C6E]">
+                    {PLATFORM_LABEL[p.platform] || p.platform}
+                  </td>
+                  <td className="py-2 pr-4">
+                    {warmed ? (
+                      <span className="text-[#1E7A36] text-[11.5px] font-medium">✓ Full cadence</span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-1.5 bg-[#E7E3D8] rounded overflow-hidden">
+                          <div className="h-full bg-[#B8864C]"
+                               style={{ width: `${Math.min(100, ((wDay ?? 0) + 1) * 100 / wTotal)}%` }} />
+                        </div>
+                        <span className="text-[11px] text-[#4E5C6E]">Day {(wDay ?? 0) + 1}/{wTotal}</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-2 pr-4 text-[11.5px] text-[#4E5C6E]">
+                    max <b>{p.max_posts_per_day}</b>/day · min <b>{p.min_minutes_between}</b>m · quiet {p.quiet_hours_start}:00–{p.quiet_hours_end}:00
+                  </td>
+                  <td className="py-2 pr-4">
+                    <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 border rounded-full ${riskColor(p.ban_risk)}`}>
+                      {p.ban_risk}
+                    </span>
+                  </td>
+                  <td className="py-2 pr-4">
+                    {p.paused ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-[#9A2424] font-semibold">
+                        <Pause size={11}/> Paused
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-[#1E7A36] font-semibold">
+                        <PlayCircle size={11}/> Active
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-2 text-right">
+                    <button
+                      onClick={() => togglePause(p)} disabled={busy}
+                      data-testid={`toggle-${p.platform}`}
+                      className="text-[11.5px] text-[#B8864C] hover:text-[#0B1B2B] transition-colors px-2"
+                    >
+                      {p.paused ? "Unpause" : "Pause"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+      <p className="mt-3 text-[10.5px] text-[#8190A1]">
+        Policy: warm-up tiers (7 days) → daily caps, min-spacing, quiet hours (1:00–7:00 local). 3 consecutive failures auto-pause. Ban-risk colour: green &lt; 40 &lt; amber &lt; 70 &lt; red.
+      </p>
+    </div>
+  );
+}
+
+
+// ---------- Phase 1: Wins manager -------------------------------------------
+function WinsCard() {
+  const [wins, setWins] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", metric: "", detail: "", tags: "" });
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    try { const r = await socialListWins(); setWins(r.wins || []); } catch { /* 401 */ }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const create = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await socialCreateWin({
+        title: form.title, metric: form.metric, detail: form.detail,
+        tags: form.tags.split(",").map(s => s.trim()).filter(Boolean),
+      });
+      toast.success("Win added — recycler can use it now");
+      setForm({ title: "", metric: "", detail: "", tags: "" });
+      setOpen(false); load();
+    } catch (e2) { toast.error(e2?.response?.data?.detail || "Failed"); }
+    finally { setBusy(false); }
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm("Delete this win?")) return;
+    try { await socialDeleteWin(id); toast.success("Deleted"); load(); }
+    catch { toast.error("Failed"); }
+  };
+
+  return (
+    <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6" data-testid="wins-card">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold">
+          <Trophy size={14}/> Client wins
+        </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          data-testid="toggle-win-form"
+          className="text-[11.5px] font-medium border border-[#E7E3D8] hover:border-[#B8864C] text-[#4E5C6E] hover:text-[#B8864C] px-3 py-1.5 rounded-full transition-colors inline-flex items-center gap-1.5"
+        >
+          <Plus size={11}/> Add win
+        </button>
+      </div>
+
+      {open && (
+        <form onSubmit={create} className="grid gap-2 mb-5 p-3 bg-[#FBFAF6] rounded-lg border border-[#E7E3D8]">
+          <input required placeholder="Title — e.g. Chrono Yachts"
+            data-testid="win-title"
+            value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
+            className="bg-white border border-[#E7E3D8] rounded px-2 py-1.5 text-[13px]"/>
+          <input required placeholder="Metric — e.g. +318% pipeline in 90 days"
+            data-testid="win-metric"
+            value={form.metric} onChange={e => setForm({ ...form, metric: e.target.value })}
+            className="bg-white border border-[#E7E3D8] rounded px-2 py-1.5 text-[13px]"/>
+          <textarea required placeholder="Detail (1-2 sentences)"
+            data-testid="win-detail"
+            value={form.detail} onChange={e => setForm({ ...form, detail: e.target.value })}
+            rows={2} className="bg-white border border-[#E7E3D8] rounded px-2 py-1.5 text-[13px] resize-none"/>
+          <input placeholder="Tags (comma-separated) e.g. receipts, cro, pipeline"
+            data-testid="win-tags"
+            value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })}
+            className="bg-white border border-[#E7E3D8] rounded px-2 py-1.5 text-[13px]"/>
+          <button disabled={busy} data-testid="win-submit"
+            className="bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-3 py-1.5 rounded mt-1 inline-flex items-center justify-center gap-1.5 disabled:opacity-50">
+            <Send size={11}/> {busy ? "Saving…" : "Save win"}
+          </button>
+        </form>
+      )}
+
+      {wins.length === 0 ? (
+        <p className="text-[13px] text-[#8190A1]">No wins on file yet. Add one to start the recycler.</p>
+      ) : (
+        <ul className="space-y-2 max-h-80 overflow-y-auto">
+          {wins.map((w) => (
+            <li key={w.id} className="flex items-start gap-2 text-[13px] border-b border-[#F2EFE6] pb-2 last:border-none last:pb-0">
+              <Trophy size={13} className="text-[#B8864C] mt-0.5 flex-shrink-0"/>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-[#0B1B2B]">{w.title}</div>
+                <div className="text-[#1E7A36] text-[12px] font-medium">{w.metric}</div>
+                <div className="text-[11.5px] text-[#4E5C6E] truncate">{w.detail}</div>
+                <div className="text-[10.5px] text-[#8190A1] mt-0.5">used {w.uses || 0}x</div>
+              </div>
+              <button onClick={() => remove(w.id)}
+                data-testid={`delete-win-${w.id}`}
+                className="text-[#8190A1] hover:text-[#9A2424] p-1 transition-colors">
+                <Trash2 size={12}/>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+
+// ---------- Phase 1: Cross-poster (1 brief → N platforms) ------------------
+function CrossPoster({ onPosted }) {
+  const [brief, setBrief] = useState("");
+  const [tone, setTone] = useState("confident");
+  const [platforms, setPlatforms] = useState(["x", "instagram", "linkedin"]);
+  const [busy, setBusy] = useState(false);
+
+  const togglePlatform = (p) => {
+    setPlatforms((ps) => ps.includes(p) ? ps.filter(x => x !== p) : [...ps, p]);
+  };
+
+  const post = async (e) => {
+    e.preventDefault();
+    if (!brief.trim() || platforms.length === 0) return;
+    setBusy(true);
+    try {
+      const r = await socialCrossPost({ brief, tone, platforms });
+      toast.success(`Queued ${r.created.length} platform-tailored post(s)`);
+      setBrief("");
+      onPosted?.();
+    } catch (e2) { toast.error(e2?.response?.data?.detail || "Failed"); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6" data-testid="cross-poster">
+      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold mb-4">
+        <Zap size={14}/> Cross-poster
+      </div>
+      <p className="text-[12px] text-[#4E5C6E] mb-3">
+        One brief → a platform-tailored caption queued for each selected platform (X punchy, IG casual, LinkedIn story-led).
+      </p>
+      <form onSubmit={post} className="grid gap-3">
+        <textarea required rows={3} value={brief}
+          data-testid="cross-brief"
+          onChange={e => setBrief(e.target.value)}
+          placeholder="What's the post about? e.g. 'Shipped a voice agent for a yacht broker that booked 14 calls in a week — lessons on AI voice for luxury.'"
+          className="bg-white border border-[#E7E3D8] rounded px-3 py-2 text-[13px] resize-none"/>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select value={tone} onChange={e => setTone(e.target.value)}
+            data-testid="cross-tone"
+            className="bg-white border border-[#E7E3D8] rounded px-2 py-1.5 text-[12.5px]">
+            <option value="confident">Confident</option>
+            <option value="contrarian">Contrarian</option>
+            <option value="receipts">Receipts</option>
+            <option value="story">Story</option>
+            <option value="curiosity">Curiosity</option>
+          </select>
+          {Object.keys(PLATFORM_LABEL).map((p) => (
+            <button type="button" key={p}
+              onClick={() => togglePlatform(p)}
+              data-testid={`cross-${p}`}
+              className={`px-3 py-1.5 rounded-full text-[11.5px] font-medium border transition-colors ${
+                platforms.includes(p)
+                  ? "bg-[#0B1B2B] text-white border-[#0B1B2B]"
+                  : "bg-white text-[#4E5C6E] border-[#E7E3D8] hover:border-[#B8864C]"
+              }`}>
+              {PLATFORM_LABEL[p]}
+            </button>
+          ))}
+          <button disabled={busy || !brief.trim() || platforms.length === 0}
+            data-testid="cross-submit"
+            className="ml-auto bg-[#B8864C] hover:bg-[#C99661] disabled:opacity-50 text-white text-[12.5px] font-medium px-4 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm shadow-[#B8864C]/20">
+            {busy ? <RefreshCw size={12} className="animate-spin"/> : <Target size={12}/>}
+            {busy ? "Queuing…" : "Queue for all"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+
 // ---------- Main page ---------------------------------------------------
 export default function AdminSocial() {
   const [admin, setAdmin] = useState(null);
@@ -556,6 +888,15 @@ export default function AdminSocial() {
         <div className="grid md:grid-cols-2 gap-6">
           <PairFlow onPaired={reload} />
           <AgentsCard agents={agents} onRevoke={revoke} />
+        </div>
+
+        {/* Phase 1: Safety panel */}
+        <SafetyPanel />
+
+        {/* Phase 1: Wins + Cross-poster */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <WinsCard />
+          <CrossPoster onPosted={reload} />
         </div>
 
         {/* Queue */}

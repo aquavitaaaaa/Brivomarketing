@@ -137,3 +137,39 @@ export const socialCancelPost = (id) =>
 
 export const socialJobs = () =>
   axios.get(`${API}/admin/social/jobs`, { headers: authHeaders() }).then((r) => r.data);
+
+// ---- Phase 1: safety + factory ----
+export const socialSafetySummary = () =>
+  axios.get(`${API}/admin/social/safety-summary`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialPauseAgent = (agent_id, platform, reason = "manual") =>
+  axios.post(`${API}/admin/social/policies/pause`,
+    { agent_id, platform, reason }, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialUnpauseAgent = (agent_id, platform) =>
+  axios.post(`${API}/admin/social/policies/unpause`,
+    { agent_id, platform }, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialUpdatePolicy = (payload) =>
+  axios.post(`${API}/admin/social/policies/update`, payload, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialListHooks = () =>
+  axios.get(`${API}/admin/social/hooks`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialListWins = () =>
+  axios.get(`${API}/admin/social/wins`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialCreateWin = (payload) =>
+  axios.post(`${API}/admin/social/wins`, payload, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialDeleteWin = (id) =>
+  axios.delete(`${API}/admin/social/wins/${id}`, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialRecycleNow = () =>
+  axios.post(`${API}/admin/social/wins/recycle-now`, {}, { headers: authHeaders() }).then((r) => r.data);
+
+export const socialCrossPost = (payload) =>
+  axios.post(`${API}/admin/social/posts/multi`, payload, {
+    headers: authHeaders(), timeout: 120000,
+  }).then((r) => r.data);
+

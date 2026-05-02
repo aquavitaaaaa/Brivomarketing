@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Chrono Yachts — custom editorial site",
+    "metric": "+318% qualified pipeline in 90 days",
+    "detail": "Rebuilt the marketing site + launched a voice concierge for after-hours inquiries. Traffic held flat; pipeline 3x'd.",
+    "tags": ["receipts", "pipeline", "voice"],
+    "vertical": "luxury"
+  },
+  {
+    "title": "Clay Collective — D2C rebuild",
+    "metric": "+62% add-to-cart in 11 days",
+    "detail": "New hero + PDP architecture + 9 conversion micro-moments. Same traffic source, cleaner funnel.",
+    "tags": ["receipts", "cro", "ecommerce"],
+    "vertical": "dtc"
+  },
+  {
+    "title": "Oakbrook Capital — B2B fundraising site",
+    "metric": "14 LP calls booked in first 3 weeks",
+    "detail": "Editorial layout, thesis-forward copy, a single pristine PDF gate. Zero-to-pipeline in under a month.",
+    "tags": ["receipts", "fundraising"],
+    "vertical": "b2b"
+  },
+  {
+    "title": "Northrise Health — voice-first triage",
+    "metric": "87% of after-hours intake handled without human",
+    "detail": "Voice agent + smart appointment routing. After-hours revenue stopped leaking.",
+    "tags": ["receipts", "voice", "healthcare"],
+    "vertical": "healthcare"
+  },
+  {
+    "title": "Vaya Studios — founder portfolio",
+    "metric": "CVR 1.8% → 5.4% in 16 days",
+    "detail": "Rebuilt funnel. Same traffic. Triple the revenue. No paid spend increase.",
+    "tags": ["receipts", "cro"],
+    "vertical": "services"
+  },
+  {
+    "title": "Arclight — AI-first product site",
+    "metric": "Waitlist closed 2,400 signups in 72 hrs",
+    "detail": "Launched a site + a Twitter drip written by the Brivo voice agent. Shipped in 5 days.",
+    "tags": ["receipts", "launch", "ai"],
+    "vertical": "saas"
+  }
+]

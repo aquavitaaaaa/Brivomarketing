@@ -1,0 +1,22 @@
+[
+  {"slug": "curiosity_gap",        "template": "Nobody talks about {topic} but here's what actually moves the needle:",                                 "category": "curiosity"},
+  {"slug": "contrarian_take",       "template": "Unpopular take: {topic} is a distraction. Here's what founders should obsess over instead.",                  "category": "contrarian"},
+  {"slug": "receipt_reveal",        "template": "Receipt: we just {did_thing}. Numbers below.",                                                                "category": "receipts"},
+  {"slug": "costly_mistake",        "template": "We just spent ${amount} to learn this about {topic}. So you don't have to:",                                "category": "story"},
+  {"slug": "founders_do_this",      "template": "99% of founders do {wrong_thing}. The 1% who compound do this instead.",                                    "category": "contrarian"},
+  {"slug": "receipt_in_days",       "template": "{metric} in {timeframe}. Here's the exact playbook.",                                                        "category": "receipts"},
+  {"slug": "pattern_break",         "template": "Your {thing} isn't broken. You're solving the wrong problem.",                                                "category": "contrarian"},
+  {"slug": "teardown_open",         "template": "Teardown time. A {type_of_brand} site came across my feed. Here's why it's leaking pipeline:",                "category": "teardown"},
+  {"slug": "lesson_from_loss",      "template": "The project I lost taught me more than the 3 I won. Here's the lesson:",                                     "category": "story"},
+  {"slug": "numbered_list",         "template": "3 signs your {thing} is costing you revenue you don't know about:",                                          "category": "list"},
+  {"slug": "hot_take",              "template": "Hot take: {topic} isn't the problem. {real_problem} is.",                                                     "category": "contrarian"},
+  {"slug": "the_real_moat",         "template": "The moat isn't {common_thing}. It's {real_thing}. And here's why:",                                           "category": "contrarian"},
+  {"slug": "bts_moment",            "template": "2:14am. {studio_moment}. The right detail is the one nobody notices.",                                        "category": "bts"},
+  {"slug": "stop_doing",            "template": "Stop doing {common_thing}. Start doing {better_thing}. Your conversion rate will thank you.",                  "category": "prescriptive"},
+  {"slug": "case_note",             "template": "Case note: founder walked in at {bad_metric}. Walked out at {good_metric}. Here's the 16-day plan:",            "category": "casenote"},
+  {"slug": "two_mistakes",          "template": "Two mistakes I see on every founder's site. Both are fixable in under an hour:",                              "category": "prescriptive"},
+  {"slug": "pov_shift",             "template": "Founders: your site isn't for you. It's for the 30-second skeptic who's already halfway clicked away.",         "category": "pov"},
+  {"slug": "what_actually_works",   "template": "What actually works in {year} for {topic}: ({number} things, ranked)",                                         "category": "list"},
+  {"slug": "the_shipment",          "template": "Just shipped: {thing_shipped}. What we learned that most studios still won't admit:",                          "category": "receipts"},
+  {"slug": "ai_reality",            "template": "Reality check on {ai_trend}: the tech's 80% there. The {missing_thing} is still 100% human.",                   "category": "contrarian"}
+]
