@@ -44,9 +44,11 @@ const SECTIONS = [
   {
     id: "twitter",
     title: "X (Twitter)",
-    subtitle: "Banner header optimized for the X safe area.",
+    subtitle: "Cinematic header + enhanced owl avatar — built specifically for X sizing and profile-pic overlay.",
     items: [
-      { slug: "twitter-header", label: "Profile Header", dims: "1500×500", note: "3:1 banner", icon: Twitter, bg: "dark" },
+      { slug: "x-avatar",       label: "Profile Avatar — Enhanced", dims: "1500×1500", note: "Dual gold ring, cinematic glow, 40px-safe", icon: Twitter, bg: "dark" },
+      { slug: "x-header",       label: "Profile Header — Cinematic", dims: "1500×500", note: "Owl integrated, profile-overlay aware",     icon: Twitter, bg: "dark" },
+      { slug: "twitter-header", label: "Profile Header — Classic (legacy)", dims: "1500×500", note: "Original text-only fabric banner",    icon: Twitter, bg: "dark" },
     ],
   },
   {
