@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import {
-  LogOut, BarChart3, Inbox, PhoneCall, Radio, MessageSquare, Bot, Send, Target, Activity,
+  LogOut, BarChart3, Inbox, PhoneCall, Radio, MessageSquare, Bot, Send, Target, Activity, Users,
 } from "lucide-react";
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
@@ -134,6 +134,13 @@ export default function AdminDashboard() {
               data-testid="admin-social-link"
             >
               <Send size={13} /> AUTO-POSTER
+            </Link>
+            <Link
+              to="/admin/affiliates"
+              className="hidden md:inline-flex items-center gap-2 border border-black text-black hover:bg-black hover:text-white font-mono text-[10px] uppercase tracking-[0.28em] px-4 py-2.5 transition-colors"
+              data-testid="admin-affiliates-link"
+            >
+              <Users size={13} /> PARTNERS
             </Link>
             <button
               onClick={logout}

@@ -74,7 +74,14 @@ export default function InquiryDialog({ open, onOpenChange, defaultService, sour
     }
     setLoading(true);
     try {
-      await submitInquiry({ ...form, source: source || "inquiry-dialog" });
+      const ref_code =
+        (typeof window !== "undefined" && localStorage.getItem("brivo_ref")) ||
+        null;
+      await submitInquiry({
+        ...form,
+        source: source || "inquiry-dialog",
+        ref_code,
+      });
       toast.success("Thank you. We'll be in touch within 24 hours.");
       onOpenChange(false);
       setForm({

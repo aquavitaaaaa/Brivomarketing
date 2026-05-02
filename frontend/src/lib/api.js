@@ -10,6 +10,69 @@ export const submitInquiry = (payload) =>
 export const submitRoiLead = (payload) =>
   axios.post(`${API}/inquiries/roi`, payload).then((r) => r.data);
 
+// ---------- Affiliate / Partner Program ----------
+export const fetchAffiliateProgram = () =>
+  axios.get(`${API}/affiliates/program`).then((r) => r.data);
+
+export const submitAffiliateApplication = (payload) =>
+  axios.post(`${API}/affiliates/apply`, payload).then((r) => r.data);
+
+export const trackRefClick = (ref) =>
+  axios.get(`${API}/affiliates/track`, { params: { ref } }).catch(() => null);
+
+export const fetchAffiliateApplications = (status) =>
+  axios.get(`${API}/admin/affiliates/applications`, {
+    headers: authHeaders(),
+    params: status ? { status } : {},
+  }).then((r) => r.data);
+
+export const approveAffiliateApplication = (id) =>
+  axios.post(`${API}/admin/affiliates/applications/${id}/approve`, {}, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const rejectAffiliateApplication = (id, note) =>
+  axios.post(`${API}/admin/affiliates/applications/${id}/reject`, { note }, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const fetchAffiliates = () =>
+  axios.get(`${API}/admin/affiliates`, { headers: authHeaders() }).then((r) => r.data);
+
+export const fetchAffiliateDetail = (id) =>
+  axios.get(`${API}/admin/affiliates/${id}`, { headers: authHeaders() }).then((r) => r.data);
+
+export const suspendAffiliate = (id, status) =>
+  axios.post(`${API}/admin/affiliates/${id}/suspend`, { status }, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const updateReferralStage = (refId, stage) =>
+  axios.post(`${API}/admin/affiliates/referrals/${refId}/stage`, { stage }, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const winReferral = (refId, payload) =>
+  axios.post(`${API}/admin/affiliates/referrals/${refId}/win`, payload, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const runMonthlyCommissions = (period) =>
+  axios.post(`${API}/admin/affiliates/commissions/run`, period ? { period } : {}, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
+export const fetchCommissions = (params = {}) =>
+  axios.get(`${API}/admin/affiliates/commissions/all`, {
+    headers: authHeaders(),
+    params,
+  }).then((r) => r.data);
+
+export const updateCommissionStatus = (id, payload) =>
+  axios.patch(`${API}/admin/affiliates/commissions/${id}`, payload, {
+    headers: authHeaders(),
+  }).then((r) => r.data);
+
 export const trackEvent = (event, path, extra = {}) => {
   try {
     let sessionId = localStorage.getItem("brivo_sid");

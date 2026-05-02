@@ -33,14 +33,34 @@ import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminSocial from "@/pages/AdminSocial";
 import AdminLeadEngine from "@/pages/AdminLeadEngine";
+import AdminAffiliates from "@/pages/AdminAffiliates";
 import BrandKit from "@/pages/BrandKit";
+import PartnersPage from "@/pages/Partners";
 import { trackEvent } from "@/lib/api";
 
 function PageViewTracker() {
   const location = useLocation();
   useEffect(() => {
+    // Capture ?ref=CODE on any page load and persist for 30 days.
+    try {
+      const params = new URLSearchParams(location.search);
+      const ref = params.get("ref");
+      if (ref) {
+        const code = ref.trim().toUpperCase();
+        localStorage.setItem("brivo_ref", code);
+        localStorage.setItem("brivo_ref_at", String(Date.now()));
+      } else {
+        const at = parseInt(localStorage.getItem("brivo_ref_at") || "0", 10);
+        if (at && Date.now() - at > 30 * 24 * 60 * 60 * 1000) {
+          localStorage.removeItem("brivo_ref");
+          localStorage.removeItem("brivo_ref_at");
+        }
+      }
+    } catch {
+      /* noop */
+    }
     trackEvent("pageview", location.pathname);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
   return null;
 }
 
@@ -117,7 +137,9 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/social" element={<AdminSocial />} />
         <Route path="/admin/leads" element={<AdminLeadEngine />} />
+        <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="/brand-kit" element={<BrandKit />} />
+        <Route path="/partners" element={<PartnersPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster

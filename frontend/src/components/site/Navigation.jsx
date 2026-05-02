@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X, ArrowRight, Instagram } from "lucide-react";
+import { Link } from "react-router-dom";
 import Logo from "@/components/site/Logo";
 
 const links = [
@@ -9,6 +10,7 @@ const links = [
   { label: "Process", href: "#process" },
   { label: "Pricing", href: "#pricing" },
   { label: "Insights", href: "#insights" },
+  { label: "Partners", to: "/partners" },
 ];
 
 export default function Navigation({ onCTA }) {
@@ -39,20 +41,35 @@ export default function Navigation({ onCTA }) {
         </a>
 
         <div className="hidden md:flex items-center gap-9">
-          {links.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className={`text-[14px] link-underline transition-colors ${
-                scrolled
-                  ? "text-[#0B1B2B]/75 hover:text-[#0B1B2B]"
-                  : "text-white/80 hover:text-white"
-              }`}
-              data-testid={`nav-link-${l.label.toLowerCase()}`}
-            >
-              {l.label}
-            </a>
-          ))}
+          {links.map((l) =>
+            l.to ? (
+              <Link
+                key={l.label}
+                to={l.to}
+                className={`text-[14px] link-underline transition-colors ${
+                  scrolled
+                    ? "text-[#0B1B2B]/75 hover:text-[#0B1B2B]"
+                    : "text-white/80 hover:text-white"
+                }`}
+                data-testid={`nav-link-${l.label.toLowerCase()}`}
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <a
+                key={l.label}
+                href={l.href}
+                className={`text-[14px] link-underline transition-colors ${
+                  scrolled
+                    ? "text-[#0B1B2B]/75 hover:text-[#0B1B2B]"
+                    : "text-white/80 hover:text-white"
+                }`}
+                data-testid={`nav-link-${l.label.toLowerCase()}`}
+              >
+                {l.label}
+              </a>
+            )
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -95,17 +112,29 @@ export default function Navigation({ onCTA }) {
 
       {open && (
         <div className="md:hidden border-t border-[#E7E3D8] bg-[#FBFAF6] px-6 py-6 flex flex-col gap-5">
-          {links.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="text-[15px] text-[#0B1B2B]/80"
-              data-testid={`mobile-nav-${l.label.toLowerCase()}`}
-            >
-              {l.label}
-            </a>
-          ))}
+          {links.map((l) =>
+            l.to ? (
+              <Link
+                key={l.label}
+                to={l.to}
+                onClick={() => setOpen(false)}
+                className="text-[15px] text-[#0B1B2B]/80"
+                data-testid={`mobile-nav-${l.label.toLowerCase()}`}
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <a
+                key={l.label}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="text-[15px] text-[#0B1B2B]/80"
+                data-testid={`mobile-nav-${l.label.toLowerCase()}`}
+              >
+                {l.label}
+              </a>
+            )
+          )}
           <button
             onClick={() => {
               setOpen(false);

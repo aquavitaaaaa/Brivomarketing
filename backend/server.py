@@ -29,6 +29,7 @@ import agents as agents_module
 import social_agent
 import lead_engine
 import lead_engine_routes
+import affiliates as affiliates_module
 import asyncio
 
 mongo_url = os.environ['MONGO_URL']
@@ -55,6 +56,7 @@ class Inquiry(BaseModel):
     message: str
     source: Optional[str] = None
     roi_snapshot: Optional[Dict[str, Any]] = None
+    ref_code: Optional[str] = None
     status: str = "new"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -68,6 +70,7 @@ class InquiryCreate(BaseModel):
     message: str
     source: Optional[str] = None
     roi_snapshot: Optional[Dict[str, Any]] = None
+    ref_code: Optional[str] = None
 
 
 class RoiLeadCreate(BaseModel):
@@ -183,6 +186,18 @@ async def create_inquiry(payload: InquiryCreate, request: Request):
     doc['ua'] = request.headers.get("user-agent")
     await db.inquiries.insert_one(doc)
     logger.info(f"New inquiry from {inquiry.email} — {inquiry.service_interest}")
+    # Attach affiliate referral if ref_code is present
+    try:
+        ref_id = await affiliates_module.attach_inquiry_to_affiliate(
+            db, ref_code=payload.ref_code, inquiry=doc
+        )
+        if ref_id:
+            await db.inquiries.update_one(
+                {"id": inquiry.id},
+                {"$set": {"affiliate_referral_id": ref_id}},
+            )
+    except Exception:
+        logger.exception("Affiliate attribution failed (non-fatal)")
     asyncio.create_task(email_client.send_new_lead_notification(doc))
     return inquiry
 
@@ -802,6 +817,10 @@ app.include_router(social_agent.router, prefix="/api")
 lead_engine_routes.attach(db)
 app.include_router(lead_engine_routes.router, prefix="/api")
 
+# Mount the affiliate / partner program routes.
+affiliates_module.attach(db)
+app.include_router(affiliates_module.router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -881,6 +900,11 @@ async def on_startup():
     if os.environ.get("LEAD_ENGINE_ENABLED", "1") == "1":
         asyncio.create_task(lead_engine.lead_discovery_loop(db))
         asyncio.create_task(lead_engine.outreach_dispatch_loop(db))
+    # Affiliate program indexes
+    try:
+        await affiliates_module.ensure_indexes(db)
+    except Exception:
+        logger.exception("Affiliate index seeding failed (non-fatal)")
     logger.info("Admin seeded. Ready.")
 
 

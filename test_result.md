@@ -210,6 +210,119 @@ backend:
           hook_slug present, scheduled_at ~45min from now. The fallback caption mechanism works 
           when LLM fails (uses _fallback_win_caption in social_content_factory.py lines 212-221).
 
+  - task: "Affiliate / Partner Program — applications, ref tracking, commissions"
+    implemented: true
+    working: true
+    file: "/app/backend/affiliates.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          New module affiliates.py + mounted under /api. Implements the full
+          partner / commission program:
+            Public:
+              GET  /api/affiliates/program           — tier table + headline copy
+              POST /api/affiliates/apply             — application form
+              GET  /api/affiliates/track?ref=CODE    — click beacon
+            Admin (requires admin token):
+              GET    /api/admin/affiliates/applications?status=pending|approved|rejected|all
+              POST   /api/admin/affiliates/applications/{id}/approve  -> creates affiliate + ref_code
+              POST   /api/admin/affiliates/applications/{id}/reject
+              GET    /api/admin/affiliates                            -> list + totals
+              GET    /api/admin/affiliates/{id}                        -> referrals + commissions
+              POST   /api/admin/affiliates/{id}/suspend
+              POST   /api/admin/affiliates/referrals/{ref_id}/stage
+              POST   /api/admin/affiliates/referrals/{ref_id}/win      -> client_mrr -> signing+recurring rows
+              POST   /api/admin/affiliates/commissions/run             -> idempotent monthly recurring loop
+              GET    /api/admin/affiliates/commissions/all
+              PATCH  /api/admin/affiliates/commissions/{id}            -> mark paid | void | reopen
+
+          Tier ladder (auto-recomputed from active_clients):
+            Bronze   1-3   = 15 % recurring + 15 % signing bonus
+            Silver   4-9   = 20 %
+            Gold    10-24  = 25 % + $500 milestone (one-shot)
+            Platinum 25+   = 30 % + $2,500 quarterly bonus
+
+          Inquiry attribution: /api/inquiries now accepts optional ref_code
+          and creates an affiliate_referrals row when the code matches an
+          active affiliate.
+
+          Indexes seeded on startup. Uses UUIDs everywhere; nothing relies
+          on Mongo ObjectIds.
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ ALL 13 STEPS PASSED - Complete end-to-end affiliate program testing:
+          
+          Step 1: GET /api/affiliates/program (no auth) - ✅ PASS
+            - Returns 4 tiers (bronze/silver/gold/platinum) with correct structure
+            - Bronze rate=0.15, Platinum rate=0.30 verified
+            - 4 examples array present with correct calculations
+          
+          Step 2: POST /api/affiliates/apply (no auth) - ✅ PASS
+            - Application created with status=pending
+            - Duplicate submission correctly rejected with 409
+          
+          Step 3: POST /api/auth/admin/login - ✅ PASS
+            - Admin login successful, JWT token captured
+          
+          Step 4: GET /api/admin/affiliates/applications?status=pending - ✅ PASS
+            - Pending applications retrieved successfully
+          
+          Step 5: POST /api/admin/affiliates/applications/{id}/approve - ✅ PASS
+            - Application approved, affiliate created
+            - ref_code starts with "BRV-", tier=bronze, rate=0.15 verified
+          
+          Step 6: POST /api/inquiries with ref_code - ✅ PASS
+            - Inquiry created and referral row automatically created
+            - Referral has correct lead_email and stage=referred
+          
+          Step 7: POST /api/admin/affiliates/referrals/{id}/win - ✅ PASS
+            - Referral marked as won with client_mrr=7500
+            - 2 commissions created: signing_bonus + recurring
+            - Both commissions: amount=$1125, percentage=0.15, status=pending
+            - Affiliate stats: active_clients=1, tier=bronze, rate=0.15, total_pending=$2250
+          
+          Step 8: POST /api/admin/affiliates/commissions/run - ✅ PASS
+            - Idempotency verified: inserted=0, skipped=1 (no duplicate commissions)
+          
+          Step 9: GET /api/admin/affiliates/commissions/all?status=pending - ✅ PASS
+            - All pending commissions retrieved
+            - Commissions hydrated with affiliate_name, affiliate_email, affiliate_ref_code
+          
+          Step 10: PATCH /api/admin/affiliates/commissions/{id} - ✅ PASS
+            - Commission marked as paid with payout_method and payout_reference
+            - paid_at timestamp set correctly
+            - Totals updated: totals.paid_out >= $1125, affiliate.total_paid = $1125
+          
+          Step 11: Tier auto-promotion - ✅ PASS
+            - Created 3 additional inquiries with same ref_code
+            - Marked all 3 as won with client_mrr=2500 each
+            - After 4th win: active_clients=4, tier=silver, rate=0.20, tier_name=Silver
+            - 4th win signing_bonus has correct rate: amount=$500, percentage=0.20
+          
+          Step 12: Application rejection - ✅ PASS
+            - New application created and found in pending list
+            - Application rejected successfully with note
+            - Verified in rejected list with status=rejected
+          
+          Step 13: GET /api/affiliates/track?ref={code} - ✅ PASS
+            - Track endpoint returns {ok: true}
+            - Affiliate clicks counter incremented correctly
+          
+          All core functionality verified:
+          - Application flow (submit, approve, reject)
+          - Referral tracking via ref_code in inquiries
+          - Commission calculation (signing bonus + recurring)
+          - Tier auto-promotion based on active_clients
+          - Payment processing and totals tracking
+          - Click tracking beacon
+          - Idempotent commission generation
+          - Proper data hydration in list endpoints
+
   - task: "Hook library seeding + A/B helpers"
     implemented: true
     working: true
@@ -251,19 +364,54 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Phase 1 safety policies — warm-up / cadence / auto-pause"
-    - "Phase 1 admin endpoints (safety + wins + cross-poster)"
-    - "Client-wins recycler loop (queue floor)"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "main"
+    message: |
+      Phase 2 — Affiliate / Partner Program is shipped backend-side.
+      Please verify the new endpoints end-to-end:
+
+        1. GET  /api/affiliates/program (no auth) — must return tiers[]
+           with bronze/silver/gold/platinum and the examples[] block.
+        2. POST /api/affiliates/apply — submit an application
+           {name,email,why_join, ...}; expect 200 and a doc with status=pending.
+           Resubmitting the same email should 409.
+        3. Login admin: POST /api/auth/admin/login
+              email=admin@brivomarketing.com, password=BrivoOps2026!
+        4. GET /api/admin/affiliates/applications?status=pending
+        5. POST /api/admin/affiliates/applications/{id}/approve
+              expect {affiliate:{ref_code:"BRV-...", tier:"bronze", rate:0.15}}.
+        6. POST /api/inquiries with body that includes ref_code=<that code>
+              -> verify a row appears in affiliate_referrals (via
+              GET /api/admin/affiliates/{id} -> referrals[]).
+        7. POST /api/admin/affiliates/referrals/{ref_id}/win
+              { client_mrr: 7500, client_company: "Acme" }
+              -> two commission rows must appear (signing_bonus + recurring),
+              affiliate active_clients=1, tier still bronze, rate 0.15.
+        8. POST /api/admin/affiliates/commissions/run with no body
+              -> response.inserted should be 0 if a row already exists for
+              the current period for the same referral (idempotent).
+        9. PATCH /api/admin/affiliates/commissions/{id} {status:"paid"}
+              -> commission status flips to paid, total_paid is reflected
+              when /api/admin/affiliates is fetched again.
+       10. Win 4 referrals total for the same affiliate so active_clients=4
+              -> tier should auto-promote to silver (rate 0.20).
+       11. GET /api/admin/affiliates/commissions/all?status=pending
+       12. POST /api/admin/affiliates/applications/{id2}/reject
+              for a separate pending app -> status=rejected.
+
+      Important known constraint: EMERGENT_LLM_KEY budget may still be
+      exhausted in this env. The affiliate flow does NOT depend on LLM
+      calls, so it should pass cleanly regardless.
+
   - agent: "main"
     message: |
       Phase 1 shipped. Backend gates every post dispatch through
@@ -320,3 +468,61 @@ agent_communication:
       - Actual: POST /api/agent/pair
       - Review said: POST /api/social/pair
       Tests updated to use actual endpoints.
+
+  - agent: "testing"
+    message: |
+      Phase 2 — Affiliate / Partner Program backend testing COMPLETE.
+      
+      ✅ ALL 13 STEPS PASSED - Full end-to-end verification:
+      
+      1. Program structure (GET /api/affiliates/program) - ✅
+         - 4 tiers with correct rates (bronze 15%, silver 20%, gold 25%, platinum 30%)
+         - 4 examples with correct calculations
+      
+      2. Application submission (POST /api/affiliates/apply) - ✅
+         - Creates application with status=pending
+         - Duplicate detection works (409 on resubmit)
+      
+      3. Admin authentication (POST /api/auth/admin/login) - ✅
+         - JWT token generation working
+      
+      4. Application management - ✅
+         - List pending applications
+         - Approve applications (creates affiliate with ref_code starting with "BRV-")
+         - Reject applications with notes
+      
+      5. Referral tracking - ✅
+         - Inquiries with ref_code automatically create referral rows
+         - Referrals linked to correct affiliate
+         - Stage tracking (referred -> won)
+      
+      6. Commission calculation - ✅
+         - Marking referral as won creates 2 commissions (signing_bonus + recurring)
+         - Correct amounts calculated based on client_mrr and tier rate
+         - Both commissions start with status=pending
+      
+      7. Idempotent commission generation - ✅
+         - POST /api/admin/affiliates/commissions/run doesn't create duplicates
+         - Correctly skips existing commissions for current period
+      
+      8. Commission payment processing - ✅
+         - PATCH endpoint updates status to paid
+         - Sets paid_at timestamp
+         - Updates affiliate totals (total_paid, total_pending)
+         - Updates global totals (totals.paid_out)
+      
+      9. Tier auto-promotion - ✅
+         - Affiliate automatically promoted from bronze to silver after 4th active client
+         - Rate updated from 0.15 to 0.20
+         - New commissions use updated rate
+      
+      10. Click tracking - ✅
+          - GET /api/affiliates/track?ref={code} increments click counter
+          - Returns {ok: true} for valid ref codes
+      
+      11. Data hydration - ✅
+          - Commission list endpoints include affiliate_name, affiliate_email, affiliate_ref_code
+      
+      The affiliate program is fully functional and ready for production.
+      All business logic verified: application flow, referral attribution,
+      commission calculation, tier progression, payment tracking, and analytics.
