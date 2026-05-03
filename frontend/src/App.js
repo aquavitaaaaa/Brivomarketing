@@ -36,6 +36,7 @@ import AdminLeadEngine from "@/pages/AdminLeadEngine";
 import AdminAffiliates from "@/pages/AdminAffiliates";
 import BrandKit from "@/pages/BrandKit";
 import InstagramKit from "@/pages/InstagramKit";
+import IgPromo from "@/pages/IgPromo";
 import PartnersPage from "@/pages/Partners";
 import PairWizard from "@/pages/PairWizard";
 import { trackEvent } from "@/lib/api";
@@ -142,6 +143,7 @@ function App() {
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="/brand-kit" element={<BrandKit />} />
         <Route path="/instagram-kit" element={<InstagramKit />} />
+        <Route path="/ig-promo" element={<IgPromo />} />
         <Route path="/partners" element={<PartnersPage />} />
         <Route path="/pair" element={<PairWizard />} />
         <Route path="*" element={<NotFound />} />

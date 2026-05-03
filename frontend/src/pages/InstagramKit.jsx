@@ -634,13 +634,23 @@ export default function InstagramKit() {
               Real client work
             </span>
           </div>
-          <button
-            onClick={downloadMd}
-            className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-black transition hover:bg-[#d6ff33] md:hidden"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Download everything (.md)
-          </button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to="/ig-promo"
+              data-testid="open-ig-promo"
+              className="inline-flex items-center gap-2 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-black transition hover:bg-[#d6ff33]"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Generate your 15-second Reel video
+            </Link>
+            <button
+              onClick={downloadMd}
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80 transition hover:border-[#CCFF00] hover:text-[#CCFF00] md:hidden"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download everything (.md)
+            </button>
+          </div>
         </div>
       </section>
 
