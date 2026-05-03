@@ -3,17 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * HeroShowcase — Apple/Tesla-tier product hero.
- * A cinematic floating MacBook that auto-rotates through client-work screens,
- * with a companion iPhone mockup floating to its lower-left.
  *
- * The MacBook IS the product. The websites on screen ARE the work.
+ * The MacBook auto-rotates through real client work (Koa, KeeperCache,
+ * InstaLease). The iPhone cycles through paired mobile captures of the
+ * same sites — in lock-step with the laptop when available, otherwise
+ * falls back to its own rotation.
+ *
+ * Zero URLs are rendered on the page. Labels are human-readable.
  */
 
 const SCREENS = [
-  { src: "/mockup-saas.jpg",       label: "SaaS dashboard" },
-  { src: "/mockup-ecom.jpg",       label: "Luxury e-commerce" },
-  { src: "/mockup-agency.jpg",     label: "Creative agency" },
-  { src: "/mockup-restaurant.jpg", label: "Fine dining" },
+  { src: "/portfolio/koa-desktop.jpg",         mobileSrc: "/portfolio/koa-mobile.jpg",         label: "Outdoor hospitality · booking engine" },
+  { src: "/portfolio/keepercache-desktop.jpg", mobileSrc: "/portfolio/keepercache-mobile.jpg", label: "Sports management OS" },
+  { src: "/portfolio/instalease-desktop.jpg",  mobileSrc: "/portfolio/instalease-mobile.jpg",  label: "Premium commercial leasing" },
 ];
 
 const ROTATE_MS = 4200;
@@ -25,6 +27,8 @@ export default function HeroShowcase() {
     const t = setInterval(() => setIdx((i) => (i + 1) % SCREENS.length), ROTATE_MS);
     return () => clearInterval(t);
   }, []);
+
+  const current = SCREENS[idx];
 
   return (
     <div className="hero-showcase" aria-hidden="true" data-testid="hero-showcase">
@@ -45,8 +49,8 @@ export default function HeroShowcase() {
             <div className="hero-macbook-display">
               <AnimatePresence mode="wait">
                 <motion.img
-                  key={SCREENS[idx].src}
-                  src={SCREENS[idx].src}
+                  key={current.src}
+                  src={current.src}
                   alt=""
                   loading="eager"
                   decoding="async"
@@ -78,13 +82,20 @@ export default function HeroShowcase() {
       >
         <div className="hero-iphone-frame">
           <div className="hero-iphone-notch" />
-          <img
-            src="/mockup-mobile.jpg"
-            alt=""
-            loading="eager"
-            decoding="async"
-            className="hero-iphone-img"
-          />
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={current.mobileSrc}
+              src={current.mobileSrc}
+              alt=""
+              loading="eager"
+              decoding="async"
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+              className="hero-iphone-img"
+            />
+          </AnimatePresence>
           <div className="hero-iphone-reflection" />
         </div>
       </motion.div>
@@ -93,7 +104,7 @@ export default function HeroShowcase() {
       <div className="hero-showcase-dots" role="tablist" aria-label="Showcase slides">
         {SCREENS.map((s, i) => (
           <button
-            key={s.src}
+            key={s.src + i}
             type="button"
             onClick={() => setIdx(i)}
             className={`hero-showcase-dot ${i === idx ? "is-active" : ""}`}

@@ -4,12 +4,31 @@ import { MoveHorizontal } from "lucide-react";
 
 /**
  * BeforeAfterSlider — drag/hover reveal of ugly-before vs premium-after.
- * Before is a hand-built CSS mock (proves craft) — After is our real mockup.
+ *
+ * The first case is a REAL side-by-side of a client's prior platform
+ * (captured from their legacy site) against the premium rebuild we shipped.
+ * The following cases are hand-built cluttered recreations of legacy
+ * experiences we've replaced for other verticals.
+ *
+ * Copy intentionally never exposes URLs — only human-readable industry tags.
  */
 
 const CASES = [
   {
+    id: "keepercache",
+    type: "real",
+    afterSrc:  "/portfolio/keepercache-desktop.jpg",
+    beforeSrc: "/portfolio/keeperkonnect-desktop.jpg",
+    tag: "Sports management OS",
+    metrics: [
+      { label: "Signup → activation",  before: "12.4%", after: "47.1%", delta: "+3.8×" },
+      { label: "Tournament creation",  before: "23 min", after: "4 min", delta: "-83%" },
+      { label: "Club retention (90d)", before: "62%",   after: "94%",   delta: "+32 pts" },
+    ],
+  },
+  {
     id: "saas",
+    type: "mock",
     afterSrc: "/mockup-saas.jpg",
     tag: "SaaS platform",
     beforeMeta: { industry: "FinOps Analytics", year: 2013 },
@@ -21,6 +40,7 @@ const CASES = [
   },
   {
     id: "ecom",
+    type: "mock",
     afterSrc: "/mockup-ecom.jpg",
     tag: "Luxury e-commerce",
     beforeMeta: { industry: "Hand-made ceramics", year: 2014 },
@@ -202,9 +222,9 @@ export default function BeforeAfterSlider() {
               Before us. <em className="italic text-[#B8864C]">After us.</em>
             </h2>
             <p className="mt-4 max-w-xl text-[#4E5C6E] text-[16px] leading-relaxed">
-              Drag the handle. This is a real side-by-side — a hand-built recreation of
-              the legacy experience vs the redesigned system we shipped. No stock photos.
-              No smoke and mirrors.
+              Drag the handle. Left is the platform as it shipped before us.
+              Right is what we delivered. Real screens. Real clients. No stock
+              photos, no smoke and mirrors — the difference speaks for itself.
             </p>
           </div>
 
@@ -284,9 +304,18 @@ function Slider({ caseData }) {
 
       {/* BEFORE (clipped) */}
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-        <LegacyMock id={caseData.id} />
+        {caseData.type === "real" && caseData.beforeSrc ? (
+          <img
+            src={caseData.beforeSrc}
+            alt=""
+            className="w-full h-full object-cover object-top"
+            draggable={false}
+          />
+        ) : (
+          <LegacyMock id={caseData.id} />
+        )}
         <div className="absolute top-4 left-4 bg-white text-[#0B1B2B] text-[10px] font-medium tracking-[0.22em] uppercase px-3 py-1.5 rounded-full border border-[#CFC9B8]">
-          Before · Legacy
+          Before · {caseData.type === "real" ? "Legacy platform" : "Legacy"}
         </div>
       </div>
 

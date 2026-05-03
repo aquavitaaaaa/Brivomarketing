@@ -887,3 +887,198 @@ agent_communication:
       - ✅ All public pages (landing, partners, brand-kit) are responsive
       
       NO CRITICAL ISSUES FOUND. All responsive changes are working as intended.
+
+
+# ==========================================================================
+# Follow-up enhancements (2026-05-03) — real portfolio imagery, richer
+# pair-a-host block, Process refresh, 320px regression script
+# ==========================================================================
+
+frontend:
+  - task: "Real client screenshots in hero showcase (MacBook + iPhone cycle)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/site/HeroShowcase.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          Hero MacBook + iPhone now auto-rotate every 4.2s through real client
+          work (captured live from each site — zero URLs rendered to the page):
+            1. Outdoor hospitality · booking engine
+            2. Sports management OS
+            3. Premium commercial leasing
+          Screenshots saved under /app/frontend/public/portfolio/
+          (koa-desktop/mobile.jpg, keepercache-desktop/mobile.jpg,
+          instalease-desktop/mobile.jpg). Dots below the devices let the user
+          jump to a specific slide; data-testid="hero-showcase-dot-{n}".
+
+          Labels on the page are industry tags only — no domain names anywhere.
+          Verified at 1440/390px: hero renders with each slide, crossfade is
+          smooth, iPhone and MacBook stay in lock-step.
+
+  - task: "Before/After transformation uses real legacy vs rebuilt screens"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/site/BeforeAfterSlider.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          First case in the slider is now a REAL side-by-side:
+            - Before: legacy blue-template platform
+            - After:  rebuilt editorial "Sports management OS" (black + lime,
+                      typographic hero, rich imagery)
+          The remaining two cases (SaaS & e-com) keep the hand-built LegacyMock
+          component to illustrate verticals we've also replaced. Case type is
+          flagged as "real" or "mock" and the slider picks the right renderer.
+          The "Before · Legacy" pill updates to "Before · Legacy platform" for
+          real-world cases. Intro copy updated to "real screens. Real clients.
+          No stock photos, no smoke and mirrors."
+
+  - task: "Process section refresh (deliverables + duration + outcome)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/site/Process.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          Same 3-card grid, much richer content per card:
+            - Duration pill (WEEK 1-2 / WEEK 3-8 / ONGOING)
+            - 3 concrete deliverables with checkmarks
+            - Outcome callout with ArrowUpRight icon
+            - Bottom reassurance strip (named senior lead, weekly reviews,
+              fixed fee) across all 3 cards
+          Ambient warm-tone blur behind each card number. Layout stacks on
+          mobile; verified at 390/1440 — no overflow, buttons still tappable.
+
+  - task: "Admin Social — Pair a host block upgrade"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminSocial.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          Rewrote PairFlow from a minimal "generate + copy" widget into a
+          premium 3-phase journey:
+            - Fleet-ready ping indicator + kicker
+            - Editorial title "Turn any Mac, PC, or Linux box into a Brivo
+              posting agent."
+            - 3-step numbered journey (Generate → Paste → Schedule)
+            - 4-cell trust bar (encrypted / no file access / low resource use /
+              revoke in one click)
+            - Expanded code display with Expires chip
+            - OS tabs that also surface the per-OS system requirement
+            - Editorial install-command block (amber $ prompt)
+            - Copy / New code / "I'm done — refresh" actions
+          Preserves ALL original functionality & data-testids
+          (pair-flow, pair-generate, pair-code, pair-os-{mac|win|linux},
+          pair-install-cmd) so no backend contract changed.
+
+  - task: "Responsive regression snapshot script — 320px floor enforced"
+    implemented: true
+    working: "NA"
+    file: "/app/tests/responsive_snapshots.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          New CI-ready Python script at /app/tests/responsive_snapshots.py
+          capturing 9 viewports × 8 routes = 72 checks per run. Hard floor
+          is 320×720 (iPhone SE 1st gen). Script:
+            - Logs into admin with test_credentials.md values
+            - Navigates every public + admin route at every viewport
+            - Asserts document.documentElement.scrollWidth <= window.innerWidth
+            - Captures a JPEG snapshot per (viewport, route)
+            - Writes a JSON report to tests/snapshots/report.json
+            - Exits 1 in --ci mode if any overflow detected
+          Accompanying README at /app/tests/README.responsive.md with
+          usage + GitHub Actions snippet. Dependency footprint is tiny
+          (playwright==1.47.0 + chromium).
+
+          Manual 320px sanity run (via the MCP screenshot tool) confirmed
+          ZERO overflow across all 8 routes:
+            landing, partners, brand-kit, admin-login,
+            admin-dash, admin-leads, admin-social, admin-affiliates.
+
+metadata:
+  last_enhancement:
+    date: "2026-05-03"
+    agent: "main"
+    items:
+      - "real portfolio screenshots wired into hero + before/after"
+      - "Pair-a-host block rewritten"
+      - "Process section refreshed"
+      - "responsive_snapshots.py added for CI"
+    verified_viewports: ["320", "375", "390", "768", "1024", "1440", "1920"]
+    emergent_url_visible_to_user: false
+
+test_plan:
+  current_focus:
+    - "Real client screenshots in hero showcase (MacBook + iPhone cycle)"
+    - "Before/After transformation uses real legacy vs rebuilt screens"
+    - "Process section refresh (deliverables + duration + outcome)"
+    - "Admin Social — Pair a host block upgrade"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Follow-up enhancement pass complete.
+
+      1. Hero showcase now cycles through 3 REAL client screenshots (koa.com,
+         keepercache.customcoded.pro, instalease.net). The MacBook + iPhone
+         stay in lock-step. Auto-rotates every 4.2s. Clickable dots let
+         visitors pick a slide.
+         Files added: /app/frontend/public/portfolio/{koa,keepercache,
+         instalease,keeperkonnect}-{desktop,mobile}.jpg.
+
+      2. The "Before us. After us." slider first case is now a REAL
+         side-by-side of a client's legacy platform (keeperkonnect.app)
+         against the rebuilt version (keepercache.customcoded.pro). The
+         contrast is dramatic — legacy pastel template vs premium editorial
+         black+lime design system. The other two cases still use the
+         hand-built LegacyMock for verticals where we don't have a public
+         legacy screen. Intro copy updated.
+
+      3. Zero URLs or Emergent branding are visible to end users anywhere
+         on the page. Verified programmatically — document.body.innerText
+         does not contain "emergent", and no link/image src exposes a
+         customer domain.
+
+      4. Process landing section refreshed with duration pills, concrete
+         deliverables, outcome callouts, and a reassurance strip.
+
+      5. Admin → Social → "Pair a host" block is now editorial-tier:
+         3-step journey, trust bar, big pair-code display, OS tabs with
+         system requirements, premium install-command block.
+
+      6. /app/tests/responsive_snapshots.py is the 320px regression script
+         for CI. 9 viewports × 8 routes. Exit 1 on any overflow.
+
+      Nothing to re-test on backend — all changes are frontend only and
+      reuse existing APIs/data-testids. Please run a regression on:
+      - data-testid="hero-showcase" (dots + auto-rotate)
+      - data-testid="pair-flow" (new design, still pair-generate/pair-code/
+        pair-os-mac/pair-install-cmd testids intact)
+      - data-testid="process-step-0" (new deliverables/outcome structure)
+      - Before/After slider on landing (drag handle, first case is now real)

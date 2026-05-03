@@ -68,87 +68,194 @@ function PairFlow({ onPaired }) {
   const cmd = installCmds[os];
 
   const tabs = [
-    { id: "mac",   label: "macOS",   icon: Apple   },
-    { id: "win",   label: "Windows", icon: Monitor },
-    { id: "linux", label: "Linux",   icon: Terminal },
+    { id: "mac",   label: "macOS",   icon: Apple,    req: "macOS 12+" },
+    { id: "win",   label: "Windows", icon: Monitor,  req: "Windows 10+" },
+    { id: "linux", label: "Linux",   icon: Terminal, req: "Ubuntu 20+ / Debian 11+" },
   ];
 
   return (
-    <div className="rounded-2xl border border-[#E7E3D8] bg-white p-6" data-testid="pair-flow">
-      <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold mb-3">
-        <Terminal size={14} /> Pair a host
-      </div>
-      <h3 className="font-display text-[22px] font-[500] text-[#0B1B2B] leading-tight">
-        Bring a host online in 60 seconds.
-      </h3>
-      <p className="mt-2 text-[13px] text-[#4E5C6E] max-w-xl">
-        Paste the install command on your spare Mac, ASUS, or Linux box. It installs
-        the agent, registers a boot daemon, and pairs with this dashboard automatically.
-      </p>
+    <div
+      className="relative rounded-2xl border border-[#E7E3D8] bg-white overflow-hidden"
+      data-testid="pair-flow"
+    >
+      {/* Ambient editorial band across the top */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#B8864C] via-[#0B1B2B] to-[#B8864C]" />
 
-      {!code ? (
-        <button
-          onClick={generate}
-          data-testid="pair-generate"
-          className="mt-5 inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[13px] font-medium px-4 py-2.5 rounded-full transition-colors"
-        >
-          <Sparkles size={14} /> Generate pair code
-        </button>
-      ) : (
-        <div className="mt-5 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="font-display text-[34px] tracking-[0.2em] font-[500] text-[#B8864C]" data-testid="pair-code">
-              {code}
-            </div>
-            <span className="text-[11px] text-[#8190A1]">
-              expires {fmtRelative(expiresAt)}
+      <div className="p-6 md:p-7">
+        {/* Fleet status chip */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#E7E3D8] bg-[#FBFAF6] px-3 py-1">
+            <span className="relative inline-flex">
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-[#1E7A36] opacity-70 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#1E7A36]" />
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#0B1B2B]">
+              Fleet ready
             </span>
           </div>
+          <span className="hidden sm:inline font-mono text-[10px] uppercase tracking-[0.22em] text-[#8190A1]">
+            Add hosts · posts · sleep · repeat
+          </span>
+        </div>
 
-          {/* OS tabs */}
-          <div className="flex gap-1 border-b border-[#F3F1EA]">
-            {tabs.map((t) => {
-              const Icon = t.icon;
-              const active = t.id === os;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setOs(t.id)}
-                  className={`relative inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium transition-colors ${active ? "text-[#0B1B2B]" : "text-[#8190A1] hover:text-[#0B1B2B]"}`}
-                  data-testid={`pair-os-${t.id}`}
-                >
-                  <Icon size={12} /> {t.label}
-                  {active && <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-[#B8864C]" />}
-                </button>
-              );
-            })}
-          </div>
+        {/* Kicker */}
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-[#B8864C] font-semibold mb-2">
+          <Terminal size={13} /> Pair a host
+        </div>
 
-          <div className="rounded-xl bg-[#0B1B2B] text-white text-[12px] font-mono p-4 overflow-x-auto" data-testid="pair-install-cmd">
-            {cmd}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => { navigator.clipboard.writeText(cmd); toast.success("Copied"); }}
-              className="inline-flex items-center gap-1.5 bg-white border border-[#E7E3D8] hover:border-[#B8864C] text-[#0B1B2B] text-[12px] font-medium px-3 py-1.5 rounded-full transition-colors"
+        <h3 className="font-display text-[22px] md:text-[26px] font-[500] text-[#0B1B2B] leading-[1.1] tracking-tight">
+          Turn any Mac, PC, or Linux box<br className="hidden sm:inline"/> into a Brivo posting agent.
+        </h3>
+
+        <p className="mt-3 text-[13.5px] text-[#4E5C6E] leading-relaxed max-w-xl">
+          No cloud VMs. No third-party schedulers. The agent runs natively on
+          your own hardware, signs in with your real sessions, and publishes
+          exactly when you tell it to — then idles invisibly between posts.
+        </p>
+
+        {/* 3-step journey */}
+        <ol className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3" data-testid="pair-journey">
+          {[
+            { n: "01", title: "Generate a pair code", body: "6 digits, expires in 15 minutes. One code = one host." },
+            { n: "02", title: "Paste one install line", body: "Auto-installs the agent, registers a boot daemon, self-pairs." },
+            { n: "03", title: "Schedule & sleep", body: "Posts go out on time even with your laptop's lid closed." },
+          ].map((s) => (
+            <li
+              key={s.n}
+              className="relative rounded-xl border border-[#F0ECE0] bg-[#FBFAF6] p-4"
             >
-              <Copy size={12} /> Copy install command
-            </button>
+              <div className="font-mono text-[10px] tracking-[0.28em] text-[#B8864C] font-semibold">
+                {s.n}
+              </div>
+              <div className="mt-1.5 text-[13px] font-semibold text-[#0B1B2B] leading-snug">
+                {s.title}
+              </div>
+              <div className="mt-1 text-[11.5px] text-[#4E5C6E] leading-snug">
+                {s.body}
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {/* Trust bar */}
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10.5px]">
+          {[
+            { label: "End-to-end encrypted", icon: Shield },
+            { label: "No file access",       icon: CheckCircle2 },
+            { label: "~2% CPU · 80MB RAM",   icon: Zap },
+            { label: "Revoke in one click",  icon: X },
+          ].map((t) => {
+            const I = t.icon;
+            return (
+              <div
+                key={t.label}
+                className="inline-flex items-center gap-1.5 text-[#4E5C6E]"
+              >
+                <I size={12} className="text-[#B8864C]" />
+                <span className="truncate">{t.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div className="my-6 h-px bg-[#F0ECE0]" />
+
+        {!code ? (
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={generate}
-              className="inline-flex items-center gap-1.5 text-[12px] text-[#4E5C6E] hover:text-[#0B1B2B] px-3 py-1.5 transition-colors"
+              data-testid="pair-generate"
+              className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[13px] font-medium px-4 py-2.5 rounded-full transition-colors shadow-sm shadow-black/10"
             >
-              <RefreshCw size={12} /> New code
+              <Sparkles size={14} /> Generate pair code
             </button>
-            <button
-              onClick={onPaired}
-              className="inline-flex items-center gap-1.5 ml-auto text-[12px] text-[#4E5C6E] hover:text-[#0B1B2B] px-3 py-1.5"
-            >
-              I'm done — refresh
-            </button>
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-[#8190A1]">
+              6-digit · expires in 15m
+            </span>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-4">
+            {/* Big code display */}
+            <div className="rounded-xl border border-[#E7E3D8] bg-[#FBFAF6] p-4 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <div className="font-mono text-[9.5px] uppercase tracking-[0.28em] text-[#8190A1] mb-1">
+                  Pair code
+                </div>
+                <div
+                  className="font-display text-[34px] sm:text-[40px] tracking-[0.22em] font-[500] text-[#B8864C] leading-none"
+                  data-testid="pair-code"
+                >
+                  {code}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-[#8190A1]">
+                  Expires
+                </div>
+                <div className="text-[12px] text-[#0B1B2B] font-medium">
+                  {fmtRelative(expiresAt)}
+                </div>
+              </div>
+            </div>
+
+            {/* OS tabs */}
+            <div className="flex gap-1 border-b border-[#F3F1EA] overflow-x-auto no-scrollbar">
+              {tabs.map((t) => {
+                const Icon = t.icon;
+                const active = t.id === os;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setOs(t.id)}
+                    className={`relative inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium transition-colors whitespace-nowrap ${
+                      active ? "text-[#0B1B2B]" : "text-[#8190A1] hover:text-[#0B1B2B]"
+                    }`}
+                    data-testid={`pair-os-${t.id}`}
+                  >
+                    <Icon size={12} /> {t.label}
+                    {active && <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-[#B8864C]" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active OS requirement */}
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#8190A1]">
+              Requires · {tabs.find((t) => t.id === os)?.req}
+            </div>
+
+            {/* Install command */}
+            <div
+              className="rounded-xl bg-[#0B1B2B] text-white text-[11.5px] font-mono p-4 overflow-x-auto leading-relaxed"
+              data-testid="pair-install-cmd"
+            >
+              <span className="text-[#B8864C]">$</span> {cmd}
+            </div>
+
+            <div className="flex flex-wrap gap-2 items-center">
+              <button
+                onClick={() => { navigator.clipboard.writeText(cmd); toast.success("Copied"); }}
+                className="inline-flex items-center gap-1.5 bg-[#0B1B2B] text-white text-[12px] font-medium px-3.5 py-2 rounded-full hover:bg-[#14283F] transition-colors"
+              >
+                <Copy size={12} /> Copy install command
+              </button>
+              <button
+                onClick={generate}
+                className="inline-flex items-center gap-1.5 text-[12px] text-[#4E5C6E] hover:text-[#0B1B2B] px-3 py-2 transition-colors"
+              >
+                <RefreshCw size={12} /> New code
+              </button>
+              <button
+                onClick={onPaired}
+                className="inline-flex items-center gap-1.5 ml-auto text-[12px] font-medium text-[#0B1B2B] border border-[#E7E3D8] hover:border-[#B8864C] hover:text-[#B8864C] rounded-full px-3.5 py-2 transition-colors"
+              >
+                <CheckCircle2 size={12} /> I'm done — refresh
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
