@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Navigate, Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import {
-  ArrowLeft,
   Users,
   Inbox,
   DollarSign,
@@ -17,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminNav from "@/components/admin/AdminNav";
 import {
   adminMe,
   fetchAffiliateApplications,
@@ -44,7 +44,6 @@ export default function AdminAffiliates() {
   const [admin, setAdmin] = useState(null);
   const [checked, setChecked] = useState(false);
   const [tab, setTab] = useState("applications");
-  const navigate = useNavigate();
 
   useEffect(() => {
     adminMe()
@@ -67,36 +66,14 @@ export default function AdminAffiliates() {
 
   return (
     <div className="min-h-screen bg-[#bebebe] text-black">
-      <header className="bg-[#0B0B0F] border-b border-black px-6 md:px-10 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/admin"
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white font-mono text-[10px] uppercase tracking-[0.28em]"
-          >
-            <ArrowLeft size={13} /> Control room
-          </Link>
-          <span className="text-white/30">·</span>
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#CCFF00]">
-              / PARTNER PROGRAM
-            </div>
-            <div className="font-display text-xl md:text-2xl font-black uppercase tracking-tight text-white leading-none mt-1">
-              AFFILIATES
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            localStorage.removeItem("brivo_admin_token");
-            navigate("/admin/login");
-          }}
-          className="border border-white/30 text-white/80 hover:border-[#CCFF00] hover:text-[#CCFF00] font-mono text-[10px] uppercase tracking-[0.28em] px-4 py-2.5"
-        >
-          Logout
-        </button>
-      </header>
+      <AdminNav
+        title="AFFILIATES"
+        subtitle="/ PARTNER PROGRAM"
+        current="affiliates"
+        backTo="/admin"
+      />
 
-      <nav className="bg-[#d6d6d6] border-b border-[#9a9a9a] px-6 md:px-10 flex gap-0">
+      <nav className="bg-[#d6d6d6] border-b border-[#9a9a9a] px-4 sm:px-6 md:px-10 flex gap-0 overflow-x-auto no-scrollbar">
         {[
           { id: "applications", label: "Applications", icon: Inbox },
           { id: "affiliates", label: "Active partners", icon: Users },
@@ -108,7 +85,7 @@ export default function AdminAffiliates() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`relative inline-flex items-center gap-2 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.28em] transition-colors ${
+              className={`relative inline-flex items-center gap-2 px-4 sm:px-5 py-3 font-mono text-[11px] uppercase tracking-[0.28em] whitespace-nowrap transition-colors ${
                 active
                   ? "text-black bg-white"
                   : "text-[#5a5a64] hover:text-black hover:bg-white/40"
@@ -122,8 +99,8 @@ export default function AdminAffiliates() {
         })}
       </nav>
 
-      <main className="px-6 md:px-10 py-8 max-w-[1480px] w-full mx-auto">
-        <div className="bg-[#0B0B0F] border border-black p-6 text-white">
+      <main className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1480px] w-full mx-auto">
+        <div className="bg-[#0B0B0F] border border-black p-4 sm:p-6 text-white overflow-x-auto">
           {tab === "applications" && <ApplicationsTab />}
           {tab === "affiliates" && <AffiliatesTab />}
           {tab === "commissions" && <CommissionsTab />}
@@ -318,17 +295,17 @@ function AffiliatesTab() {
               <div key={a.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setActiveId(open ? null : a.id)}
-                  className="w-full flex items-center justify-between gap-4 p-5 hover:bg-white/10 transition-colors text-left"
+                  className="w-full flex items-start md:items-center justify-between gap-4 p-4 sm:p-5 hover:bg-white/10 transition-colors text-left flex-col md:flex-row"
                   data-testid={`affiliate-row-${a.id}`}
                 >
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="flex items-center gap-4 min-w-0 flex-1 w-full">
                     <TierIcon size={20} style={{ color: tier.color }} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-display text-lg text-white">{a.name}</span>
-                        <span className="text-white/45 text-[13px]">{a.email}</span>
+                        <span className="font-display text-base sm:text-lg text-white">{a.name}</span>
+                        <span className="text-white/45 text-[12px] sm:text-[13px] truncate max-w-[200px]">{a.email}</span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1.5">
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <RefBadge code={a.ref_code} compact />
                         <span className="text-white/55 text-[12px]">
                           {a.active_clients} active · {a.total_referred} referred
@@ -336,7 +313,7 @@ function AffiliatesTab() {
                       </div>
                     </div>
                   </div>
-                  <div className="hidden md:flex items-center gap-7 text-right">
+                  <div className="flex md:items-center gap-3 md:gap-7 text-left md:text-right flex-wrap md:flex-nowrap w-full md:w-auto">
                     <div>
                       <div className="text-[10px] uppercase tracking-[0.22em] text-white/45">Tier</div>
                       <div className="font-display text-base" style={{ color: tier.color }}>

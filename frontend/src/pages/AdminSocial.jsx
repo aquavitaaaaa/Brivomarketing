@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Bot, Wifi, WifiOff, Play, X, Sparkles, Copy, Terminal,
+  Bot, Wifi, WifiOff, Play, X, Sparkles, Copy, Terminal,
   CheckCircle2, AlertTriangle, Clock, RefreshCw, Send, Plus, Apple, Monitor,
   Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2,
 } from "lucide-react";
+import AdminNav from "@/components/admin/AdminNav";
 import {
   adminMe, socialDashboard, socialAgents, socialCreatePairCode, socialRevokeAgent,
   socialPosts, socialCreatePost, socialGenerateBatch, socialRunNow, socialCancelPost,
@@ -843,21 +844,18 @@ export default function AdminSocial() {
 
   return (
     <div className="min-h-screen bg-[#FBFAF6] text-[#0B1B2B]">
-      {/* Top bar */}
-      <header className="border-b border-[#E7E3D8] bg-white sticky top-0 z-30">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/admin" className="inline-flex items-center gap-1.5 text-[12.5px] text-[#4E5C6E] hover:text-[#0B1B2B] transition-colors">
-              <ArrowLeft size={13} /> Admin
-            </Link>
-            <span className="text-[#E7E3D8]">·</span>
-            <h1 className="font-display text-[20px] font-[500] text-[#0B1B2B]">Social auto-poster</h1>
-          </div>
-          <div className="flex items-center gap-2">
+      <AdminNav
+        theme="bone"
+        title="Social auto-poster"
+        subtitle="/ CONTENT FACTORY"
+        current="social"
+        backTo="/admin"
+        rightSlot={
+          <>
             <button
               onClick={() => setComposerOpen(true)}
               data-testid="open-composer"
-              className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors whitespace-nowrap shrink-0"
             >
               <Plus size={13} /> New post
             </button>
@@ -865,18 +863,19 @@ export default function AdminSocial() {
               onClick={generateBatch}
               disabled={generating}
               data-testid="generate-batch"
-              className="inline-flex items-center gap-2 bg-[#B8864C] hover:bg-[#C99661] disabled:opacity-50 text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors shadow-sm shadow-[#B8864C]/20"
+              className="inline-flex items-center gap-2 bg-[#B8864C] hover:bg-[#C99661] disabled:opacity-50 text-white text-[12.5px] font-medium px-4 py-2 rounded-full transition-colors shadow-sm shadow-[#B8864C]/20 whitespace-nowrap shrink-0"
             >
               {generating ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
-              Generate next 14 days
+              <span className="hidden sm:inline">Generate next 14 days</span>
+              <span className="sm:hidden">Generate 14d</span>
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <main className="max-w-[1280px] mx-auto px-6 md:px-10 py-10 space-y-10">
+      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-10 py-8 md:py-10 space-y-8 md:space-y-10">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4" data-testid="social-stats">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4" data-testid="social-stats">
           <StatCard label="Hosts online"  value={dash?.agents_online ?? 0} accent testid="stat-online" />
           <StatCard label="Hosts paired"  value={dash?.agents_total  ?? 0} testid="stat-paired" />
           <StatCard label="Queued"        value={dash?.queued        ?? 0} testid="stat-queued" />

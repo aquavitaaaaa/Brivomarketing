@@ -57,6 +57,21 @@ html, body {
 ::-webkit-scrollbar-thumb { background: #D8D3C4; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brivo-accent); }
 
+/* Hide scrollbar utility (used on admin horizontal shelves) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Prevent any horizontal overflow bleed on narrow viewports */
+html, body { max-width: 100%; }
+
+/* Ensure tap targets meet 44px on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button, a[role="button"], .tap-44 {
+    min-height: 44px;
+  }
+}
+
+
 /* Refined small-caps label style (replaces all-mono uppercase) */
 .eyebrow {
   font-family: 'Inter', sans-serif;

@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  ArrowLeft, RefreshCw, Send, Sparkles, Target, Activity,
+  RefreshCw, Send, Sparkles, Target, Activity,
   Search, Inbox, ChevronRight, Plus, Zap, Brain, Cpu, Radio,
   Gauge, TrendingUp, Filter, MessageSquare, AlertTriangle,
 } from "lucide-react";
+import AdminNav from "@/components/admin/AdminNav";
 import {
   adminMe,
   leadsPipeline, leadsList, leadGet, leadDiscoverNow, leadDispatch,
@@ -38,18 +39,18 @@ function TelemetryStrip({ ai, stats }) {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="bg-black text-white px-6 md:px-10 py-2 flex items-center justify-between gap-4 overflow-x-auto">
-      <div className="flex items-center gap-5">
+    <div className="bg-black text-white px-4 sm:px-6 md:px-10 py-2 flex items-center justify-between gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-3 sm:gap-5 shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_8px_#CCFF00]" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-[#CCFF00]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.32em] text-[#CCFF00] whitespace-nowrap">
             AI ENGINE · ONLINE
           </span>
         </div>
-        <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-white/60">
+        <span className="font-mono text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.32em] text-white/60 whitespace-nowrap">
           PIPELINE · {stats?.total ?? 0} LEADS
         </span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-white/60">
+        <span className="font-mono text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.32em] text-white/60 whitespace-nowrap">
           OUTREACH 24H · {stats?.outreach_sent_today ?? 0}
         </span>
         <span className="hidden md:inline font-mono text-[9px] uppercase tracking-[0.32em] text-white/60">
@@ -59,8 +60,8 @@ function TelemetryStrip({ ai, stats }) {
           DISPATCH LOOP · 1M ↻
         </span>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-[#CCFF00]">
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="font-mono text-[9px] uppercase tracking-[0.28em] sm:tracking-[0.32em] text-[#CCFF00]">
           {new Date().toLocaleTimeString(undefined, { hour12: false })}
         </span>
       </div>
@@ -132,43 +133,65 @@ function ScoreBattery({ score = 0, size = "md" }) {
   );
 }
 
-// --- Lead row (Tesla-style)
+// --- Lead row (Tesla-style; mobile-friendly card)
 function LeadRow({ lead, onOpen, onDispatch }) {
   const stage = STAGES.find((s) => s.key === lead.stage);
   return (
     <div
-      className="grid grid-cols-12 gap-2 items-center bg-white hover:bg-[#f5f5f5] border-b border-[#dcdcdc] px-3 py-3 cursor-pointer transition-colors"
+      className="bg-white hover:bg-[#f5f5f5] border-b border-[#dcdcdc] px-3 py-3 cursor-pointer transition-colors"
       onClick={() => onOpen(lead)}
       data-testid={`lead-row-${lead.id}`}
     >
-      <div className="col-span-2">
-        <ScoreBattery score={lead.signal_score} />
-      </div>
-      <div className="col-span-5">
-        <div className="text-sm font-medium text-black line-clamp-1">{lead.title}</div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5a64] mt-1">
-          {lead.subreddit ? `r/${lead.subreddit}` : lead.source} · @{lead.platform_handle || "?"} · {fmt(lead.created_at)}
+      {/* Desktop ≥ md : 12-col grid. Mobile : stacked card. */}
+      <div className="md:grid md:grid-cols-12 md:gap-2 md:items-center">
+        {/* Row 1 (mobile): title + stage pill */}
+        <div className="md:col-span-5 md:order-2">
+          <div className="flex items-start justify-between gap-2 md:block">
+            <div className="text-sm font-medium text-black line-clamp-2 md:line-clamp-1 flex-1">
+              {lead.title}
+            </div>
+            {/* Stage pill — mobile only (inline). Desktop has its own col below. */}
+            <span
+              className={`md:hidden shrink-0 text-[9px] uppercase tracking-[0.22em] font-mono px-2 py-[2px] ${stage?.color || "bg-[#5a5a64] text-white"}`}
+            >
+              {stage?.label || lead.stage}
+            </span>
+          </div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#5a5a64] mt-1 truncate">
+            {lead.subreddit ? `r/${lead.subreddit}` : lead.source} · @{lead.platform_handle || "?"} · {fmt(lead.created_at)}
+          </div>
         </div>
-      </div>
-      <div className="col-span-2">
-        <span className={`inline-block text-[9px] uppercase tracking-[0.22em] font-mono px-2 py-[2px] ${stage?.color || "bg-[#5a5a64] text-white"}`}>
-          {stage?.label || lead.stage}
-        </span>
-      </div>
-      <div className="col-span-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#5a5a64]">
-        {lead.outreach_attempts > 0 ? `${lead.outreach_attempts}× SENT` : "—"}
-      </div>
-      <div className="col-span-2 text-right">
-        {lead.stage === "discovered" && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDispatch(lead); }}
-            className="inline-flex items-center gap-1 bg-[#CCFF00] text-black border border-black font-mono text-[9px] uppercase tracking-[0.22em] px-2 py-1 hover:bg-black hover:text-[#CCFF00] transition-colors"
-            data-testid={`dispatch-${lead.id}`}
-          >
-            <Send size={11} /> DISPATCH
-          </button>
-        )}
-        <ChevronRight size={14} className="inline-block text-[#5a5a64] ml-2" />
+
+        {/* Row 2 (mobile): score battery */}
+        <div className="md:col-span-2 md:order-1 mt-2 md:mt-0">
+          <ScoreBattery score={lead.signal_score} />
+        </div>
+
+        {/* Stage pill — desktop only */}
+        <div className="hidden md:block md:col-span-2 md:order-3">
+          <span className={`inline-block text-[9px] uppercase tracking-[0.22em] font-mono px-2 py-[2px] ${stage?.color || "bg-[#5a5a64] text-white"}`}>
+            {stage?.label || lead.stage}
+          </span>
+        </div>
+
+        {/* Outreach count */}
+        <div className="md:col-span-1 md:order-4 font-mono text-[10px] uppercase tracking-[0.22em] text-[#5a5a64] mt-2 md:mt-0">
+          {lead.outreach_attempts > 0 ? `${lead.outreach_attempts}× sent` : "—"}
+        </div>
+
+        {/* Action — full width button on mobile, aligned right on desktop */}
+        <div className="md:col-span-2 md:order-5 md:text-right mt-3 md:mt-0 flex md:block items-center justify-end gap-2">
+          {lead.stage === "discovered" && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDispatch(lead); }}
+              className="inline-flex items-center gap-1 bg-[#CCFF00] text-black border border-black font-mono text-[9px] uppercase tracking-[0.22em] px-2 py-1.5 hover:bg-black hover:text-[#CCFF00] transition-colors"
+              data-testid={`dispatch-${lead.id}`}
+            >
+              <Send size={11} /> DISPATCH
+            </button>
+          )}
+          <ChevronRight size={14} className="inline-block text-[#5a5a64] md:ml-2" />
+        </div>
       </div>
     </div>
   );
@@ -359,17 +382,22 @@ function OutreachJobs() {
         <p className="px-4 py-6 text-xs text-[#5a5a64] italic">No jobs yet. Discover or import leads to start.</p>
       )}
       {jobs.slice(0, 10).map((j) => (
-        <div key={j.id} className="px-4 py-3 border-b border-[#dcdcdc] grid grid-cols-12 gap-2 text-xs">
-          <div className="col-span-2 font-mono text-[10px] text-[#5a5a64]">{fmt(j.created_at)}</div>
-          <div className="col-span-1 font-mono text-[10px] uppercase text-black">{j.channel}</div>
-          <div className="col-span-1 font-mono text-[10px]">
+        <div
+          key={j.id}
+          className="px-4 py-3 border-b border-[#dcdcdc] md:grid md:grid-cols-12 md:gap-2 text-xs"
+        >
+          <div className="md:col-span-2 font-mono text-[10px] text-[#5a5a64]">{fmt(j.created_at)}</div>
+          <div className="md:col-span-1 font-mono text-[10px] uppercase text-black mt-1 md:mt-0">
+            {j.channel}
+          </div>
+          <div className="md:col-span-1 font-mono text-[10px] mt-1 md:mt-0">
             <span className={`px-1.5 py-[1px] uppercase tracking-[0.18em] ${
               j.status === "sent" ? "bg-[#1E7A36] text-white" :
               j.status === "failed" ? "bg-[#8B0000] text-white" :
               "bg-[#9C5314] text-white"
             }`}>{j.status}</span>
           </div>
-          <div className="col-span-8 text-black/85 line-clamp-2">{j.body}</div>
+          <div className="md:col-span-8 text-black/85 line-clamp-3 md:line-clamp-2 mt-2 md:mt-0">{j.body}</div>
         </div>
       ))}
     </div>
@@ -542,29 +570,17 @@ export default function AdminLeadEngine() {
     <div className="min-h-screen bg-[#bebebe] text-black" data-testid="admin-lead-engine">
       <TelemetryStrip stats={stats} />
 
-      {/* Top bar */}
-      <header className="sticky top-0 z-20 border-b border-[#9a9a9a] bg-[#d6d6d6]/95 backdrop-blur-md">
-        <div className="px-6 md:px-10 py-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 text-black hover:text-[#5a5a64] font-mono text-[10px] uppercase tracking-[0.32em]"
-              data-testid="back-to-admin"
-            >
-              <ArrowLeft size={13} /> CONTROL ROOM
-            </Link>
-            <div className="border-l border-black pl-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-[#5a5a64]">/ AUTONOMOUS ACQUISITION</div>
-              <div className="font-display text-xl md:text-2xl font-black uppercase tracking-tight leading-none mt-1 text-black">
-                LEAD ENGINE
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
+      <AdminNav
+        title="LEAD ENGINE"
+        subtitle="/ AUTONOMOUS ACQUISITION"
+        current="leads"
+        backTo="/admin"
+        rightSlot={
+          <>
             <button
               onClick={autoQualify}
               disabled={busyQualify}
-              className="inline-flex items-center gap-2 bg-black text-[#CCFF00] border border-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 hover:bg-[#CCFF00] hover:text-black transition-colors disabled:opacity-40"
+              className="inline-flex items-center gap-2 bg-black text-[#CCFF00] border border-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 hover:bg-[#CCFF00] hover:text-black transition-colors disabled:opacity-40 whitespace-nowrap shrink-0"
               data-testid="auto-qualify-btn"
             >
               {busyQualify ? <RefreshCw size={12} className="animate-spin" /> : <Brain size={12} />}
@@ -573,7 +589,7 @@ export default function AdminLeadEngine() {
             <button
               onClick={discover}
               disabled={busyDiscover}
-              className="inline-flex items-center gap-2 bg-[#CCFF00] text-black border border-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 hover:bg-black hover:text-[#CCFF00] transition-colors disabled:opacity-40"
+              className="inline-flex items-center gap-2 bg-[#CCFF00] text-black border border-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 hover:bg-black hover:text-[#CCFF00] transition-colors disabled:opacity-40 whitespace-nowrap shrink-0"
               data-testid="discover-now-btn"
             >
               {busyDiscover ? <RefreshCw size={12} className="animate-spin" /> : <Search size={12} />}
@@ -582,23 +598,16 @@ export default function AdminLeadEngine() {
             <QuickImport onImported={refresh} />
             <button
               onClick={refresh}
-              className="inline-flex items-center gap-2 border border-[#5a5a64] text-[#5a5a64] hover:border-black hover:text-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 transition-colors"
+              className="inline-flex items-center gap-2 border border-[#5a5a64] text-[#5a5a64] hover:border-black hover:text-black font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 transition-colors whitespace-nowrap shrink-0"
               data-testid="pipeline-refresh-btn"
             >
               <RefreshCw size={12} /> REFRESH
             </button>
-            <Link
-              to="/admin/social"
-              className="hidden md:inline-flex items-center gap-2 border border-black text-black hover:bg-black hover:text-white font-mono text-[10px] uppercase tracking-[0.28em] px-3 py-2.5 transition-colors"
-              data-testid="link-social"
-            >
-              <Send size={12} /> AUTO-POSTER
-            </Link>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <main className="px-6 md:px-10 py-6 max-w-[1480px] mx-auto">
+      <main className="px-4 sm:px-6 md:px-10 py-6 max-w-[1480px] mx-auto">
         {/* ANALYTICS ROW */}
         <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.32em] text-[#5a5a64] flex items-center gap-2">
           <TrendingUp size={11} /> PERFORMANCE · 7-DAY
@@ -641,7 +650,7 @@ export default function AdminLeadEngine() {
 
         {/* Lead list */}
         <div className="border border-[#9a9a9a] bg-white" data-testid="lead-list">
-          <div className="grid grid-cols-12 gap-2 px-3 py-2 border-b border-[#9a9a9a] font-mono text-[9px] uppercase tracking-[0.32em] text-[#5a5a64] bg-[#ececec]">
+          <div className="hidden md:grid grid-cols-12 gap-2 px-3 py-2 border-b border-[#9a9a9a] font-mono text-[9px] uppercase tracking-[0.32em] text-[#5a5a64] bg-[#ececec]">
             <div className="col-span-2">SIGNAL</div>
             <div className="col-span-5">TITLE / SOURCE</div>
             <div className="col-span-2">STAGE</div>
