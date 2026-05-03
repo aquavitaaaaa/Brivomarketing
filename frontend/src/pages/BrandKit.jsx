@@ -203,6 +203,14 @@ export default function BrandKit() {
               >
                 <FileDown size={15} /> Download the lookbook · PDF
               </a>
+              <Link
+                to="/instagram-kit"
+                data-testid="brand-kit-ig-launch"
+                className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] text-[#CCFF00] px-6 py-3 rounded-full text-[14px] font-medium transition-colors shadow-lg"
+              >
+                <Instagram size={15} /> Instagram Launch Kit
+                <span className="text-[10px] uppercase tracking-[0.2em] bg-[#CCFF00] text-black px-2 py-0.5 rounded-full ml-1">NEW</span>
+              </Link>
               <span className="text-[12px] text-[#8190A1]">
                 17 pages · 8 MB · full press kit with URLs
               </span>

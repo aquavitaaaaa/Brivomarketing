@@ -47,7 +47,7 @@ into a GitHub Action or similar:
     pip install playwright==1.47.0
     playwright install chromium --with-deps
     python3 tests/responsive_snapshots.py \
-      --base-url https://admin-panel-launch.preview.emergentagent.com \
+      --base-url https://bio-boost-7.preview.emergentagent.com \
       --ci
 ```
 

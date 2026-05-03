@@ -9,6 +9,7 @@ import {
   Send,
   Users,
   Palette,
+  Instagram,
   ArrowLeft,
 } from "lucide-react";
 
@@ -70,6 +71,7 @@ export default function AdminNav({
     { key: "social", to: "/admin/social", label: "Auto-Poster", icon: Send },
     { key: "affiliates", to: "/admin/affiliates", label: "Partners", icon: Users },
     { key: "brandkit", to: "/brand-kit", label: "Brand Kit", icon: Palette },
+    { key: "instagramkit", to: "/instagram-kit", label: "Instagram Kit", icon: Instagram },
   ];
 
   const chrome =
