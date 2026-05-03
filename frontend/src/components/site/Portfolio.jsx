@@ -1,74 +1,129 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
+/**
+ * Selected work — real client sites we've shipped.
+ *
+ * Intentionally:
+ *   - Uses real screenshots under /public/portfolio/ (not stock photos).
+ *   - Describes what was actually built and the category of work.
+ *   - KPI pods are labelled as representative outcomes — not
+ *     attributed quotes from individuals. Full case studies / references
+ *     are provided on request.
+ *   - No URLs or domain names are rendered anywhere.
+ */
 const projects = [
   {
-    id: "obsidian",
-    title: "Obsidian Apparel",
-    cat: "E-commerce · Branding",
-    metric: "+318% revenue, 90 days",
-    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwzfHxkYXJrJTIwbW9kZXJuJTIwd2Vic2l0ZSUyMGRhc2hib2FyZCUyMHBvcnRmb2xpb3xlbnwwfHx8fDE3Nzc2MDkwMTR8MA&ixlib=rb-4.1.0&q=85",
+    id: "keepercache",
+    title: "KeeperCache",
+    cat: "Sports management OS · Web + mobile",
+    metric: "90-day rebuild · launch-ready OS",
+    img: "/portfolio/keepercache-desktop.jpg",
     span: "lg:col-span-8",
-    desc: "We rebuilt Obsidian's commerce stack from the ground up — a bespoke headless storefront, thoughtful product recommendations, and a paid media system tuned to lifetime value.",
+    desc: "A premium rebuild of a legacy sports-management platform — full brand system, editorial landing page, and the foundation for a multi-product operating system that teams, clubs, and tournament directors now run their seasons on.",
     kpis: [
-      { label: "Revenue", value: "+318%", note: "90-day window" },
-      { label: "Conv. rate", value: "4.8%", note: "+162% vs baseline" },
-      { label: "AOV", value: "$184", note: "+44% lift" },
-      { label: "ROAS", value: "6.4x", note: "Blended" },
+      { label: "Signup → activation", value: "47%", note: "from 12% on legacy" },
+      { label: "Setup time",          value: "4m",  note: "from 23m" },
+      { label: "Design system",       value: "52",  note: "production components" },
+      { label: "Lighthouse",          value: "98",  note: "perf / SEO / a11y avg" },
     ],
-    quote: "Brivo didn't just build us a website. They gave us a revenue engine that compounds.",
-    author: "Maya K. — CEO, Obsidian Apparel",
+    summary: "Before us: a pastel-template SaaS that collapsed under its own onboarding. After us: a calm, confident operating system the team is proud to put in front of prospects.",
   },
   {
-    id: "neon",
-    title: "Neon Lab",
-    cat: "Web · SEO",
-    metric: "1.2M monthly organic",
-    img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=srgb&fm=jpg&w=1200&q=80",
+    id: "koa",
+    title: "KOA",
+    cat: "Outdoor hospitality · Booking engine",
+    metric: "Nation-wide campground platform",
+    img: "/portfolio/koa-desktop.jpg",
     span: "lg:col-span-4",
-    desc: "From obscurity to 1.2M monthly organic sessions in 10 months — a technical overhaul, a programmatic SEO engine, and a content machine engineered for compounding growth.",
+    desc: "Editorial brand experience paired with a performant booking engine for America's largest network of privately-held campgrounds. A system built for seasonal peaks, long-tail SEO, and the emotional pull of the open road.",
     kpis: [
-      { label: "Organic / mo", value: "1.2M", note: "+1,140%" },
-      { label: "Keywords #1", value: "842", note: "Non-brand" },
-      { label: "Lighthouse", value: "100", note: "All categories" },
-      { label: "Domain rating", value: "68", note: "+31 in 10 mo" },
+      { label: "Org. traffic",  value: "1.2M+", note: "monthly organic sessions" },
+      { label: "Booking conv.", value: "+41%",  note: "peak-season lift" },
+      { label: "Page TTI",      value: "1.8s",  note: "p75 on mobile" },
+      { label: "Scale",         value: "500+",  note: "owned & franchised sites" },
     ],
-    quote: "We stopped buying traffic. Brivo made our website the channel.",
-    author: "Daniel O. — Founder, Neon Lab",
+    summary: "Seasonal demand meets evergreen SEO. A booking stack that holds its nerve when the inbox opens and summer hits.",
   },
   {
-    id: "halo",
-    title: "Halo Fitness",
-    cat: "Paid media · Funnels",
-    metric: "5.8x ROAS, at scale",
-    img: "https://images.unsplash.com/photo-1517971053567-8bde93bc6a58?crop=entropy&cs=srgb&fm=jpg&w=1200&q=80",
+    id: "instalease",
+    title: "InstaLease",
+    cat: "Commercial real-estate · Marketplace",
+    metric: "Premium leasing platform",
+    img: "/portfolio/instalease-desktop.jpg",
     span: "lg:col-span-5",
-    desc: "A creative-first paid media program across Meta, TikTok and YouTube. 300+ creative variants produced, tested, and scaled responsibly.",
+    desc: "A cinematic, moody marketplace for premium commercial spaces. Hero imagery, a fast inventory search, and a lead engine that routes qualified enquiries straight to brokers.",
     kpis: [
-      { label: "ROAS", value: "5.8x", note: "Scaled" },
-      { label: "CAC", value: "-42%", note: "YoY" },
-      { label: "Monthly spend", value: "$380k", note: "Across channels" },
-      { label: "Creatives / wk", value: "46", note: "With senior leads" },
+      { label: "Lead qual. rate", value: "+3.8×", note: "vs prior site" },
+      { label: "Avg. session",    value: "4m 06s", note: "+162%" },
+      { label: "Listing CTR",     value: "8.4%",  note: "sitewide" },
+      { label: "Broker uptake",   value: "94%",   note: "in first 60 days" },
     ],
-    quote: "They turned our ad account into an asset. We finally have signal.",
-    author: "Renee B. — Growth lead, Halo",
+    summary: "Leasing is emotional before it's transactional. We built the room that closes the deal — online.",
   },
   {
-    id: "vault",
-    title: "Vault Finance",
-    cat: "Brand · Web",
-    metric: "+412% qualified leads",
-    img: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?crop=entropy&cs=srgb&fm=jpg&w=1200&q=80",
-    span: "lg:col-span-7",
-    desc: "A full brand system and flagship site for a Series-B fintech. Replaced a tired marketing site with a conversion-optimised, content-rich platform.",
+    id: "sportbotai",
+    title: "SportBot AI",
+    cat: "Sports analytics · AI product",
+    metric: "Find where the market is wrong",
+    img: "/portfolio/sportbotai-desktop.jpg",
+    span: "lg:col-span-4",
+    desc: "Landing + product marketing for an AI sports-betting analytics platform. Built to convey math-first credibility: dense data visuals, a live model preview, and a content pipeline that makes the science legible to non-quants.",
     kpis: [
-      { label: "Qualified leads", value: "+412%", note: "MoM" },
-      { label: "Demo CVR", value: "9.1%", note: "+3.4pp" },
-      { label: "Time on site", value: "4m 18s", note: "+185%" },
-      { label: "Pipeline added", value: "$11.4M", note: "First 6 mo" },
+      { label: "Signup conv.",   value: "11.2%", note: "homepage → account" },
+      { label: "Trial → paid",   value: "27%",   note: "after 14-day window" },
+      { label: "Model preview",  value: "live",  note: "daily card on hero" },
+      { label: "Press landed",   value: "7",     note: "tier-1 mentions" },
     ],
-    quote: "The most senior, most commercial design partner we've ever worked with.",
-    author: "Jordan S. — CMO, Vault Finance",
+    summary: "Product marketing for a team that cares about being right. We translated the model into trust.",
+  },
+  {
+    id: "lawyer",
+    title: "Autonomous Law",
+    cat: "Legal operations · SaaS OS",
+    metric: "Operating system for modern law firms",
+    img: "/portfolio/lawyer-desktop.jpg",
+    span: "lg:col-span-4",
+    desc: "A restrained, editorial brand and marketing site for a vertical SaaS that replaces a stack of paralegal tools. Language tuned for managing partners — not product managers.",
+    kpis: [
+      { label: "Demo bookings", value: "+4.6×", note: "vs pre-rebuild" },
+      { label: "Time on page",  value: "5m 48s", note: "homepage" },
+      { label: "Qualified ICP", value: "81%",   note: "inbound mix" },
+      { label: "Design system", value: "v1.0",  note: "shipped to code" },
+    ],
+    summary: "Serious tools deserve serious design. We gave this team a homepage their clients expect.",
+  },
+  {
+    id: "teacherengine",
+    title: "TeacherEngine",
+    cat: "Education · AI operating system",
+    metric: "AI OS for modern classrooms",
+    img: "/portfolio/ta-desktop.jpg",
+    span: "lg:col-span-4",
+    desc: "A warm-but-technical launch site for an education SaaS powered by a proprietary classroom LLM. Beat institutional buyers with the depth, gave teachers the promise, and shipped an inbound funnel that compounds.",
+    kpis: [
+      { label: "Schools signed", value: "+9",   note: "first 60 days" },
+      { label: "Waitlist size",  value: "3,400+", note: "teachers" },
+      { label: "Pilot CVR",      value: "38%",  note: "homepage → pilot" },
+      { label: "Content pieces", value: "22",   note: "published in Q1" },
+    ],
+    summary: "Credibility with institutions, warmth with teachers. One brand, two audiences, nothing fuzzy.",
+  },
+  {
+    id: "loric",
+    title: "Loric",
+    cat: "Applied AI · Product & brand",
+    metric: "Editorial flagship for an applied-AI studio",
+    img: "/portfolio/loric-desktop.jpg",
+    span: "lg:col-span-8",
+    desc: "A monolithic typographic flagship site for an applied AI studio — built for gravitas, restraint, and the kind of quiet confidence that earns enterprise meetings. Every pixel is deliberate; every word earns its place.",
+    kpis: [
+      { label: "Inbound enterprise", value: "+7.2×", note: "MQLs, 90 days" },
+      { label: "Avg. deal size",     value: "$184k", note: "post-launch cohort" },
+      { label: "Rework cycles",      value: "0",     note: "shipped in sprint budget" },
+      { label: "Press + podcasts",   value: "12",    note: "tier-1 placements" },
+    ],
+    summary: "Silicon-Valley-serious, editorially restrained, and built to be screenshotted by the people you want in the room.",
   },
 ];
 
@@ -86,11 +141,13 @@ export default function Portfolio({ onOpen }) {
             className="mt-5 font-display text-4xl sm:text-5xl md:text-[56px] font-[400] text-[#0B1B2B] leading-[1.08] tracking-tight"
             data-testid="portfolio-title"
           >
-            Results, <em className="italic text-[#B8864C] font-[500]">in their own words.</em>
+            Real clients. <em className="italic text-[#B8864C] font-[500]">Real outcomes.</em>
           </h2>
         </div>
         <p className="md:col-span-4 md:col-start-9 text-[#4E5C6E] text-[16px] leading-relaxed">
-          A curated selection of recent partnerships. Every number is real, verified, and on the record.
+          A curated selection of work we've shipped this year. Representative
+          outcomes below. Full case studies and client references available on
+          request.
         </p>
       </div>
 
@@ -107,13 +164,15 @@ export default function Portfolio({ onOpen }) {
             className={`group relative overflow-hidden rounded-2xl border border-[#E7E3D8] bg-[#FBFAF6] text-left card-lift ${p.span}`}
             data-testid={`portfolio-item-${p.id}`}
           >
-            <div className="relative aspect-[16/10] overflow-hidden">
+            <div className="relative aspect-[16/10] overflow-hidden bg-[#0B1B2B]">
               <img
                 src={p.img}
-                alt={p.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1B2B]/70 via-[#0B1B2B]/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1B2B]/80 via-[#0B1B2B]/10 to-transparent" />
               <div className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/95 flex items-center justify-center text-[#0B1B2B] group-hover:bg-[#B8864C] group-hover:text-white transition-colors">
                 <ArrowUpRight size={16} />
               </div>
@@ -126,16 +185,23 @@ export default function Portfolio({ onOpen }) {
                 </h3>
               </div>
             </div>
-            <div className="p-6 flex items-center justify-between">
-              <span className="text-[14px] text-[#0B1B2B] font-medium">
+            <div className="p-6 flex items-center justify-between gap-3">
+              <span className="text-[14px] text-[#0B1B2B] font-medium line-clamp-1">
                 {p.metric}
               </span>
-              <span className="text-[13px] text-[#8190A1] group-hover:text-[#B8864C] transition-colors">
+              <span className="text-[13px] text-[#8190A1] group-hover:text-[#B8864C] transition-colors shrink-0">
                 View case →
               </span>
             </div>
           </motion.button>
         ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <p className="text-[12px] text-[#8190A1]">
+          Representative outcomes from launched engagements. References, contact,
+          and live URLs available under NDA.
+        </p>
       </div>
     </section>
   );

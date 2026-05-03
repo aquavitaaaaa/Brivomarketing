@@ -16,6 +16,10 @@ const SCREENS = [
   { src: "/portfolio/koa-desktop.jpg",         mobileSrc: "/portfolio/koa-mobile.jpg",         label: "Outdoor hospitality · booking engine" },
   { src: "/portfolio/keepercache-desktop.jpg", mobileSrc: "/portfolio/keepercache-mobile.jpg", label: "Sports management OS" },
   { src: "/portfolio/instalease-desktop.jpg",  mobileSrc: "/portfolio/instalease-mobile.jpg",  label: "Premium commercial leasing" },
+  { src: "/portfolio/sportbotai-desktop.jpg",  mobileSrc: "/portfolio/sportbotai-mobile.jpg",  label: "AI sports analytics" },
+  { src: "/portfolio/lawyer-desktop.jpg",      mobileSrc: "/portfolio/lawyer-mobile.jpg",      label: "Legal operations OS" },
+  { src: "/portfolio/ta-desktop.jpg",          mobileSrc: "/portfolio/ta-mobile.jpg",          label: "Education operating system" },
+  { src: "/portfolio/loric-desktop.jpg",       mobileSrc: "/portfolio/loric-mobile.jpg",       label: "Applied AI platform" },
 ];
 
 const ROTATE_MS = 4200;

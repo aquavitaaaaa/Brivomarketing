@@ -107,6 +107,15 @@ export default function CaseStudyModal({ open, project, onClose, onCTA }) {
                 </p>
               )}
 
+              {/* Summary — short editorial line, rendered when no testimonial quote exists */}
+              {project.summary && !project.quote && (
+                <div className="mt-8 p-6 md:p-8 border-l-4 border-[#B8864C] bg-[#FBFAF6] rounded-r-xl">
+                  <p className="font-display text-[20px] md:text-[24px] italic font-[400] leading-snug text-[#0B1B2B]">
+                    {project.summary}
+                  </p>
+                </div>
+              )}
+
               {/* Quote */}
               {project.quote && (
                 <div className="mt-10 p-6 md:p-8 border-l-4 border-[#B8864C] bg-[#FBFAF6] rounded-r-xl">
