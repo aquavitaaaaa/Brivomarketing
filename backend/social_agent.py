@@ -257,6 +257,77 @@ async def admin_cancel_post(post_id: str, admin=Depends(get_current_admin)):
     return {"ok": True}
 
 
+@router.get("/admin/social/posts/{post_id}/preview")
+async def admin_preview_post(post_id: str, admin=Depends(get_current_admin)):
+    """Dry-run preview: return exactly what the Playwright agent would post
+    to each platform (no network I/O, no DB mutation). Lets admin eyeball
+    the final output before a host is even paired."""
+    db = router.db  # type: ignore[attr-defined]
+    post = await db.social_posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(404, "Post not found")
+
+    caption = (post.get("caption") or "").strip()
+    image_url = post.get("image_url")
+    video_url = post.get("video_url")
+    platforms = post.get("platforms") or []
+
+    previews = []
+    for plat in platforms:
+        if plat == "x":
+            body = caption
+            if len(body) > 280:
+                body = body[:277].rsplit(" ", 1)[0] + "…"
+            previews.append({
+                "platform": "x",
+                "character_count": len(body),
+                "character_limit": 280,
+                "rendered_body": body,
+                "attachment": image_url or video_url,
+                "warnings": (["Truncated to 280 chars"] if len(caption) > 280 else []),
+                "looks_like": "thread-free single tweet",
+            })
+        elif plat == "instagram":
+            previews.append({
+                "platform": "instagram",
+                "character_count": len(caption),
+                "character_limit": 2200,
+                "rendered_body": caption,
+                "attachment": image_url or video_url,
+                "warnings": ([] if (image_url or video_url) else ["Instagram requires media — post will fail without an image/video"]),
+                "looks_like": "feed post (no carousel)",
+            })
+        elif plat == "linkedin":
+            previews.append({
+                "platform": "linkedin",
+                "character_count": len(caption),
+                "character_limit": 3000,
+                "rendered_body": caption,
+                "attachment": image_url or video_url,
+                "warnings": [],
+                "looks_like": "text update" + (" with image" if image_url else ""),
+            })
+        else:
+            previews.append({
+                "platform": plat,
+                "character_count": len(caption),
+                "character_limit": None,
+                "rendered_body": caption,
+                "attachment": image_url or video_url,
+                "warnings": ["Unknown platform — handler may not exist"],
+                "looks_like": "generic",
+            })
+
+    return {
+        "post_id": post_id,
+        "scheduled_at": post.get("scheduled_at"),
+        "theme": post.get("theme"),
+        "previews": previews,
+        "agent_required": True,
+        "dry_run": True,
+    }
+
+
 @router.get("/admin/social/jobs")
 async def admin_list_jobs(limit: int = Query(50, ge=1, le=200), admin=Depends(get_current_admin)):
     db = router.db  # type: ignore[attr-defined]

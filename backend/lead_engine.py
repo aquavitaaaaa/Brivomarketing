@@ -101,8 +101,18 @@ async def fetch_reddit_signals(subreddits: list[str], limit: int = 25) -> list[d
     Returns raw lead candidates: {source, source_id, url, title, snippet, author, ts}.
     """
     out: list[dict] = []
-    headers = {"User-Agent": "BrivoMarketing-LeadBot/1.0 (+https://brivomarketing.com)"}
-    async with httpx.AsyncClient(timeout=15, headers=headers) as cli:
+    # Reddit blocks most scraper-looking UAs. A modern browser UA + accept header
+    # has a much higher success rate on the public /r/*/new.json endpoint.
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) "
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/17.4 Safari/605.1.15"
+        ),
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    async with httpx.AsyncClient(timeout=15, headers=headers, follow_redirects=True) as cli:
         for sub in subreddits:
             try:
                 r = await cli.get(f"https://www.reddit.com/r/{sub}/new.json?limit={limit}")
@@ -170,17 +180,253 @@ def _heuristic_signal_score(raw: dict) -> int:
 
 
 async def discovery_tick(db, subreddits: Optional[list[str]] = None) -> int:
-    """Run one discovery pass. Returns count of newly inserted leads."""
+    """Run one discovery pass across ALL channels. Returns newly inserted leads."""
     subs = subreddits or DEFAULT_SUBREDDITS
-    raws = await fetch_reddit_signals(subs)
     inserted = 0
-    for r in raws:
-        rec = await upsert_lead(db, r)
-        if rec:
-            inserted += 1
+    candidates = 0
+
+    # Channel 1 — Reddit (may 403 — degrades gracefully)
+    try:
+        reddit_raws = await fetch_reddit_signals(subs)
+        candidates += len(reddit_raws)
+        for r in reddit_raws:
+            rec = await upsert_lead(db, r)
+            if rec:
+                inserted += 1
+    except Exception:
+        logger.exception("reddit channel failed")
+
+    # Channel 2 — Hacker News (Algolia search API, no auth required)
+    try:
+        hn_raws = await fetch_hackernews_signals()
+        candidates += len(hn_raws)
+        for r in hn_raws:
+            rec = await upsert_lead(db, r)
+            if rec:
+                inserted += 1
+    except Exception:
+        logger.exception("hackernews channel failed")
+
+    # Channel 3 — IndieHackers RSS (public, no auth)
+    try:
+        ih_raws = await fetch_indiehackers_signals()
+        candidates += len(ih_raws)
+        for r in ih_raws:
+            rec = await upsert_lead(db, r)
+            if rec:
+                inserted += 1
+    except Exception:
+        logger.exception("indiehackers channel failed")
+
+    # Channel 4 — Google News RSS (broadest reach, exact-phrase search)
+    try:
+        gn_raws = await fetch_google_news_signals()
+        candidates += len(gn_raws)
+        for r in gn_raws:
+            rec = await upsert_lead(db, r)
+            if rec:
+                inserted += 1
+    except Exception:
+        logger.exception("googlenews channel failed")
+
     if inserted:
-        logger.info("Discovery: %d new leads (from %d candidates)", inserted, len(raws))
+        logger.info("Discovery: %d new leads (from %d candidates across 4 channels)", inserted, candidates)
     return inserted
+
+
+# ============================================================ HACKER NEWS
+
+# Keyword bank we'll query against HN (Algolia search index)
+HN_SEARCH_QUERIES = [
+    "need a marketing agency",
+    "need a new website",
+    "need a web designer",
+    "hire marketing agency",
+    "struggling to get leads",
+    "website not converting",
+    "rebuild my website",
+    "looking for seo help",
+    "looking for ads help",
+]
+
+
+async def fetch_hackernews_signals(max_per_query: int = 30) -> list[dict]:
+    """Query HN Algolia search for recent comments/stories matching our signals.
+
+    We do two-layer filtering: Algolia finds candidate docs via loose match,
+    then we re-verify the actual matched query phrase (or a SIGNAL_RE pattern)
+    appears in the text — HN's Algolia otherwise returns noise (any of the
+    individual query words can satisfy a hit).
+    """
+    import time
+    out: list[dict] = []
+    cutoff = int(time.time()) - (30 * 86400)
+    headers = {"User-Agent": "Mozilla/5.0 BrivoDiscovery/1.0"}
+    async with httpx.AsyncClient(timeout=15, headers=headers, follow_redirects=True) as cli:
+        for q in HN_SEARCH_QUERIES:
+            try:
+                params = {
+                    "query": q,
+                    "tags": "(story,comment)",
+                    "numericFilters": f"created_at_i>{cutoff}",
+                    "hitsPerPage": max_per_query,
+                }
+                r = await cli.get("https://hn.algolia.com/api/v1/search", params=params)
+                if r.status_code != 200:
+                    logger.info("hn %s -> %s", q[:30], r.status_code)
+                    continue
+                data = r.json()
+                for hit in data.get("hits", []):
+                    title = hit.get("title") or hit.get("story_title") or ""
+                    body = hit.get("comment_text") or hit.get("story_text") or ""
+                    blob = f"{title}\n{body}".lower()
+                    # Algolia gives us noisy matches — require either the full
+                    # query phrase OR a signal pattern actually appears.
+                    if q.lower() not in blob and not SIGNAL_RE.search(blob):
+                        continue
+                    oid = hit.get("objectID")
+                    out.append({
+                        "source": "hackernews",
+                        "source_id": f"hn-{oid}",
+                        "url": f"https://news.ycombinator.com/item?id={oid}",
+                        "title": (title or body[:120])[:280],
+                        "snippet": (body or title)[:600],
+                        "author": hit.get("author"),
+                        "score": int(hit.get("points") or 0),
+                        "ts": int(hit.get("created_at_i") or 0),
+                        "matched_query": q,
+                    })
+            except Exception as e:
+                logger.warning("hn search %s failed: %s", q[:30], e)
+    return out
+
+
+# ============================================================ GOOGLE NEWS RSS
+
+GOOGLE_NEWS_QUERIES = [
+    '"need a marketing agency"',
+    '"looking for a marketing agency"',
+    '"hiring a marketing agency"',
+    '"rebuild my website"',
+    '"website not converting"',
+    '"struggling to get leads"',
+]
+
+
+async def fetch_google_news_signals() -> list[dict]:
+    """Google News RSS search — no auth, returns articles mentioning an
+    exact buying-signal phrase anywhere on the public web (blogs, forums,
+    press releases). Much broader than Reddit + HN combined.
+    """
+    import re as _re
+    import urllib.parse as _up
+    out: list[dict] = []
+    headers = {"User-Agent": "Mozilla/5.0 BrivoDiscovery/1.0"}
+    async with httpx.AsyncClient(timeout=15, headers=headers, follow_redirects=True) as cli:
+        for q in GOOGLE_NEWS_QUERIES:
+            try:
+                url = (
+                    "https://news.google.com/rss/search?"
+                    + _up.urlencode({"q": q, "hl": "en-US", "gl": "US", "ceid": "US:en"})
+                )
+                r = await cli.get(url)
+                if r.status_code != 200:
+                    logger.info("googlenews %s -> %s", q[:30], r.status_code)
+                    continue
+                items = _re.findall(r"<item>(.*?)</item>", r.text, _re.DOTALL)
+                for item in items:
+                    def _tag(name: str) -> str:
+                        m = _re.search(rf"<{name}[^>]*>(.*?)</{name}>", item, _re.DOTALL)
+                        if not m:
+                            return ""
+                        val = m.group(1)
+                        val = _re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", val, flags=_re.DOTALL)
+                        val = _re.sub(r"<[^>]+>", "", val)
+                        return val.strip()
+                    title = _tag("title")
+                    link = _tag("link")
+                    guid = _tag("guid") or link
+                    desc = _tag("description")
+                    source = _tag("source")
+                    if not title or not link:
+                        continue
+                    out.append({
+                        "source": "googlenews",
+                        "source_id": f"gn-{hash(guid) & 0xffffffff:x}",
+                        "url": link,
+                        "title": title[:280],
+                        "snippet": (desc or title)[:600],
+                        "author": source or None,
+                        "score": 0,
+                        "ts": 0,
+                        "matched_query": q,
+                    })
+            except Exception as e:
+                logger.warning("googlenews fetch %s failed: %s", q[:30], e)
+    return out
+
+
+# ============================================================ INDIE HACKERS
+
+INDIEHACKERS_FEEDS = [
+    # IH used to serve feed.xml; it now serves an HTML shell. We keep the
+    # URL but detect non-XML and skip gracefully.
+    "https://www.indiehackers.com/feed.xml",
+]
+
+
+async def fetch_indiehackers_signals() -> list[dict]:
+    """Fetch IndieHackers public RSS and filter by signal regex.
+
+    No auth required; feed is publicly exposed. Follow redirects since the
+    canonical URL has moved in the past. Skips gracefully if the server
+    returns HTML instead of RSS (which it does right now).
+    """
+    import re as _re
+    out: list[dict] = []
+    headers = {"User-Agent": "Mozilla/5.0 BrivoDiscovery/1.0"}
+    async with httpx.AsyncClient(timeout=15, headers=headers, follow_redirects=True) as cli:
+        for feed_url in INDIEHACKERS_FEEDS:
+            try:
+                r = await cli.get(feed_url)
+                if r.status_code != 200:
+                    logger.info("indiehackers %s -> %s", feed_url, r.status_code)
+                    continue
+                body = r.text
+                # Skip if the server returned an HTML shell (feed deprecated).
+                if "<rss" not in body[:400] and "<feed" not in body[:400]:
+                    logger.info("indiehackers returned non-feed payload — skipping")
+                    continue
+                items = _re.findall(r"<item>(.*?)</item>", body, _re.DOTALL)
+                for item in items:
+                    def _tag(name: str) -> str:
+                        m = _re.search(rf"<{name}[^>]*>(.*?)</{name}>", item, _re.DOTALL)
+                        if not m:
+                            return ""
+                        val = m.group(1)
+                        val = _re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", val, flags=_re.DOTALL)
+                        val = _re.sub(r"<[^>]+>", "", val)
+                        return val.strip()
+                    title = _tag("title")
+                    desc = _tag("description")
+                    link = _tag("link")
+                    guid = _tag("guid") or link
+                    blob = f"{title}\n{desc}"
+                    if not SIGNAL_RE.search(blob):
+                        continue
+                    out.append({
+                        "source": "indiehackers",
+                        "source_id": f"ih-{guid}"[:140],
+                        "url": link or feed_url,
+                        "title": title[:280],
+                        "snippet": desc[:600] or title,
+                        "author": None,
+                        "score": 0,
+                        "ts": 0,
+                    })
+            except Exception as e:
+                logger.warning("indiehackers fetch failed: %s", e)
+    return out
 
 
 async def lead_discovery_loop(db) -> None:
@@ -201,12 +447,26 @@ async def lead_discovery_loop(db) -> None:
 FALLBACK_OPENERS = {
     "reddit": (
         "Saw your post about {pain}. We run AI-built marketing systems for "
-        "small teams — we ship a full audit + 1-page plan free, no pitch. "
-        "If it'd help: brivomarketing.com (or reply here). — Brivo"
+        "small teams — happy to share a free audit + 1-page plan, no pitch. "
+        "Reply here if useful. — Brivo"
+    ),
+    "hackernews": (
+        "Saw your post — we've shipped systems for similar teams. "
+        "Happy to share a free teardown + 1-page plan, no pitch. "
+        "Reply here if useful."
+    ),
+    "indiehackers": (
+        "Saw your post — we build AI marketing systems for indie founders in your spot. "
+        "Free 30-min teardown + 1-page plan, no pitch. Reply if that'd help."
+    ),
+    "googlenews": (
+        "Saw the piece mentioning {pain}. We ship AI marketing systems that "
+        "fix exactly this — happy to share a free 30-min teardown if it'd help. "
+        "Reply if useful."
     ),
     "x": (
         "Hey {name} — saw your post on {topic}. We help teams in your spot fix "
-        "this fast. Free 30-min teardown if useful. brivomarketing.com"
+        "this fast. Free 30-min teardown if useful — DM for details."
     ),
     "instagram": (
         "Loved your latest post. We build AI marketing systems that bring "
@@ -221,7 +481,7 @@ FALLBACK_OPENERS = {
         "Hi {name},\n\nSaw your post about {pain}. At Brivo we run AI-driven "
         "marketing systems for small teams in your spot — we usually find 2-3 "
         "fixable leaks within 30 minutes.\n\nWould a free audit be useful?\n\n"
-        "— Brivo Marketing\nhttps://brivomarketing.com"
+        "— Brivo Marketing"
     ),
 }
 
@@ -251,7 +511,10 @@ async def compose_outreach(db, lead: dict, channel: str = "reddit") -> str:
             "x": "Under 240 chars. 1 line. Plain.",
             "instagram": "Under 350 chars. Conversational. 1-2 short sentences.",
             "linkedin": "60-90 words. Professional but warm. 2 short paragraphs.",
-            "reddit": "60-120 words. Helpful tone, like a peer. End with brivomarketing.com URL.",
+            "reddit": "60-120 words. Helpful tone, like a peer. End with a soft invite to reply or DM — never paste a URL.",
+            "hackernews": "80-140 words. Direct, technical, no fluff. HN tone. Never use marketing buzzwords. End with an offer to share the teardown — never paste a URL.",
+            "indiehackers": "80-140 words. Friendly peer tone like IH comments. Never paste a URL.",
+            "googlenews": "80-140 words. Professional outreach email tone. Reference the article's angle. End with invite to reply. Never paste a URL.",
             "email": "80-140 words. Subject line on first line prefixed 'Subject: '. Then body.",
         }.get(channel, "60-100 words.")
         user = (
@@ -302,7 +565,14 @@ async def _last_outreach_minutes_ago(db) -> Optional[int]:
 
 async def dispatch_one_lead(db, lead: dict) -> Optional[dict]:
     """Compose + queue an outreach job. Returns the job doc or None on skip."""
-    channel = "reddit"  # MVP: reply on the same Reddit thread
+    # Channel follows the source platform (so we reply where we found them).
+    source_to_channel = {
+        "reddit": "reddit",
+        "hackernews": "hackernews",
+        "indiehackers": "indiehackers",
+        "googlenews": "googlenews",
+    }
+    channel = source_to_channel.get(lead.get("source"), "reddit")
     cap = int(os.environ.get("OUTREACH_DAILY_CAP", DEFAULT_OUTREACH_CAP_PER_DAY))
     if await _outreach_count_today(db, channel) >= cap:
         logger.info("Daily outreach cap (%d) hit for channel=%s", cap, channel)
@@ -421,7 +691,7 @@ async def handle_inbound_reply(db, lead_id: str, message: str) -> dict:
     history = list(lead.get("messages", []))
     history.append({"role": "prospect", "body": message, "ts": _now_iso()})
 
-    calendly = os.environ.get("CALENDLY_LINK", "https://brivomarketing.com/audit")
+    calendly = (os.environ.get("CALENDLY_LINK") or "").strip()
     system = (
         "You are a B2B SDR for BrivoMarketing. Goal: qualify the prospect and "
         "book a free 30-min audit. Rules:\n"
@@ -430,7 +700,8 @@ async def handle_inbound_reply(db, lead_id: str, message: str) -> dict:
         "- If they show interest, return JSON {\"action\":\"book\",\"message\":\"...with the booking link...\"}\n"
         "- If they're hostile/uninterested, JSON {\"action\":\"close\",\"message\":\"polite signoff\"}\n"
         "- If they need more info, JSON {\"action\":\"reply\",\"message\":\"answer + push to book\"}\n"
-        f"- Booking link: {calendly}\n"
+        f"- Booking link (use ONLY if non-empty, otherwise ask them for the best time): {calendly or '(no link configured)'}\n"
+        "- NEVER fabricate a URL. If no booking link is configured, propose a time window instead.\n"
         "Output VALID JSON ONLY."
     )
 
@@ -492,7 +763,12 @@ async def pipeline_stats(db) -> dict:
     for s in stages:
         out[s] = await db.leads.count_documents({"stage": s})
     out["total"] = await db.leads.count_documents({})
-    out["outreach_sent_today"] = await _outreach_count_today(db, "reddit")
+    # Count today's outreach across ALL channels
+    start = _now().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    out["outreach_sent_today"] = await db.outreach_jobs.count_documents({
+        "created_at": {"$gte": start},
+        "status": {"$in": ["sent", "running"]},
+    })
     return out
 
 

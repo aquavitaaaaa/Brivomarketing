@@ -4,13 +4,13 @@ import { toast } from "sonner";
 import {
   Bot, Wifi, WifiOff, Play, X, Sparkles, Copy, Terminal,
   CheckCircle2, AlertTriangle, Clock, RefreshCw, Send, Plus, Apple, Monitor,
-  Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2,
+  Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2, Eye,
 } from "lucide-react";
 import AdminNav from "@/components/admin/AdminNav";
 import {
   adminMe, socialDashboard, socialAgents, socialCreatePairCode, socialRevokeAgent,
   socialPosts, socialCreatePost, socialGenerateBatch, socialRunNow, socialCancelPost,
-  socialJobs,
+  socialJobs, socialPreviewPost,
   socialSafetySummary, socialPauseAgent, socialUnpauseAgent,
   socialListWins, socialCreateWin, socialDeleteWin,
   socialRecycleNow, socialCrossPost,
@@ -465,7 +465,7 @@ function JobDetailModal({ job, onClose }) {
 }
 
 // ---------- Posts queue --------------------------------------------------
-function PostsQueue({ posts, onRunNow, onCancel }) {
+function PostsQueue({ posts, onRunNow, onCancel, onPreview }) {
   return (
     <div className="rounded-2xl border border-[#E7E3D8] bg-white overflow-hidden" data-testid="posts-queue">
       <div className="px-6 py-4 border-b border-[#F3F1EA] flex items-center justify-between">
@@ -521,6 +521,13 @@ function PostsQueue({ posts, onRunNow, onCancel }) {
                 <td className="px-3 py-3 text-[#4E5C6E] capitalize">{p.theme || "—"}</td>
                 <td className="px-3 py-3 text-[#8190A1] text-[11.5px] whitespace-nowrap">{fmtRelative(p.scheduled_at)}</td>
                 <td className="px-6 py-3 text-right whitespace-nowrap">
+                  <button
+                    onClick={() => onPreview(p)}
+                    className="inline-flex items-center gap-1 text-[11px] text-[#4E5C6E] hover:underline mr-3"
+                    data-testid={`preview-${p.id}`}
+                  >
+                    <Eye size={11} /> Preview
+                  </button>
                   {(p.status === "queued" || p.status === "scheduled") && (
                     <>
                       <button
@@ -544,6 +551,106 @@ function PostsQueue({ posts, onRunNow, onCancel }) {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+// ---------- Preview modal (dry-run) -----------------------------------------
+function PreviewModal({ post, onClose }) {
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!post) { setPreview(null); return; }
+    setLoading(true);
+    socialPreviewPost(post.id)
+      .then(setPreview)
+      .catch(() => toast.error("Preview failed"))
+      .finally(() => setLoading(false));
+  }, [post]);
+
+  if (!post) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 sm:p-8"
+      onClick={onClose}
+      data-testid="preview-modal"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-3xl bg-white rounded-2xl border border-[#E7E3D8] shadow-2xl"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F1EA]">
+          <div className="flex items-center gap-2">
+            <Eye size={16} className="text-[#B8864C]" />
+            <div>
+              <div className="text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold">
+                Dry-run preview
+              </div>
+              <div className="text-[11px] text-[#8190A1]">
+                Exactly what the host will publish · no network call
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-[#8190A1] hover:text-[#0B1B2B]"
+            data-testid="preview-close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {loading && <div className="text-[13px] text-[#8190A1]">Rendering previews…</div>}
+          {preview && (
+            <div className="space-y-4">
+              {preview.previews.map((pv) => {
+                const conf = PLATFORM_PILL[pv.platform] || { label: pv.platform, bg: "bg-gray-300", fg: "text-black" };
+                const over = pv.character_limit && pv.character_count > pv.character_limit;
+                return (
+                  <div key={pv.platform} className="border border-[#E7E3D8] rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#FBFAF6] border-b border-[#F3F1EA]">
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${conf.bg} ${conf.fg}`}>
+                        {conf.label}
+                      </span>
+                      <span className={`text-[11px] font-mono ${over ? "text-[#9A2424]" : "text-[#8190A1]"}`}>
+                        {pv.character_count}{pv.character_limit ? ` / ${pv.character_limit}` : ""}
+                      </span>
+                    </div>
+                    <div className="p-4 text-[13.5px] text-[#0B1B2B] whitespace-pre-wrap leading-relaxed">
+                      {pv.rendered_body}
+                    </div>
+                    {pv.attachment && (
+                      <div className="px-4 pb-4">
+                        <img
+                          src={pv.attachment}
+                          alt=""
+                          className="w-full max-h-64 object-cover rounded-lg border border-[#E7E3D8]"
+                        />
+                      </div>
+                    )}
+                    <div className="px-4 pb-3 text-[10.5px] uppercase tracking-wider text-[#8190A1]">
+                      Renders as: {pv.looks_like}
+                    </div>
+                    {(pv.warnings || []).length > 0 && (
+                      <div className="px-4 pb-4 space-y-1">
+                        {pv.warnings.map((w, i) => (
+                          <div key={i} className="flex items-start gap-2 text-[12px] text-[#9A2424]">
+                            <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+                            {w}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -887,6 +994,7 @@ export default function AdminSocial() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [activeJob, setActiveJob] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [previewPost, setPreviewPost] = useState(null);
 
   const reload = useCallback(async () => {
     try {
@@ -981,6 +1089,40 @@ export default function AdminSocial() {
       />
 
       <main className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-10 py-8 md:py-10 space-y-8 md:space-y-10">
+        {/* Agent-offline banner — critical: no host online but posts queued */}
+        {dash && dash.agents_online === 0 && dash.queued > 0 && (
+          <div
+            className="rounded-2xl border border-[#9A2424]/40 bg-gradient-to-r from-[#FAE0E0] to-[#FBF3EC] p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4"
+            data-testid="agent-offline-banner"
+          >
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-10 h-10 rounded-full bg-[#9A2424]/15 flex items-center justify-center flex-shrink-0">
+                <WifiOff size={18} className="text-[#9A2424]" />
+              </div>
+              <div>
+                <div className="text-[13px] font-semibold text-[#9A2424] uppercase tracking-wider">
+                  No host online — {dash.queued} post{dash.queued === 1 ? "" : "s"} stalled
+                </div>
+                <div className="text-[12.5px] text-[#4E5C6E] mt-0.5">
+                  The auto-poster is running, but posts will not publish until you pair a Mac, Windows, or Linux host below.
+                  {dash.agents_total > 0 && ` ${dash.agents_total} host${dash.agents_total === 1 ? "" : "s"} paired but offline.`}
+                </div>
+              </div>
+            </div>
+            <a
+              href="#pair-flow"
+              onClick={(e) => {
+                e.preventDefault();
+                document.querySelector('[data-testid="pair-flow"]')?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-1.5 bg-[#0B1B2B] hover:bg-[#14283F] text-white text-[12.5px] font-medium px-4 py-2 rounded-full whitespace-nowrap"
+              data-testid="banner-pair-cta"
+            >
+              Pair a host now →
+            </a>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4" data-testid="social-stats">
           <StatCard label="Hosts online"  value={dash?.agents_online ?? 0} accent testid="stat-online" />
@@ -1006,7 +1148,7 @@ export default function AdminSocial() {
         </div>
 
         {/* Queue */}
-        <PostsQueue posts={posts} onRunNow={runNow} onCancel={cancel} />
+        <PostsQueue posts={posts} onRunNow={runNow} onCancel={cancel} onPreview={setPreviewPost} />
 
         {/* Recent jobs */}
         {jobs.length > 0 && (
@@ -1037,6 +1179,7 @@ export default function AdminSocial() {
 
       <Composer open={composerOpen} onClose={() => setComposerOpen(false)} onCreated={reload} />
       <JobDetailModal job={activeJob} onClose={() => setActiveJob(null)} />
+      <PreviewModal post={previewPost} onClose={() => setPreviewPost(null)} />
     </div>
   );
 }

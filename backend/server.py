@@ -657,8 +657,7 @@ async def chat(payload: ChatRequest, request: Request):
         reply_text = (
             "Thanks for reaching out. Our AI is briefly recharging — "
             "in the meantime, the fastest path is a free 30-min audit. "
-            "Reply with your email or hit the contact form at brivomarketing.com "
-            "and a real human will follow up within a few hours."
+            "Drop your email here and a real human will follow up within a few hours."
         )
 
     asst_msg = ChatMessage(session_id=session_id, role="assistant", content=reply_text)

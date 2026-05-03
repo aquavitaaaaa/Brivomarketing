@@ -229,6 +229,36 @@ backend start).
     - `GET  /api/admin/leads/analytics`    — funnel + rates + 7d outreach
   Route ordering fix: literal routes declared before /{lead_id} dynamic.
   34/34 backend tests pass.
+- 2026-05-03 — **Backend hardening pass + URL-leak scrub + multi-channel
+  lead engine + dry-run preview** (DONE — P0).
+  `server.py`, `lead_engine.py`, `social.py` scrubbed of all
+  `brivomarketing.com` / `.ai` hardcoded URLs in user-facing fallbacks
+  (chat handoff, fallback openers, cross-poster templates). Chat fallback
+  now ends with "drop your email here" — zero TLD leaks.
+  Lead discovery expanded from Reddit-only (403-blocked) to **4 channels**:
+  Reddit (degraded, kept for future OAuth upgrade), Hacker News (Algolia
+  API, exact-phrase re-filter), IndieHackers (graceful skip — feed
+  deprecated), **Google News RSS** (biggest producer — returned 48 new
+  leads in single pass during smoke test). `discovery_tick` now iterates
+  channels independently with per-channel try/except so one source failing
+  doesn't kill the run. Source→channel mapping ensures outreach replies
+  on the platform where the lead was found. `pipeline_stats` now counts
+  outreach across ALL channels, not just Reddit.
+  New endpoint: `GET /api/admin/social/posts/{id}/preview` — dry-run
+  renders exactly what the Playwright agent WILL publish (per-platform
+  char counts, truncation warnings, missing-media warnings, attachment
+  preview) with zero network I/O. Admin can eyeball final output before
+  pairing any Mac/Win/Linux host.
+  Frontend: `AdminSocial.jsx` now shows a loud red-bordered
+  `agent-offline-banner` at the top when `agents_online === 0 &&
+  queued > 0` — surfaces the "posts stalled" state operators would
+  otherwise miss. Every queued post has a Preview button opening the
+  dry-run modal.
+  Tests: fixed 3 stale backend tests (public `GET /inquiries` switched
+  to admin endpoint; chat continuity now `pytest.skip`s gracefully in
+  LLM-fallback mode). Added `test_autoposter.py` (6 tests — pair-code,
+  content generation, URL-leak scrubbing, dry-run preview, chat-fallback
+  guardrail). **81 passed, 2 skipped, 0 failed.**
 
 ## Backlog (Phase 2 → 4)
 - **P1 Phase 2 — Engagement Flywheel**: Auto-DM responder using paired

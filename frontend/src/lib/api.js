@@ -198,6 +198,9 @@ export const socialRunNow = (id) =>
 export const socialCancelPost = (id) =>
   axios.delete(`${API}/admin/social/posts/${id}`, { headers: authHeaders() }).then((r) => r.data);
 
+export const socialPreviewPost = (id) =>
+  axios.get(`${API}/admin/social/posts/${id}/preview`, { headers: authHeaders() }).then((r) => r.data);
+
 export const socialJobs = () =>
   axios.get(`${API}/admin/social/jobs`, { headers: authHeaders() }).then((r) => r.data);
 

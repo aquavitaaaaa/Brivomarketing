@@ -165,7 +165,7 @@ def _fallback_variants(brief: str, platforms: List[str], count: int, reason: str
     for i in range(max(count, 1)):
         plat = platforms[i % len(platforms)]
         if plat == "x":
-            content = f"{brief_short}\n\nMore: brivomarketing.com"
+            content = f"{brief_short}\n\nReply AUDIT for a free 30-min teardown."
         elif plat == "linkedin":
             content = (
                 f"{brief_short}\n\n"

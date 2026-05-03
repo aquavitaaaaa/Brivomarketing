@@ -265,6 +265,11 @@ def test_chat_reflects_default_agent_prompt(auth):
         )
         assert rc.status_code == 200, rc.text
         reply = rc.json()["reply"].strip()
+        # If the LLM is in fallback (budget exhausted), we can't validate
+        # prompt swap behaviour — chat is returning the graceful handoff instead.
+        if "recharging" in reply.lower():
+            import pytest as _pt
+            _pt.skip("LLM in fallback mode — prompt swap cannot be validated")
         # Soft check: reply should start with AGENT-OK:
         assert reply.startswith("AGENT-OK:"), f"prompt swap not reflected: {reply[:120]!r}"
     finally:
