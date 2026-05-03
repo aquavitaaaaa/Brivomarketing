@@ -359,23 +359,31 @@ export default function IgPromo() {
                   </div>
                 </div>
 
-                {/* SCENE 4 — portfolio carousel */}
+                {/* SCENE 4 — portfolio carousel (mobile shots in device frame) */}
                 <div className="scene scene-4">
                   <div className="reel-card reel-card-1">
-                    <img src="/portfolio/koa-desktop.jpg" alt="" />
+                    <div className="reel-device">
+                      <img src="/portfolio/koa-mobile.jpg" alt="" />
+                    </div>
                     <div className="reel-card-label">Outdoor hospitality</div>
                   </div>
                   <div className="reel-card reel-card-2">
-                    <img src="/portfolio/keepercache-desktop.jpg" alt="" />
+                    <div className="reel-device">
+                      <img src="/portfolio/keepercache-mobile.jpg" alt="" />
+                    </div>
                     <div className="reel-card-label">Sports management OS</div>
                   </div>
                   <div className="reel-card reel-card-3">
-                    <img src="/portfolio/instalease-desktop.jpg" alt="" />
+                    <div className="reel-device">
+                      <img src="/portfolio/instalease-mobile.jpg" alt="" />
+                    </div>
                     <div className="reel-card-label">Commercial leasing</div>
                   </div>
                   <div className="reel-card reel-card-4">
-                    <img src="/portfolio/sportbotai-desktop.jpg" alt="" />
-                    <div className="reel-card-label">AI sports platform</div>
+                    <div className="reel-device">
+                      <img src="/portfolio/loric-mobile.jpg" alt="" />
+                    </div>
+                    <div className="reel-card-label">Luxury brand</div>
                   </div>
                 </div>
 
@@ -585,58 +593,93 @@ export default function IgPromo() {
         }
         .reel-card {
           position: absolute;
-          inset: 10% 8%;
-          border-radius: 18px;
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.15);
-          box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(204,255,0,0.15);
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 50px 60px 90px;
+          gap: 18px;
           opacity: 0;
-          transform: scale(1.1);
         }
-        .reel-card img {
-          width: 100%; height: 100%; object-fit: cover;
+        .reel-device {
+          width: 100%;
+          max-height: 100%;
+          aspect-ratio: 9 / 19.5;
+          border: 2px solid rgba(255,255,255,0.18);
+          border-radius: 28px;
+          overflow: hidden;
+          background: #000;
+          box-shadow:
+            0 30px 80px rgba(0,0,0,0.55),
+            0 0 50px rgba(204,255,0,0.22),
+            inset 0 0 0 1px rgba(204,255,0,0.1);
+          position: relative;
+        }
+        .reel-device::before {
+          /* phone notch */
+          content: "";
+          position: absolute;
+          top: 8px; left: 50%;
+          transform: translateX(-50%);
+          width: 60px; height: 14px;
+          background: #000;
+          border-radius: 999px;
+          z-index: 2;
+        }
+        .reel-device img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          object-position: top center;
+          display: block;
         }
         .reel-card-label {
-          position: absolute;
-          left: 16px; bottom: 16px;
-          padding: 8px 14px;
-          background: rgba(0,0,0,0.7);
+          padding: 8px 16px;
+          background: rgba(0,0,0,0.75);
           backdrop-filter: blur(8px);
-          border: 1px solid rgba(204,255,0,0.3);
+          border: 1px solid rgba(204,255,0,0.35);
           border-radius: 999px;
-          font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+          font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
           color: #CCFF00; font-weight: 600;
+          white-space: nowrap;
         }
-        .reel-card-1 { animation: card1 15s ease infinite; }
-        .reel-card-2 { animation: card2 15s ease infinite; }
-        .reel-card-3 { animation: card3 15s ease infinite; }
-        .reel-card-4 { animation: card4 15s ease infinite; }
+        .reel-card-1 { animation: cardFade 15s ease infinite; }
+        .reel-card-2 { animation: cardFade 15s ease infinite; animation-delay: 0s; }
+        .reel-card-3 { animation: cardFade 15s ease infinite; animation-delay: 0s; }
+        .reel-card-4 { animation: cardFade 15s ease infinite; animation-delay: 0s; }
+
+        /* Each card has its own keyframes — only differs in the visibility window. */
+        .reel-card-1 { animation-name: card1; }
+        .reel-card-2 { animation-name: card2; }
+        .reel-card-3 { animation-name: card3; }
+        .reel-card-4 { animation-name: card4; }
+
         @keyframes card1 {
-          0%, 33% { opacity: 0; transform: scale(1.15); }
+          0%, 33% { opacity: 0; transform: scale(1.04); }
           35%     { opacity: 1; transform: scale(1); }
-          40%     { opacity: 1; transform: scale(1.04); }
-          42%     { opacity: 0; transform: scale(1.08); }
+          40%     { opacity: 1; transform: scale(1.015); }
+          42%     { opacity: 0; transform: scale(1.03); }
           100%    { opacity: 0; }
         }
         @keyframes card2 {
-          0%, 41% { opacity: 0; transform: scale(1.15) translateX(40px); }
-          43%     { opacity: 1; transform: scale(1) translateX(0); }
-          48%     { opacity: 1; transform: scale(1.04) translateX(0); }
-          50%     { opacity: 0; transform: scale(1.08) translateX(-40px); }
+          0%, 41% { opacity: 0; transform: scale(1.04); }
+          43%     { opacity: 1; transform: scale(1); }
+          48%     { opacity: 1; transform: scale(1.015); }
+          50%     { opacity: 0; transform: scale(1.03); }
           100%    { opacity: 0; }
         }
         @keyframes card3 {
-          0%, 49% { opacity: 0; transform: scale(1.15) translateX(40px); }
-          51%     { opacity: 1; transform: scale(1) translateX(0); }
-          56%     { opacity: 1; transform: scale(1.04) translateX(0); }
-          58%     { opacity: 0; transform: scale(1.08) translateX(-40px); }
+          0%, 49% { opacity: 0; transform: scale(1.04); }
+          51%     { opacity: 1; transform: scale(1); }
+          56%     { opacity: 1; transform: scale(1.015); }
+          58%     { opacity: 0; transform: scale(1.03); }
           100%    { opacity: 0; }
         }
         @keyframes card4 {
-          0%, 57% { opacity: 0; transform: scale(1.15) translateX(40px); }
-          59%     { opacity: 1; transform: scale(1) translateX(0); }
-          63%     { opacity: 1; transform: scale(1.04) translateX(0); }
-          65%     { opacity: 0; transform: scale(1.08) translateX(-40px); }
+          0%, 57% { opacity: 0; transform: scale(1.04); }
+          59%     { opacity: 1; transform: scale(1); }
+          63%     { opacity: 1; transform: scale(1.015); }
+          65%     { opacity: 0; transform: scale(1.03); }
           100%    { opacity: 0; }
         }
 
