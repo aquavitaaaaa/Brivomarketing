@@ -1,11 +1,11 @@
-# BrivoMarketing Auto-Poster — Mac Host Agent
+# Brivo Auto-Poster — Host Agent (Khaelyx)
 
 This folder is what gets installed on **your spare Mac Mini** (or any Mac /
-Linux box on a residential LAN). The agent:
+Windows / Linux box on a residential LAN). The agent:
 
-1. Connects out to the BrivoMarketing backend over a single secure WebSocket.
+1. Connects out to the Brivo backend over a single secure WebSocket.
    No port forwarding. No proxy. It works behind any home router because the
-   Mac initiates the connection.
+   host initiates the connection.
 2. Drives a **persistent Chromium profile** via Playwright. You log into
    Instagram / X / LinkedIn **once** in that browser; the session stays
    logged in forever.
@@ -17,7 +17,7 @@ Linux box on a residential LAN). The agent:
 Open Terminal and run:
 
 ```bash
-curl -fsSL https://admin-panel-launch.preview.emergentagent.com/agent-host/install.sh | bash
+curl -fsSL https://brivomarketing.com/agent-host/install.sh | bash
 ```
 
 The installer will:
@@ -25,7 +25,7 @@ The installer will:
 - Install Homebrew (if missing), Python 3.11, and Playwright Chromium
 - Create `~/Library/Application Support/BrivoAgent/` (config + Chromium profile)
 - Install a launchd daemon so the agent starts on boot and auto-restarts on crash
-- Prompt you for the **6-digit pair code** from the BrivoMarketing admin
+- Prompt you for the **6-digit pair code** from the Brivo admin
   dashboard and store the long-lived agent token
 
 After that, open Terminal once and run:
@@ -38,7 +38,19 @@ This launches the persistent Chromium so you can manually log into IG, X,
 LinkedIn (and complete any 2FA challenges). You only need to do it once per
 account; the cookies live forever in the profile.
 
-## Anti-sleep
+## One-click install (Windows)
+
+```powershell
+irm https://brivomarketing.com/agent-host/install.ps1 | iex
+```
+
+## One-click install (Linux)
+
+```bash
+curl -fsSL https://brivomarketing.com/agent-host/install-linux.sh | bash
+```
+
+## Anti-sleep (macOS)
 
 The installer also runs:
 

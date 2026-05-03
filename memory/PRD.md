@@ -229,6 +229,28 @@ backend start).
     - `GET  /api/admin/leads/analytics`    — funnel + rates + 7d outreach
   Route ordering fix: literal routes declared before /{lead_id} dynamic.
   34/34 backend tests pass.
+- 2026-05-03 — **Khaelyx rebrand + static-domain future-proofing** (DONE — P0).
+  All user-visible "Emergent" strings scrubbed: install scripts
+  (`install.sh`, `install.ps1`, `install-linux.sh`), `agent.py`,
+  `agent-host/README.md`, backend Python comments in `social_content.py`,
+  `social.py`, `agents.py`. Removed `<script src="assets.emergent.sh/…">`
+  from `/app/frontend/public/index.html`. Hardcoded preview-URL defaults
+  in install scripts + `agent.py` CLI replaced with
+  `https://brivomarketing.com`. Pair-flow install command in
+  `AdminSocial.jsx` already uses `window.location.origin` dynamically, so
+  the moment `brivomarketing.com` is mapped to the deployed app,
+  everything flips with zero code changes. Host agents reconnect via
+  `BRIVO_BACKEND_URL` env var stored in launchd/systemd/Task Scheduler,
+  so they survive preview-URL rotation.
+  `EMERGENT_LLM_KEY` + `emergentintegrations` package left in place —
+  server-side only, never exposed to clients (confirmed with
+  support_agent: no ToS restriction on custom-brand frontends).
+  NOTE: The Emergent platform still injects `assets.emergent.sh/scripts/
+  emergent-main.js` at the ingress layer on the preview URL (re-injected
+  even after file removal). This may persist on production; to remove on
+  prod, contact support@emergent.sh post-deploy.
+  Deployment path: user owns `brivomarketing.com` → Emergent native
+  deploy → map custom domain → everything auto-upgrades.
 - 2026-05-03 — **Backend hardening pass + URL-leak scrub + multi-channel
   lead engine + dry-run preview** (DONE — P0).
   `server.py`, `lead_engine.py`, `social.py` scrubbed of all

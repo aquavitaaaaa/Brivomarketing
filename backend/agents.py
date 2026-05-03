@@ -38,7 +38,7 @@ Tone: Confident, sharp, direct. Sound like a top-tier strategist who closes deal
 
 
 # Curated model options exposed in the admin UI. Picked to work with the
-# Emergent LLM universal key.
+# Khaelyx LLM universal key.
 MODEL_OPTIONS = [
     {"provider": "anthropic", "model": "claude-sonnet-4-5-20250929", "label": "Claude Sonnet 4.5 (smart, default)"},
     {"provider": "anthropic", "model": "claude-haiku-4-5", "label": "Claude Haiku 4.5 (fast + cheap)"},

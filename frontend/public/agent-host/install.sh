@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# BrivoMarketing Auto-Poster — one-click installer for macOS.
+# Brivo Auto-Poster — one-click installer for macOS (Khaelyx host agent).
 #
 # Usage on the Mac you want to host the agent:
-#   curl -fsSL https://admin-panel-launch.preview.emergentagent.com/agent-host/install.sh | bash
+#   curl -fsSL https://brivomarketing.com/agent-host/install.sh | bash
 #
 # Or, with backend already provisioned and a pair code in hand:
-#   curl -fsSL https://.../install.sh | bash -s -- --code 123456 --name "Mac mini"
+#   curl -fsSL https://brivomarketing.com/agent-host/install.sh | bash -s -- --code 123456 --name "Mac mini"
 
 set -euo pipefail
 
-BACKEND_URL="${BRIVO_BACKEND_URL:-https://admin-panel-launch.preview.emergentagent.com}"
+BACKEND_URL="${BRIVO_BACKEND_URL:-https://brivomarketing.com}"
 APP_HOME="$HOME/Library/Application Support/BrivoAgent"
 LAUNCHD_PLIST="$HOME/Library/LaunchAgents/com.brivomarketing.agent.plist"
 LAUNCHD_LABEL="com.brivomarketing.agent"
@@ -30,7 +30,7 @@ bold()  { printf "\033[1m%s\033[0m\n" "$*"; }
 green() { printf "\033[32m%s\033[0m\n" "$*"; }
 red()   { printf "\033[31m%s\033[0m\n" "$*"; }
 
-bold "BrivoMarketing Auto-Poster — one-click install"
+bold "Brivo Auto-Poster — one-click install"
 echo "  Backend: $BACKEND_URL"
 echo "  Install dir: $APP_HOME"
 echo

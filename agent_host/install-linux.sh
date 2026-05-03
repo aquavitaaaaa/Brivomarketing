@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# BrivoMarketing Auto-Poster — installer for Linux (systemd).
+# Brivo Auto-Poster — installer for Linux / systemd (Khaelyx host agent).
 #
 # Usage on the Linux box that should host the agent:
-#   curl -fsSL https://admin-panel-launch.preview.emergentagent.com/agent-host/install-linux.sh | bash
+#   curl -fsSL https://brivomarketing.com/agent-host/install-linux.sh | bash
 set -euo pipefail
 
-BACKEND_URL="${BRIVO_BACKEND_URL:-https://admin-panel-launch.preview.emergentagent.com}"
+BACKEND_URL="${BRIVO_BACKEND_URL:-https://brivomarketing.com}"
 APP_HOME="$HOME/.local/share/brivo-agent"
 SERVICE_NAME="brivo-agent"
 PAIR_CODE="${1:-}"

@@ -3,7 +3,7 @@ Social-media automation helpers — caption generator + model seeds.
 
 Most of the real posting / DM handling will come online once the user plugs in
 platform OAuth tokens. For now we focus on:
-  - AI-drafted captions (works today via Emergent LLM key)
+  - AI-drafted captions (works today via the Khaelyx LLM stack)
   - DB schemas for scheduled posts + DM templates
   - Account-connection stubs returning 'not connected' status per platform
 """
@@ -106,7 +106,7 @@ async def generate_post_variants(
     """Return `count` caption variants per platform tuned via the social agent."""
     api_key = os.environ.get("EMERGENT_LLM_KEY")
     if not api_key:
-        raise RuntimeError("EMERGENT_LLM_KEY not configured")
+        raise RuntimeError("LLM key not configured")
 
     agent = await _resolve_agent(db, "social")
     if not agent:

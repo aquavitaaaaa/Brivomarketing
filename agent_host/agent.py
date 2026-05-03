@@ -408,7 +408,7 @@ def main() -> None:
                    help="redeem a 6-digit pair code, e.g. --pair 123456 'Mac mini'")
     p.add_argument("--backend", default=os.environ.get(
         "BRIVO_BACKEND_URL",
-        "https://admin-panel-launch.preview.emergentagent.com",
+        "https://brivomarketing.com",
     ))
     args = p.parse_args()
 

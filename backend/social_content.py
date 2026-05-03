@@ -2,8 +2,8 @@
 Content factory — turns a 'days × posts/day' request into a batch of
 ready-to-post social entries following the BrivoMarketing weekly rhythm.
 
-Captions: Gemini 3 Pro via Emergent LLM key (text)
-Images:   Nano Banana via Emergent LLM key (image generation)
+Captions: Gemini 3 Pro via the Khaelyx LLM stack (text)
+Images:   Nano Banana via the Khaelyx LLM stack (image generation)
 
 Theme rotation comes straight from the brand kit playbook page:
   Mon = Receipts        (client wins, screenshot vibe)
