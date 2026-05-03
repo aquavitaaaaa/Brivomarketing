@@ -4,11 +4,12 @@ import { toast } from "sonner";
 import {
   Bot, Wifi, WifiOff, Play, X, Sparkles, Copy, Terminal,
   CheckCircle2, AlertTriangle, Clock, RefreshCw, Send, Plus, Apple, Monitor,
-  Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2, Eye,
+  Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2, Eye, Link2, Share2,
 } from "lucide-react";
 import AdminNav from "@/components/admin/AdminNav";
 import {
   adminMe, socialDashboard, socialAgents, socialCreatePairCode, socialRevokeAgent,
+  socialCreatePairInvite,
   socialPosts, socialCreatePost, socialGenerateBatch, socialRunNow, socialCancelPost,
   socialJobs, socialPreviewPost,
   socialSafetySummary, socialPauseAgent, socialUnpauseAgent,
@@ -47,6 +48,12 @@ function PairFlow({ onPaired }) {
   const [code, setCode] = useState(null);
   const [expiresAt, setExpiresAt] = useState(null);
   const [os, setOs] = useState("mac");
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareExpiresAt, setShareExpiresAt] = useState("");
+  const [hostNameHint, setHostNameHint] = useState("");
+  const [shareNote, setShareNote] = useState("");
+  const [sharing, setSharing] = useState(false);
 
   const generate = async () => {
     try {
@@ -55,6 +62,23 @@ function PairFlow({ onPaired }) {
       setExpiresAt(r.expires_at);
     } catch (e) {
       toast.error("Could not generate pair code");
+    }
+  };
+
+  const createShareLink = async () => {
+    setSharing(true);
+    try {
+      const r = await socialCreatePairInvite({
+        host_name_hint: hostNameHint || null,
+        note: shareNote || null,
+      });
+      const full = `${window.location.origin}${r.path}`;
+      setShareUrl(full);
+      setShareExpiresAt(r.expires_at);
+    } catch (e) {
+      toast.error("Could not create share link");
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -170,6 +194,14 @@ function PairFlow({ onPaired }) {
             >
               <Sparkles size={14} /> Generate pair code
             </button>
+            <button
+              onClick={() => { setShareOpen(true); setShareUrl(""); setHostNameHint(""); setShareNote(""); }}
+              data-testid="pair-share-link"
+              className="inline-flex items-center gap-2 border border-[#E7E3D8] hover:border-[#B8864C] hover:text-[#B8864C] text-[#0B1B2B] text-[13px] font-medium px-4 py-2.5 rounded-full transition-colors"
+              title="Share a one-time pair link with a teammate or client — they pair their own Mac without admin access."
+            >
+              <Share2 size={13} /> Share public pair link
+            </button>
             <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-[#8190A1]">
               6-digit · expires in 15m
             </span>
@@ -256,10 +288,118 @@ function PairFlow({ onPaired }) {
           </div>
         )}
       </div>
+
+      {/* Share public pair link modal */}
+      {shareOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center overflow-y-auto p-4 sm:p-8"
+          onClick={() => setShareOpen(false)}
+          data-testid="share-link-modal"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white rounded-2xl border border-[#E7E3D8] shadow-2xl overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F1EA]">
+              <div className="flex items-center gap-2">
+                <Share2 size={15} className="text-[#B8864C]" />
+                <div>
+                  <div className="text-[12px] uppercase tracking-[0.2em] text-[#B8864C] font-semibold">
+                    Public pair link
+                  </div>
+                  <div className="text-[11px] text-[#8190A1]">
+                    Single-use · expires in 60 min · no admin login required
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setShareOpen(false)} className="text-[#8190A1] hover:text-[#0B1B2B]">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {!shareUrl ? (
+                <>
+                  <p className="text-[13px] text-[#4E5C6E] leading-relaxed">
+                    Generate a one-time link you can send to a teammate or client. They'll
+                    open it in a browser, hit "Start pairing", and follow a wizard — no admin
+                    panel access.
+                  </p>
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-[0.2em] text-[#8190A1] font-semibold mb-1.5">
+                      Host name hint <span className="text-[#B8864C]">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={hostNameHint}
+                      onChange={(e) => setHostNameHint(e.target.value)}
+                      placeholder="e.g. Alex's Mac mini"
+                      className="w-full text-[13px] border border-[#E7E3D8] rounded-lg px-3 py-2 outline-none focus:border-[#B8864C]"
+                      data-testid="share-host-hint"
+                    />
+                    <div className="mt-1 text-[11px] text-[#8190A1]">Shown on the public page so the recipient knows it's for them.</div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-[0.2em] text-[#8190A1] font-semibold mb-1.5">
+                      Personal note <span className="text-[#B8864C]">(optional)</span>
+                    </label>
+                    <textarea
+                      value={shareNote}
+                      onChange={(e) => setShareNote(e.target.value)}
+                      rows={2}
+                      placeholder="Thanks for helping us run this on your Mac!"
+                      className="w-full text-[13px] border border-[#E7E3D8] rounded-lg px-3 py-2 outline-none focus:border-[#B8864C] resize-none"
+                      data-testid="share-note"
+                    />
+                  </div>
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      onClick={createShareLink}
+                      disabled={sharing}
+                      data-testid="share-create"
+                      className="inline-flex items-center gap-2 bg-[#0B1B2B] hover:bg-[#14283F] disabled:opacity-60 text-white text-[13px] font-medium px-4 py-2.5 rounded-full"
+                    >
+                      <Link2 size={13} />
+                      {sharing ? "Creating…" : "Create one-time link"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-[12.5px] text-[#4E5C6E] leading-relaxed">
+                    Send this link to your teammate. When they claim it, a fresh pair code
+                    is issued automatically. The link can only be claimed <strong>once</strong>.
+                  </div>
+                  <div className="rounded-xl bg-[#FBFAF6] border border-[#E7E3D8] p-3 break-all font-mono text-[11.5px]" data-testid="share-url">
+                    {shareUrl}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Link copied"); }}
+                      className="inline-flex items-center gap-1.5 bg-[#0B1B2B] text-white text-[12.5px] font-medium px-4 py-2 rounded-full hover:bg-[#14283F]"
+                      data-testid="share-copy"
+                    >
+                      <Copy size={12} /> Copy link
+                    </button>
+                    <button
+                      onClick={() => { setShareUrl(""); setHostNameHint(""); setShareNote(""); }}
+                      className="inline-flex items-center gap-1.5 text-[12.5px] text-[#4E5C6E] hover:text-[#0B1B2B] px-3 py-2"
+                    >
+                      <RefreshCw size={12} /> New link
+                    </button>
+                    <span className="ml-auto font-mono text-[10.5px] uppercase tracking-[0.22em] text-[#8190A1]">
+                      Expires {new Date(shareExpiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
 // ---------- Stat card ---------------------------------------------------
 function StatCard({ label, value, accent = false, testid }) {
   return (

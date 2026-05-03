@@ -179,6 +179,16 @@ export const socialCreatePairCode = () =>
 export const socialRevokeAgent = (id) =>
   axios.delete(`${API}/admin/social/agents/${id}`, { headers: authHeaders() }).then((r) => r.data);
 
+// ---- Public pair-invite wizard ----
+export const socialCreatePairInvite = (payload = {}) =>
+  axios.post(`${API}/admin/social/pair-invite`, payload, { headers: authHeaders() }).then((r) => r.data);
+
+export const publicGetPairInvite = (token) =>
+  axios.get(`${API}/public/pair-invite/${token}`).then((r) => r.data);
+
+export const publicClaimPairInvite = (token) =>
+  axios.post(`${API}/public/pair-invite/${token}/claim`, {}).then((r) => r.data);
+
 export const socialPosts = (status) =>
   axios.get(`${API}/admin/social/posts`, {
     headers: authHeaders(), params: status ? { status } : {},

@@ -36,6 +36,7 @@ import AdminLeadEngine from "@/pages/AdminLeadEngine";
 import AdminAffiliates from "@/pages/AdminAffiliates";
 import BrandKit from "@/pages/BrandKit";
 import PartnersPage from "@/pages/Partners";
+import PairWizard from "@/pages/PairWizard";
 import { trackEvent } from "@/lib/api";
 
 function PageViewTracker() {
@@ -140,6 +141,7 @@ function App() {
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="/brand-kit" element={<BrandKit />} />
         <Route path="/partners" element={<PartnersPage />} />
+        <Route path="/pair" element={<PairWizard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster

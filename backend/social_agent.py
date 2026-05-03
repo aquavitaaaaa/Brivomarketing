@@ -48,7 +48,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from auth import get_current_admin
@@ -155,6 +155,160 @@ async def admin_create_pair_code(req: dict | None = None, admin=Depends(get_curr
         "used": False,
     })
     return {"code": code, "expires_at": expires.isoformat()}
+
+
+# ====================================================== PUBLIC PAIR INVITES
+# Admin creates a one-time share link that lets a non-technical teammate pair
+# their own Mac/Win/Linux host without ever seeing the admin panel. The link
+# carries a cryptographically random token. Viewing the link does NOT consume
+# it — only "Claim" does (which issues a fresh single-use 6-digit pair code).
+
+PAIR_INVITE_TTL_MIN = 60  # invite link good for 60 min from issue
+
+
+class PairInviteCreate(BaseModel):
+    host_name_hint: Optional[str] = None
+    note: Optional[str] = None
+
+
+@router.post("/admin/social/pair-invite")
+async def admin_create_pair_invite(
+    payload: PairInviteCreate | None = None,
+    admin=Depends(get_current_admin),
+):
+    """Create a public pair-invite token. Returns {token, url, expires_at}.
+
+    The admin shares the URL; whoever opens it in a browser can pair their
+    host with ONE click, no admin login required. Single-use: claimed tokens
+    are retired and a fresh 6-digit code is issued to the claimer.
+    """
+    db = router.db  # type: ignore[attr-defined]
+    token = secrets.token_urlsafe(24)
+    now = _now_dt()
+    expires = now + timedelta(minutes=PAIR_INVITE_TTL_MIN)
+    doc = {
+        "token": token,
+        "created_by": admin["email"],
+        "created_at": now.isoformat(),
+        "expires_at": expires.isoformat(),
+        "host_name_hint": (payload.host_name_hint if payload else None),
+        "note": (payload.note if payload else None),
+        "used_at": None,
+        "used_code": None,
+        "used_ip": None,
+    }
+    await db.pair_invites.insert_one(doc)
+    return {
+        "token": token,
+        "expires_at": expires.isoformat(),
+        # Relative path — frontend prefixes with origin.
+        "path": f"/pair?token={token}",
+    }
+
+
+@router.get("/admin/social/pair-invites")
+async def admin_list_pair_invites(admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    cursor = db.pair_invites.find({}, {"_id": 0}).sort("created_at", -1).limit(50)
+    invites = await cursor.to_list(length=50)
+    return {"invites": invites}
+
+
+@router.delete("/admin/social/pair-invite/{token}")
+async def admin_revoke_pair_invite(token: str, admin=Depends(get_current_admin)):
+    db = router.db  # type: ignore[attr-defined]
+    res = await db.pair_invites.update_one(
+        {"token": token, "used_at": None},
+        {"$set": {"used_at": _now(), "used_code": None, "used_ip": "revoked"}},
+    )
+    if res.matched_count == 0:
+        raise HTTPException(404, "Invite not found or already used")
+    return {"ok": True}
+
+
+# ---- Public (no auth) endpoints used by the /pair wizard ----
+
+@router.get("/public/pair-invite/{token}")
+async def public_get_pair_invite(token: str):
+    """Validate + return metadata for a pair invite WITHOUT consuming it.
+
+    Returns 404 if token doesn't exist, 410 if expired or used.
+    """
+    db = router.db  # type: ignore[attr-defined]
+    inv = await db.pair_invites.find_one({"token": token}, {"_id": 0})
+    if not inv:
+        raise HTTPException(404, "Invite not found")
+    if inv.get("used_at"):
+        raise HTTPException(410, "Invite already used")
+    try:
+        expires = datetime.fromisoformat(inv["expires_at"])
+    except Exception:
+        raise HTTPException(410, "Invite malformed")
+    if expires < _now_dt():
+        raise HTTPException(410, "Invite expired")
+    return {
+        "host_name_hint": inv.get("host_name_hint"),
+        "note": inv.get("note"),
+        "expires_at": inv["expires_at"],
+        "issued_by_display": _mask_email(inv.get("created_by") or ""),
+    }
+
+
+@router.post("/public/pair-invite/{token}/claim")
+async def public_claim_pair_invite(token: str, request: Request):
+    """Consume the invite and return a fresh 6-digit pair code + install URLs.
+
+    Single-use. Writes used_at + used_code on the invite so it cannot be
+    redeemed twice.
+    """
+    db = router.db  # type: ignore[attr-defined]
+    inv = await db.pair_invites.find_one({"token": token}, {"_id": 0})
+    if not inv:
+        raise HTTPException(404, "Invite not found")
+    if inv.get("used_at"):
+        raise HTTPException(410, "Invite already used")
+    try:
+        expires = datetime.fromisoformat(inv["expires_at"])
+    except Exception:
+        raise HTTPException(410, "Invite malformed")
+    if expires < _now_dt():
+        raise HTTPException(410, "Invite expired")
+
+    # Issue a fresh pair code bound to the invite.
+    code = _new_pair_code()
+    code_expires = _now_dt() + timedelta(minutes=PAIR_CODE_TTL_MIN)
+    await db.pair_codes.insert_one({
+        "code": code,
+        "created_by": f"invite:{inv.get('created_by')}",
+        "created_at": _now(),
+        "expires_at": code_expires.isoformat(),
+        "used": False,
+        "invite_token": token,
+    })
+
+    ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
+
+    await db.pair_invites.update_one(
+        {"token": token},
+        {"$set": {
+            "used_at": _now(),
+            "used_code": code,
+            "used_ip": (ip or "")[:80],
+        }},
+    )
+    return {
+        "code": code,
+        "expires_at": code_expires.isoformat(),
+        "host_name_hint": inv.get("host_name_hint"),
+    }
+
+
+def _mask_email(e: str) -> str:
+    """'admin@brivomarketing.com' -> 'a***@brivomarketing.com' (light privacy)."""
+    if not e or "@" not in e:
+        return "brivo admin"
+    name, _, dom = e.partition("@")
+    return f"{name[:1]}***@{dom}"
 
 
 @router.get("/admin/social/agents")
