@@ -63,6 +63,16 @@ def tracked_width(d, s, font, tracking=0):
     return sum(text_w(d, ch, font) + tracking for ch in s) - tracking
 
 
+def draw_outlined(d, xy, s, font, fill, outline=(6, 15, 26), w=4, step=2):
+    """Draw text with a dark halo so it stays legible on any background."""
+    x, y = xy
+    for ox in range(-w, w + 1, step):
+        for oy in range(-w, w + 1, step):
+            if ox or oy:
+                d.text((x + ox, y + oy), s, font=font, fill=outline)
+    d.text((x, y), s, font=font, fill=fill)
+
+
 def wrap(d, s, font, max_w):
     words, lines, cur = s.split(), [], ""
     for w in words:
@@ -189,7 +199,7 @@ def compose(bg, post):
     y = 250
     if post.get("stat"):
         f_stat = F("Fraunces.ttf", 300)
-        d.text((MARGIN - 6, y), post["stat"], font=f_stat, fill=GOLD_HI)
+        draw_outlined(d, (MARGIN - 6, y), post["stat"], f_stat, GOLD_HI, w=8, step=2)
         y += 300
         f_sl = F("Inter.ttf", 30)
         draw_tracked(d, (MARGIN, y + 6), post["stat_label"].upper(), f_sl,
@@ -204,7 +214,7 @@ def compose(bg, post):
         total = len(lines) * (post.get("head_size", 92) + 14)
         y = max(360, int(H * 0.46) - total // 2)
     for ln in lines:
-        d.text((MARGIN, y), ln, font=f_head, fill=IVORY)
+        draw_outlined(d, (MARGIN, y), ln, f_head, IVORY, w=3, step=3)
         y += post.get("head_size", 92) + 14
 
     # supporting line (italic)
