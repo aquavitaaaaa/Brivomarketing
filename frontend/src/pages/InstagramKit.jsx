@@ -268,6 +268,20 @@ First-come, first-served. 🦉`,
   },
 ];
 
+/* Branded poster pack — AI/procedural high-def 1080x1350 posters we render
+   into /public/kit-assets/ig-posts. Download-ready, on-brand. */
+const POSTERS = [
+  { file: "post-01.jpg", tag: "Manifesto",   title: "We build receipts." },
+  { file: "post-02.jpg", tag: "Receipts",    title: "+318% revenue · 90 days" },
+  { file: "post-03.jpg", tag: "Receipts",    title: "+412% qualified leads" },
+  { file: "post-04.jpg", tag: "Testimonial", title: "Target hit in 5 months" },
+  { file: "post-05.jpg", tag: "Carousel",    title: "5 signs your site leaks $" },
+  { file: "post-06.jpg", tag: "Process",     title: "8 weeks. Zero surprises." },
+  { file: "post-07.jpg", tag: "Founder POV", title: "We said no to $4k" },
+  { file: "post-08.jpg", tag: "Press",       title: "As featured in…" },
+  { file: "post-09.jpg", tag: "Scarcity",    title: "2 slots left · July" },
+];
+
 /* Reel ideas — short form, high-replay */
 const REELS = [
   {
@@ -623,6 +637,9 @@ export default function InstagramKit() {
             <span className="rounded-full border border-white/20 px-3 py-1.5 text-white/70">
               9 ready-to-post
             </span>
+            <span className="rounded-full border border-[#CCFF00]/60 bg-[#CCFF00]/10 px-3 py-1.5 text-[#CCFF00]">
+              9 hi-def posters
+            </span>
             <span className="rounded-full border border-white/20 px-3 py-1.5 text-white/70">
               5 reels
             </span>
@@ -891,6 +908,79 @@ export default function InstagramKit() {
                 </article>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Branded poster pack */}
+      <section className="border-b border-white/10">
+        <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-10 md:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionTitle
+              kicker="Step 03 · Poster pack"
+              title="9 high-def posters. Download-ready."
+            >
+              Brand-built 1080×1350 posters in the Brivo navy/gold system —
+              manifesto, client receipts, testimonial, press, and scarcity.
+              Drop them straight into your feed or the Auto-Poster.
+            </SectionTitle>
+            <button
+              onClick={() => {
+                POSTERS.forEach((p, i) => {
+                  setTimeout(() => {
+                    const a = document.createElement("a");
+                    a.href = `/kit-assets/ig-posts/${p.file}`;
+                    a.download = `brivo-ig-${p.file}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                  }, i * 350);
+                });
+              }}
+              data-testid="download-all-posters"
+              className="inline-flex items-center gap-2 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-black transition hover:bg-[#d6ff33]"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download all 9
+            </button>
+          </div>
+
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {POSTERS.map((p) => (
+              <article
+                key={p.file}
+                data-testid={`poster-${p.file}`}
+                className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-[#CCFF00]/40"
+              >
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-black">
+                  <img
+                    src={`/kit-assets/ig-posts/${p.file}`}
+                    alt={p.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                    onError={(e) => {
+                      e.currentTarget.src = "/owl-logo.jpg";
+                    }}
+                  />
+                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-white/80 backdrop-blur">
+                    {p.tag}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/80 to-transparent p-3">
+                    <span className="text-xs font-medium text-white/90">
+                      {p.title}
+                    </span>
+                    <a
+                      href={`/kit-assets/ig-posts/${p.file}`}
+                      download={`brivo-ig-${p.file}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-black transition hover:bg-[#d6ff33]"
+                    >
+                      <Download className="h-3 w-3" />
+                      Save
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>

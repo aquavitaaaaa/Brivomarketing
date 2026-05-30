@@ -1030,12 +1030,51 @@ metadata:
     verified_viewports: ["320", "375", "390", "768", "1024", "1440", "1920"]
     emergent_url_visible_to_user: false
 
+  - task: "Instagram Kit — Poster pack section (9 hi-def posters)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/InstagramKit.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: |
+          Added new "Poster pack" section to Instagram Kit page at /instagram-kit.
+          Section includes:
+          - Kicker "Step 03 · Poster pack" and title "9 high-def posters. Download-ready."
+          - 9 branded poster cards (1080×1350) with data-testid="poster-post-01.jpg" through "poster-post-09.jpg"
+          - Images served from /kit-assets/ig-posts/post-0X.jpg
+          - "Download all 9" button with data-testid="download-all-posters"
+          - Individual "Save" download link on each poster card
+          - Hero badge showing "9 HI-DEF POSTERS"
+        -working: true
+        -agent: "testing"
+        -comment: |
+          ✅ ALL TESTS PASSED - Instagram Kit Poster Pack Section fully functional.
+          
+          TEST RESULTS:
+          1. ✅ Hero badge "9 HI-DEF POSTERS" found and visible
+          2. ✅ Section kicker "STEP 03 · POSTER PACK" found
+          3. ✅ Section title "9 high-def posters. Download-ready." found
+          4. ✅ "Download all 9" button (data-testid="download-all-posters") present, visible, enabled, and clickable
+          5. ✅ Exactly 9 poster cards found with correct data-testid attributes:
+             - poster-post-01.jpg through poster-post-09.jpg
+          6. ✅ All 9 images loaded successfully (naturalWidth: 1080, NOT broken)
+             - Images served from /kit-assets/ig-posts/post-0X.jpg
+          7. ✅ All 9 poster cards have "Save" download buttons with correct href attributes
+          
+          VERIFIED:
+          - All poster images render correctly (no broken images, no fallback to owl logo)
+          - Download functionality is properly wired
+          - Section layout and styling are correct
+          - All data-testid attributes match specification
+          
+          Screenshots captured showing poster section and grid layout.
+
 test_plan:
-  current_focus:
-    - "Real client screenshots in hero showcase (MacBook + iPhone cycle)"
-    - "Before/After transformation uses real legacy vs rebuilt screens"
-    - "Process section refresh (deliverables + duration + outcome)"
-    - "Admin Social — Pair a host block upgrade"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -1082,3 +1121,20 @@ agent_communication:
         pair-os-mac/pair-install-cmd testids intact)
       - data-testid="process-step-0" (new deliverables/outcome structure)
       - Before/After slider on landing (drag handle, first case is now real)
+  
+  - agent: "testing"
+    message: |
+      Instagram Kit Poster Pack Section Testing COMPLETE - ALL TESTS PASSED ✅
+      
+      Tested the NEW "Poster pack" section at /instagram-kit as requested.
+      
+      VERIFIED COMPONENTS:
+      1. Section structure with correct kicker and title
+      2. Hero badge "9 HI-DEF POSTERS" 
+      3. All 9 poster cards with correct data-testid attributes
+      4. All 9 images load successfully (naturalWidth: 1080, no broken images)
+      5. "Download all 9" button is present and clickable
+      6. Each poster has a "Save" download button
+      
+      NO ISSUES FOUND. The poster pack section is fully functional and ready for production.
+      All images render correctly, download buttons work, and the layout is perfect.
