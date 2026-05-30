@@ -30,6 +30,7 @@ import social_agent
 import lead_engine
 import lead_engine_routes
 import affiliates as affiliates_module
+import instagram_direct
 import asyncio
 
 mongo_url = os.environ['MONGO_URL']
@@ -819,6 +820,10 @@ app.include_router(lead_engine_routes.router, prefix="/api")
 # Mount the affiliate / partner program routes.
 affiliates_module.attach(db)
 app.include_router(affiliates_module.router, prefix="/api")
+
+# Mount the direct Instagram poster (instagrapi private API + proxy).
+instagram_direct.attach(db)
+app.include_router(instagram_direct.router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
