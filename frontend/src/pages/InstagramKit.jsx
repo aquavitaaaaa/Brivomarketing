@@ -282,6 +282,103 @@ const POSTERS = [
   { file: "post-09.jpg", tag: "Scarcity",    title: "2 slots left · July" },
 ];
 
+/* Ad creatives — unique, conversation-starting ad images (mixed formats) with
+   ready-to-paste advertising copy. Images in /kit-assets/ad-creatives. */
+const AD_CREATIVES = [
+  {
+    file: "ad-01.jpg", format: "feed", tag: "Hot take",
+    title: "Your website isn't ugly. It's invisible.",
+    caption: `Unpopular truth: your website isn't losing customers because it's ugly. It's losing them because Google can't find it and visitors can't tell what you do in 3 seconds.
+
+Pretty is table stakes. Found + clear + fast is what prints money.
+
+Comment "INVISIBLE" and we'll DM you a 2-minute teardown of why your site isn't showing up. Free.`,
+  },
+  {
+    file: "ad-02.jpg", format: "square", tag: "Free roast",
+    title: "Send us your homepage. We'll roast it. Free.",
+    caption: `We'll tear your homepage apart — for free. 🔥
+
+Drop your URL in the comments (or DM "ROAST"). We'll send back 3 brutal, specific things killing your conversions, plus exactly how we'd fix them.
+
+No call. No pitch. Just the truth your last agency was too polite to tell you.`,
+  },
+  {
+    file: "ad-03.jpg", format: "feed", tag: "Unpopular opinion",
+    title: "Most 'award-winning' sites quietly lose money.",
+    caption: `Hot take: half the "award-winning" websites you admire are quietly bleeding money.
+
+Awards reward art. Your business needs a closer. The two rarely overlap.
+
+We design for one metric: revenue. Everything else is decoration.
+
+Agree or hard disagree? 👇`,
+  },
+  {
+    file: "ad-04.jpg", format: "story", tag: "Poll",
+    title: "Your site: a weapon or a liability?",
+    caption: `Quick gut-check: is your website actively winning you customers... or quietly costing you them?
+
+There's no neutral. Every site is either a weapon or a liability.
+
+Reply with ONE word: "WEAPON" or "LIABILITY". We'll tell you how to flip it.`,
+  },
+  {
+    file: "ad-05.jpg", format: "feed", tag: "Shock stat",
+    title: "53% of visitors leave after 3 seconds.",
+    caption: `53% of mobile visitors abandon a site that takes longer than 3 seconds to load. (Google's own data.)
+
+That's half your ad spend — gone before they read a word.
+
+Want your real load time + the fix? Comment "AUDIT".`,
+  },
+  {
+    file: "ad-06.jpg", format: "feed", tag: "Mic drop",
+    title: "We don't do revisions. We get it right.",
+    caption: `We don't do "revision rounds". We get it right the first time.
+
+One named senior lead. A fixed fee. A full editorial design you actually see before we build. Launched in 8 weeks, zero surprises.
+
+That's not arrogance — it's a process most agencies can't afford to offer.`,
+  },
+  {
+    file: "ad-07.jpg", format: "square", tag: "The dare",
+    title: "Bet your site can't load in under 1 second.",
+    caption: `Bet your current site can't load in under 1 second. 🥱
+
+Ours do. Every time. On mobile. On 4G.
+
+Prove us wrong — drop your URL. Or DM "SPEED" and we'll show you what fast actually feels like.`,
+  },
+  {
+    file: "ad-08.jpg", format: "story", tag: "True story",
+    title: "We turned down $20k last week. Here's why.",
+    caption: `We said no to a $20k project last week.
+
+Wrong timeline, wrong expectations, wrong fit. We're a partner, not a vendor — and partners tell you the truth even when it costs them.
+
+The full story (and the 3 red flags we look for) → link in bio.`,
+  },
+  {
+    file: "ad-09.jpg", format: "feed", tag: "Reality check",
+    title: "A $4k template costs you $40k in lost deals.",
+    caption: `That $4k template feels like a steal. Until you count the deals it quietly loses.
+
+Slow load, no SEO, looks like 400 other businesses → invisible on Google for 24 months → tens of thousands in revenue you never see.
+
+Buy twice, or buy right. Do the math → link in bio.`,
+  },
+  {
+    file: "ad-10.jpg", format: "story", tag: "Last call",
+    title: "We only build 4 sites a month. 2 left.",
+    caption: `We cap our roster at 4 builds a month — on purpose. Every site gets a named senior lead and weekly exec reviews. That doesn't scale, and we're fine with that.
+
+July: 2 slots booked, 2 open.
+
+DM "JULY" and we'll hold a 20-minute strategy call this week. First come, first served. 🦉`,
+  },
+];
+
 /* Reel ideas — short form, high-replay */
 const REELS = [
   {
@@ -640,6 +737,9 @@ export default function InstagramKit() {
             <span className="rounded-full border border-[#CCFF00]/60 bg-[#CCFF00]/10 px-3 py-1.5 text-[#CCFF00]">
               9 hi-def posters
             </span>
+            <span className="rounded-full border border-[#CCFF00]/60 bg-[#CCFF00]/10 px-3 py-1.5 text-[#CCFF00]">
+              10 viral ads
+            </span>
             <span className="rounded-full border border-white/20 px-3 py-1.5 text-white/70">
               5 reels
             </span>
@@ -981,6 +1081,102 @@ export default function InstagramKit() {
                 </div>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ad creatives — built to go viral */}
+      <section className="border-b border-white/10">
+        <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-10 md:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionTitle
+              kicker="Step 04 · Ad creatives"
+              title="Unique ads built to make people talk."
+            >
+              Scroll-stopping creatives engineered for comments + shares — hot
+              takes, a free "roast your homepage" challenge, shock stats, and
+              scarcity. Mixed feed / square / story formats, each with
+              ready-to-paste ad copy. Run them as posts or paid ads.
+            </SectionTitle>
+            <button
+              onClick={() => {
+                AD_CREATIVES.forEach((a, i) => {
+                  setTimeout(() => {
+                    const el = document.createElement("a");
+                    el.href = `/kit-assets/ad-creatives/${a.file}`;
+                    el.download = `brivo-ad-${a.file}`;
+                    document.body.appendChild(el);
+                    el.click();
+                    el.remove();
+                  }, i * 350);
+                });
+              }}
+              data-testid="download-all-ads"
+              className="inline-flex items-center gap-2 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-black transition hover:bg-[#d6ff33]"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download all 10
+            </button>
+          </div>
+
+          <div className="mt-8 columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
+            {AD_CREATIVES.map((a) => {
+              const aspect =
+                a.format === "story"
+                  ? "aspect-[9/16]"
+                  : a.format === "square"
+                  ? "aspect-square"
+                  : "aspect-[4/5]";
+              return (
+                <article
+                  key={a.file}
+                  data-testid={`ad-${a.file}`}
+                  className="group break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-[#CCFF00]/40"
+                >
+                  <div className={`relative w-full overflow-hidden bg-black ${aspect}`}>
+                    <img
+                      src={`/kit-assets/ad-creatives/${a.file}`}
+                      alt={a.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                      onError={(e) => {
+                        e.currentTarget.src = "/owl-logo.jpg";
+                      }}
+                    />
+                    <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-white/80 backdrop-blur">
+                      {a.tag} · {a.format}
+                    </div>
+                    <a
+                      href={`/kit-assets/ad-creatives/${a.file}`}
+                      download={`brivo-ad-${a.file}`}
+                      className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[#CCFF00] bg-[#CCFF00] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-black opacity-0 transition group-hover:opacity-100"
+                    >
+                      <Download className="h-3 w-3" />
+                      Save
+                    </a>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-base font-semibold text-white">
+                      {a.title}
+                    </h3>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <div className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                        {a.caption.length} chars
+                      </div>
+                      <CopyChip value={a.caption} label="Copy ad copy" />
+                    </div>
+                    <details className="mt-3 text-sm text-white/75">
+                      <summary className="cursor-pointer text-[11px] uppercase tracking-[0.25em] text-white/50 hover:text-[#CCFF00]">
+                        Read ad copy →
+                      </summary>
+                      <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-relaxed text-white/80">
+                        {a.caption}
+                      </pre>
+                    </details>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
