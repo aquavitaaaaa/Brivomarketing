@@ -20,7 +20,7 @@ import requests
 
 BASE_URL = os.environ.get(
     "REACT_APP_BACKEND_URL",
-    "https://bio-boost-7.preview.emergentagent.com",
+    "https://platform-roadmap-2.preview.emergentagent.com",
 ).rstrip("/")
 API = f"{BASE_URL}/api"
 
