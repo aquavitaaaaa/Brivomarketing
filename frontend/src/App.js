@@ -32,6 +32,7 @@ import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminSocial from "@/pages/AdminSocial";
+import AdminDirectPoster from "@/pages/AdminDirectPoster";
 import AdminLeadEngine from "@/pages/AdminLeadEngine";
 import AdminAffiliates from "@/pages/AdminAffiliates";
 import BrandKit from "@/pages/BrandKit";
@@ -139,6 +140,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/social" element={<AdminSocial />} />
+        <Route path="/admin/social/direct" element={<AdminDirectPoster />} />
         <Route path="/admin/leads" element={<AdminLeadEngine />} />
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="/brand-kit" element={<BrandKit />} />

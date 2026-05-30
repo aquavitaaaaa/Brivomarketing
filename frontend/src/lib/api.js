@@ -298,3 +298,23 @@ export const leadQualify = (id) =>
     headers: authHeaders(), timeout: 60000,
   }).then((r) => r.data);
 
+// ---------- Direct Instagram Poster (instagrapi + proxy) ----------
+export const directIgAccounts = () =>
+  axios.get(`${API}/admin/social/direct/accounts`, { headers: authHeaders() })
+    .then((r) => r.data);
+
+export const directIgConnect = (payload) =>
+  axios.post(`${API}/admin/social/direct/connect`, payload, {
+    headers: authHeaders(), timeout: 120000,
+  }).then((r) => r.data);
+
+export const directIgPost = (payload) =>
+  axios.post(`${API}/admin/social/direct/post`, payload, {
+    headers: authHeaders(), timeout: 120000,
+  }).then((r) => r.data);
+
+export const directIgDisconnect = (id) =>
+  axios.delete(`${API}/admin/social/direct/${id}`, { headers: authHeaders() })
+    .then((r) => r.data);
+
+

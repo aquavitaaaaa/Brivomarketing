@@ -170,6 +170,24 @@ backend start).
   flagged "visually striking", zero bland or placeholder pages.
 
 ## Changelog (cont.)
+- 2026-05-30 — **Direct Instagram poster (website logs in + posts)** (DONE).
+  New `instagram_direct.py` (mounted `/api/admin/social/direct`, admin-only):
+  connect / accounts / post / disconnect via the `instagrapi` private API with a
+  per-account **SOCKS5/HTTP proxy** (operator-supplied to dodge datacenter-IP
+  flagging). 2FA handled (returns `two_factor_required`), ChallengeRequired +
+  BadPassword + PleaseWaitFewMinutes handled cleanly (no 500s — verified by
+  backend testing agent). Passwords encrypted at rest (Fernet via JWT_SECRET);
+  instagrapi session persisted in Mongo `direct_accounts`. Posting accepts a
+  /kit-assets path or https URL → downloads → `photo_upload`. Frontend:
+  `AdminDirectPoster.jsx` at `/admin/social/direct` (AdminNav "Direct IG") —
+  connect form + 2FA field + connected-accounts list + per-account composer
+  (pick a generated poster/ad + caption + Post now) + disconnect. instagrapi
+  added to requirements.txt. This is the cloud "no spare PC" path that
+  complements the existing residential host-agent (operator wanted BOTH).
+  NOT YET WIRED into the scheduler for hands-off auto-posting — currently
+  manual "Post now" per account; scheduler integration is the next step.
+
+## Changelog (cont.)
 - 2026-05-30 — **Viral Ad Creatives pack** (DONE). New generator
   `/app/scripts/generate_ad_creatives.py` produces 10 conversation-starting ad
   creatives (hot takes, "roast your homepage" challenge, shock stats, dares,

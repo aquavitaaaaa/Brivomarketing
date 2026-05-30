@@ -412,6 +412,25 @@ backend:
           properly attached to generated posts (verified in recycle-now test).
 
 frontend:
+  - task: "Direct Instagram poster admin UI (/admin/social/direct)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDirectPoster.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          New admin page at /admin/social/direct (linked in AdminNav as "Direct IG").
+          Connect form (username/password/proxy + 2FA field that appears when backend
+          returns two_factor_required), connected-accounts list with status badges +
+          last_error, per-account composer (pick one of 19 generated posters/ads +
+          caption + "Post now"), and disconnect. Verified via screenshot logged in as
+          admin: renders correctly. Full connect/post needs operator's real IG creds +
+          SOCKS5 proxy (not auto-tested for account safety).
+
   - task: "Phase 1 admin UI — safety panel, wins manager, cross-poster"
     implemented: true
     working: "NA"

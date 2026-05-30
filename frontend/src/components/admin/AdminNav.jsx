@@ -10,6 +10,7 @@ import {
   Users,
   Palette,
   Instagram,
+  AtSign,
   ArrowLeft,
 } from "lucide-react";
 
@@ -69,6 +70,7 @@ export default function AdminNav({
     { key: "dashboard", to: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { key: "leads", to: "/admin/leads", label: "Lead Engine", icon: Target },
     { key: "social", to: "/admin/social", label: "Auto-Poster", icon: Send },
+    { key: "directposter", to: "/admin/social/direct", label: "Direct IG", icon: AtSign },
     { key: "affiliates", to: "/admin/affiliates", label: "Partners", icon: Users },
     { key: "brandkit", to: "/brand-kit", label: "Brand Kit", icon: Palette },
     { key: "instagramkit", to: "/instagram-kit", label: "Instagram Kit", icon: Instagram },
