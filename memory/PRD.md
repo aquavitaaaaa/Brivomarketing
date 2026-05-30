@@ -169,6 +169,27 @@ backend start).
   grid pages. Visual audit via `analyze_file_tool` passed: every page
   flagged "visually striking", zero bland or placeholder pages.
 
+## Changelog (cont.)
+- 2026-05-30 — **Instagram Poster Pack** (DONE). New generator
+  `/app/scripts/generate_ig_posts.py` renders 9 high-def 1080×1350 IG posters
+  (manifesto, +318%/+412% receipts, testimonial, carousel, process, founder POV,
+  press, scarcity) into `/app/frontend/public/kit-assets/ig-posts/post-0X.jpg`.
+  Backgrounds: Nano Banana (`gemini-3.1-flash-image-preview` via LlmChat,
+  `modalities=["image","text"]`) with a cinematic procedural fallback
+  (navy/gold glows + gold light streaks + film grain + vignette, per-post
+  variant) when LLM budget is unavailable. Typography overlaid in Pillow
+  (Fraunces/Inter, navy/gold/ivory) for razor-sharp legibility. Surfaced on
+  `/instagram-kit` as a new "Step 03 · Poster pack" section with per-poster
+  Save + "Download all 9". Frontend test: 9/9 images load, downloads wired.
+  NOTE: emergentintegrations image module is `...llm.gemeni.image_generation`
+  (typo 'gemeni'); the OLD `social_content.py:_gen_image` imports `gemini` and
+  uses `GeminiImageGeneration.generate_images` (Imagen path) — that path is
+  BROKEN/never worked. Correct pattern is LlmChat multimodal (used in the new
+  generator). Recommend porting `social_content.py` to the same pattern.
+  CURRENT KEY `sk-emergent-99c9839BfDb5561Ca9` is the example placeholder and
+  has NO budget — AI backgrounds need the user's funded Universal Key, then
+  re-run `python3 /app/scripts/generate_ig_posts.py`.
+
 ## Roadmap
 - 2026-02 — Built **Social Auto-Poster** end-to-end: Mac-host browser-automation
   architecture (Playwright + persistent Chromium profile + outbound WebSocket
