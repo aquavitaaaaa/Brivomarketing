@@ -170,6 +170,23 @@ backend start).
   flagged "visually striking", zero bland or placeholder pages.
 
 ## Changelog (cont.)
+- 2026-05-30 — **Viral Ad Creatives pack** (DONE). New generator
+  `/app/scripts/generate_ad_creatives.py` produces 10 conversation-starting ad
+  creatives (hot takes, "roast your homepage" challenge, shock stats, dares,
+  scarcity) across MIXED formats — feed 1080×1350, square 1080×1080, story
+  1080×1920 — into `/app/frontend/public/kit-assets/ad-creatives/ad-0X.jpg`.
+  Nano Banana backgrounds + Pillow typography. Legibility hardening: darker
+  scrim, thick dark text halos, and a translucent dark backing bar behind the
+  CREAM italic sub-line (fixes gold-on-gold). Clean backgrounds CACHED under
+  `ad-creatives/_clean/` so re-composites cost ZERO credits
+  (`IG_RECOMPOSE=1`). Surfaced on `/instagram-kit` as "Step 04 · Ad creatives"
+  (masonry grid, per-card Copy ad-copy + Save, "Download all 10"). Visual QA via
+  analyze_file_tool: headlines + sub-lines PASS, nothing clipped. Frontend test:
+  10/10 load, poster pack (9/9) intact, badges present.
+  NOTE: EMERGENT_LLM_KEY budget is intermittent — some generations fall back to
+  the cinematic procedural background; re-run with `IG_RECOMPOSE=1` is free.
+
+## Changelog
 - 2026-05-30 — **Instagram Poster Pack** (DONE). New generator
   `/app/scripts/generate_ig_posts.py` renders 9 high-def 1080×1350 IG posters
   (manifesto, +318%/+412% receipts, testimonial, carousel, process, founder POV,
