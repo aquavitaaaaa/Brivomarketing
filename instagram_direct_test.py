@@ -13,7 +13,7 @@ import sys
 from typing import Optional
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://platform-roadmap-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://gracious-volhard-12.preview.emergentagent.com/api"
 
 # Admin credentials from /app/memory/test_credentials.md
 ADMIN_EMAIL = "admin@brivomarketing.com"
