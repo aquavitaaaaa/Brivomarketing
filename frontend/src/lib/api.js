@@ -142,6 +142,27 @@ export const fetchRecentPageviews = () =>
     .get(`${API}/admin/analytics/recent`, { headers: authHeaders() })
     .then((r) => r.data);
 
+// ---------- Clients (CRM) ----------
+export const fetchClients = () =>
+  axios
+    .get(`${API}/admin/clients`, { headers: authHeaders() })
+    .then((r) => r.data);
+
+export const fetchClientDetail = (email) =>
+  axios
+    .get(`${API}/admin/clients/${encodeURIComponent(email)}`, {
+      headers: authHeaders(),
+    })
+    .then((r) => r.data);
+
+export const fetchInquiryAnalytics = (days = 30) =>
+  axios
+    .get(`${API}/admin/inquiries/analytics`, {
+      headers: authHeaders(),
+      params: { days },
+    })
+    .then((r) => r.data);
+
 export const fetchOperatorStatus = () =>
   axios
     .get(`${API}/admin/operator/status`, { headers: authHeaders() })

@@ -58,6 +58,7 @@ class Inquiry(BaseModel):
     source: Optional[str] = None
     roi_snapshot: Optional[Dict[str, Any]] = None
     ref_code: Optional[str] = None
+    session_id: Optional[str] = None
     status: str = "new"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -72,6 +73,7 @@ class InquiryCreate(BaseModel):
     source: Optional[str] = None
     roi_snapshot: Optional[Dict[str, Any]] = None
     ref_code: Optional[str] = None
+    session_id: Optional[str] = None
 
 
 class RoiLeadCreate(BaseModel):
@@ -299,6 +301,190 @@ async def update_inquiry_status(
         raise HTTPException(status_code=400, detail="Invalid status")
     await db.inquiries.update_one({"id": inquiry_id}, {"$set": {"status": status}})
     return {"ok": True}
+
+
+# =====================================================================
+# ADMIN — CLIENTS (CRM)  —  unified people view (inquiries + chats)
+# =====================================================================
+_STATUS_RANK = {"new": 0, "contacted": 1, "qualified": 2, "won": 3, "lost": 4}
+
+
+@api_router.get("/admin/inquiries/analytics")
+async def inquiry_analytics(
+    days: int = 30,
+    admin: dict = Depends(get_current_admin),
+):
+    """Lead/conversion analytics derived from the inquiries collection."""
+    inquiries = await db.inquiries.find({}, {"_id": 0}).to_list(5000)
+
+    funnel = {"new": 0, "contacted": 0, "qualified": 0, "won": 0, "lost": 0}
+    sources: Dict[str, Dict[str, Any]] = {}
+    by_day: Dict[str, int] = {}
+
+    for i in inquiries:
+        st = i.get("status", "new")
+        funnel[st] = funnel.get(st, 0) + 1
+
+        src = i.get("source") or "direct"
+        s = sources.setdefault(src, {"source": src, "total": 0, "won": 0})
+        s["total"] += 1
+        if st == "won":
+            s["won"] += 1
+
+        ca = i.get("created_at")
+        if ca:
+            day = str(ca)[:10]
+            by_day[day] = by_day.get(day, 0) + 1
+
+    total = len(inquiries)
+    won = funnel.get("won", 0)
+    lost = funnel.get("lost", 0)
+    conversion_rate = round((won / total) * 100, 1) if total else 0.0
+
+    today = datetime.now(timezone.utc).date()
+    series = []
+    for n in range(days - 1, -1, -1):
+        d = (today - timedelta(days=n)).isoformat()
+        series.append({"date": d, "count": by_day.get(d, 0)})
+
+    top_sources = sorted(sources.values(), key=lambda x: x["total"], reverse=True)[:8]
+    for s in top_sources:
+        s["conversion"] = round((s["won"] / s["total"]) * 100, 1) if s["total"] else 0.0
+
+    return {
+        "total": total,
+        "won": won,
+        "lost": lost,
+        "open": total - won - lost,
+        "conversion_rate": conversion_rate,
+        "funnel": funnel,
+        "series": series,
+        "top_sources": top_sources,
+    }
+
+
+@api_router.get("/admin/clients")
+async def list_clients(admin: dict = Depends(get_current_admin)):
+    """Aggregate every contact into a single client record (keyed by email),
+    combining all their inquiries and a count of their linked chat messages."""
+    inquiries = await db.inquiries.find({}, {"_id": 0}).sort("created_at", 1).to_list(5000)
+    clients: Dict[str, Dict[str, Any]] = {}
+
+    for inq in inquiries:
+        email = (inq.get("email") or "").lower().strip()
+        if not email:
+            continue
+        c = clients.get(email)
+        if not c:
+            c = {
+                "email": email,
+                "name": inq.get("name"),
+                "company": inq.get("company"),
+                "inquiry_count": 0,
+                "statuses": [],
+                "sources": set(),
+                "session_ids": set(),
+                "first_seen": inq.get("created_at"),
+                "last_seen": inq.get("created_at"),
+                "latest_status": inq.get("status", "new"),
+                "has_roi": False,
+                "last_message": inq.get("message"),
+            }
+            clients[email] = c
+
+        c["inquiry_count"] += 1
+        if inq.get("name"):
+            c["name"] = inq.get("name")
+        if inq.get("company"):
+            c["company"] = inq.get("company")
+        c["statuses"].append(inq.get("status", "new"))
+        if inq.get("source"):
+            c["sources"].add(inq.get("source"))
+        if inq.get("session_id"):
+            c["session_ids"].add(inq.get("session_id"))
+        if inq.get("roi_snapshot"):
+            c["has_roi"] = True
+
+        ca = inq.get("created_at")
+        if ca:
+            if not c["first_seen"] or ca < c["first_seen"]:
+                c["first_seen"] = ca
+            if not c["last_seen"] or ca >= c["last_seen"]:
+                c["last_seen"] = ca
+                c["latest_status"] = inq.get("status", "new")
+                c["last_message"] = inq.get("message")
+
+    result = []
+    for email, c in clients.items():
+        session_ids = list(c["session_ids"])
+        chat_count = 0
+        if session_ids:
+            chat_count = await db.chat_messages.count_documents(
+                {"session_id": {"$in": session_ids}}
+            )
+        pipeline_status = (
+            max(c["statuses"], key=lambda s: _STATUS_RANK.get(s, 0))
+            if c["statuses"]
+            else "new"
+        )
+        result.append({
+            "email": email,
+            "name": c["name"],
+            "company": c["company"],
+            "inquiry_count": c["inquiry_count"],
+            "latest_status": c["latest_status"],
+            "pipeline_status": pipeline_status,
+            "sources": sorted(c["sources"]),
+            "chat_message_count": chat_count,
+            "has_chat": bool(session_ids) and chat_count > 0,
+            "has_roi": c["has_roi"],
+            "first_seen": c["first_seen"],
+            "last_seen": c["last_seen"],
+            "last_message": c["last_message"],
+        })
+
+    result.sort(key=lambda x: x["last_seen"] or "", reverse=True)
+    return result
+
+
+@api_router.get("/admin/clients/{email}")
+async def client_detail(email: str, admin: dict = Depends(get_current_admin)):
+    """Full timeline for one client: every inquiry + every linked chat message."""
+    email = (email or "").lower().strip()
+    inquiries = await db.inquiries.find({"email": email}, {"_id": 0}).sort(
+        "created_at", -1
+    ).to_list(500)
+    if not inquiries:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    session_ids = list({i.get("session_id") for i in inquiries if i.get("session_id")})
+    chat_messages: List[Dict[str, Any]] = []
+    sessions: List[Dict[str, Any]] = []
+    if session_ids:
+        chat_messages = await db.chat_messages.find(
+            {"session_id": {"$in": session_ids}}, {"_id": 0}
+        ).sort("created_at", 1).to_list(2000)
+        sessions = await db.chat_sessions.find(
+            {"session_id": {"$in": session_ids}}, {"_id": 0}
+        ).to_list(100)
+
+    name = next((i.get("name") for i in inquiries if i.get("name")), None)
+    company = next((i.get("company") for i in inquiries if i.get("company")), None)
+    statuses = [i.get("status", "new") for i in inquiries]
+    pipeline_status = (
+        max(statuses, key=lambda s: _STATUS_RANK.get(s, 0)) if statuses else "new"
+    )
+
+    return {
+        "email": email,
+        "name": name,
+        "company": company,
+        "pipeline_status": pipeline_status,
+        "inquiry_count": len(inquiries),
+        "inquiries": inquiries,
+        "chat_messages": chat_messages,
+        "sessions": sessions,
+    }
 
 
 # =====================================================================

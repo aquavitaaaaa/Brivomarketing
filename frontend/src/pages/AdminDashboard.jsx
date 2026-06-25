@@ -7,10 +7,12 @@ import {
   Radio,
   MessageSquare,
   Bot,
+  Users,
 } from "lucide-react";
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import LeadsTab from "@/components/admin/LeadsTab";
+import ClientsTab from "@/components/admin/ClientsTab";
 import CallsTab from "@/components/admin/CallsTab";
 import OperatorTab from "@/components/admin/OperatorTab";
 import MessagesTab from "@/components/admin/MessagesTab";
@@ -19,6 +21,7 @@ import AdminNav from "@/components/admin/AdminNav";
 
 const TABS = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "clients", label: "Clients", icon: Users },
   { id: "messages", label: "Messages", icon: MessageSquare },
   { id: "leads", label: "Inbox", icon: Inbox },
   { id: "agents", label: "AI Agents", icon: Bot },
@@ -57,6 +60,7 @@ export default function AdminDashboard() {
   const Tab = TABS.find((t) => t.id === tab);
   const TabContent = {
     analytics: AnalyticsTab,
+    clients: ClientsTab,
     messages: MessagesTab,
     leads: LeadsTab,
     agents: AgentsTab,

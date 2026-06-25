@@ -411,6 +411,83 @@ backend:
           Each hook has id, slug, template, category, uses, wins, score, created_at. Hooks are 
           properly attached to generated posts (verified in recycle-now test).
 
+  - task: "Clients CRM + Lead Analytics (3 new admin endpoints)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          NEW ENHANCEMENT — Clients CRM + Lead Analytics.
+          Backend (server.py) added 3 admin endpoints (all require Bearer admin token):
+            - GET /api/admin/inquiries/analytics?days=30 → funnel (status counts),
+              conversion_rate, won/open, series (leads/day), top_sources.
+            - GET /api/admin/clients → contacts aggregated by email, each with
+              inquiry_count, pipeline_status, sources, chat_message_count, has_roi,
+              first_seen/last_seen.
+            - GET /api/admin/clients/{email} → full profile: all inquiries +
+              all linked chat_messages + chat sessions. Chats link to a client
+              because inquiries now store session_id (brivo_sid).
+          Also: added session_id field to Inquiry/InquiryCreate models, and the
+          public InquiryDialog now sends session_id so chats↔inquiries link.
+          Frontend: new ClientsTab.jsx + new "Clients" tab in AdminDashboard.
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ ALL 3 ENDPOINTS PASSED - Clients CRM + Lead Analytics fully functional.
+          
+          Test file: /app/clients_crm_test.py
+          
+          VERIFIED ENDPOINTS (all under /api/admin):
+          
+          1. ✅ GET /api/admin/inquiries/analytics?days=30
+             - WITHOUT token → 401 (correctly rejected)
+             - WITH admin token → 200 + JSON with correct structure
+             - Response keys verified: total, won, lost, open, conversion_rate, funnel, series, top_sources
+             - Funnel structure verified: new, contacted, qualified, won, lost
+             - Series length matches days parameter (30 days)
+             - Each series item has date and count
+             - Top sources array with source, total, won, conversion fields
+             - Test data: total=11, won=0, lost=0, open=11, conversion_rate=0.0%
+          
+          2. ✅ GET /api/admin/clients
+             - WITHOUT token → 401 (correctly rejected)
+             - WITH admin token → 200 + JSON array
+             - Each client has all required fields: email, name, company, inquiry_count, 
+               latest_status, pipeline_status, sources, chat_message_count, has_chat, 
+               has_roi, first_seen, last_seen, last_message
+             - Sources field is correctly a list
+             - Test data: 3 clients found, structure verified
+          
+          3. ✅ GET /api/admin/clients/{email}
+             - WITHOUT token → 401 (correctly rejected)
+             - WITH admin token + unknown email → 404 (correctly rejected)
+             - WITH admin token + valid email → 200 + JSON with correct structure
+             - Response has: email, name, company, pipeline_status, inquiry_count, 
+               inquiries (list), chat_messages (list), sessions (list)
+             - All fields are correctly populated
+          
+          4. ✅ INQUIRY + CHAT LINKING VERIFIED
+             - Created inquiry with session_id=brivo_sid_test_12345
+             - Created chat message with same session_id
+             - GET /api/admin/clients/{email} correctly returns linked chat message
+             - Linking mechanism working: inquiries with session_id → chat_messages with same session_id
+             - Test data: 1 inquiry, 2 chat messages, 1 session all correctly linked
+          
+          SECURITY & DATA INTEGRITY VERIFIED:
+          - All endpoints require admin authentication (401 without token)
+          - Unknown email returns 404 (not 500)
+          - Data aggregation working correctly (clients grouped by email)
+          - Session linking working correctly (inquiries ↔ chat messages via session_id)
+          - All response structures match specification
+          
+          NOTE: LLM budget=0, so chat responses use fallback content, but messages persist correctly.
+
+
 frontend:
   - task: "Direct Instagram poster admin UI (/admin/social/direct)"
     implemented: true
@@ -1241,15 +1318,33 @@ metadata:
           Screenshots captured showing ad creatives section, expanded details, and hero badges.
 
 test_plan:
-  current_focus:
-    - "Full backend regression after .env restore (continuation env)"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
     message: |
+      NEW ENHANCEMENT — Clients CRM + Lead Analytics.
+      Backend (server.py) added 3 admin endpoints (all require Bearer admin token):
+        - GET /api/admin/inquiries/analytics?days=30 → funnel (status counts),
+          conversion_rate, won/open, series (leads/day), top_sources.
+        - GET /api/admin/clients → contacts aggregated by email, each with
+          inquiry_count, pipeline_status, sources, chat_message_count, has_roi,
+          first_seen/last_seen.
+        - GET /api/admin/clients/{email} → full profile: all inquiries +
+          all linked chat_messages + chat sessions. Chats link to a client
+          because inquiries now store session_id (brivo_sid).
+      Also: added session_id field to Inquiry/InquiryCreate models, and the
+      public InquiryDialog now sends session_id so chats↔inquiries link.
+      Frontend: new ClientsTab.jsx + new "Clients" tab in AdminDashboard.
+      All 3 endpoints already verified working via curl (Jane@acme.com inquiry
+      correctly linked to her chat session with 2 messages). LLM budget still 0
+      (irrelevant to these endpoints). Please regression-test the 3 new
+      endpoints: auth protection (401 w/o token), correct data shapes, and that
+      a 404 is returned for an unknown client email.
+
       CONTINUATION ENV RESTORE — please run a FULL backend regression.
       Context: This is a continuation environment. Both backend/.env and
       frontend/.env were missing (gitignored, not persisted) so all services
@@ -1519,3 +1614,45 @@ agent_communication:
       
       The backend has successfully recovered from the .env restore and is
       operating normally. All core functionality is working as expected.
+
+  - agent: "testing"
+    message: |
+      Clients CRM + Lead Analytics backend testing COMPLETE.
+      
+      ✅ ALL 3 NEW ADMIN ENDPOINTS PASSED
+      
+      Test file: /app/clients_crm_test.py
+      
+      ENDPOINTS TESTED:
+      
+      1. ✅ GET /api/admin/inquiries/analytics?days=30
+         - Auth protection: 401 without token ✅
+         - With admin token: 200 + correct JSON structure ✅
+         - Response keys: total, won, lost, open, conversion_rate, funnel, series, top_sources ✅
+         - Funnel structure: new, contacted, qualified, won, lost ✅
+         - Series length matches days parameter (30 days) ✅
+         - Top sources array with source, total, won, conversion ✅
+      
+      2. ✅ GET /api/admin/clients
+         - Auth protection: 401 without token ✅
+         - With admin token: 200 + JSON array ✅
+         - Each client has all required fields: email, name, company, inquiry_count, 
+           latest_status, pipeline_status, sources, chat_message_count, has_chat, 
+           has_roi, first_seen, last_seen, last_message ✅
+         - Sources field is correctly a list ✅
+      
+      3. ✅ GET /api/admin/clients/{email}
+         - Auth protection: 401 without token ✅
+         - Unknown email: 404 ✅
+         - Valid email: 200 + correct structure ✅
+         - Response has: email, name, company, pipeline_status, inquiry_count, 
+           inquiries (list), chat_messages (list), sessions (list) ✅
+      
+      4. ✅ INQUIRY + CHAT LINKING VERIFIED
+         - Created inquiry with session_id ✅
+         - Created chat message with same session_id ✅
+         - GET /api/admin/clients/{email} correctly returns linked chat message ✅
+         - Linking mechanism working: inquiries ↔ chat messages via session_id ✅
+      
+      All endpoints are production-ready. No critical issues found.
+      Auth, data aggregation, session linking, and error handling all verified.
