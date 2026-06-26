@@ -20,7 +20,7 @@ import requests
 
 BASE_URL = os.environ.get(
     "REACT_APP_BACKEND_URL",
-    "https://gracious-volhard-12.preview.emergentagent.com",
+    "https://growth-funnel-8.preview.emergentagent.com",
 ).rstrip("/")
 API = f"{BASE_URL}/api"
 

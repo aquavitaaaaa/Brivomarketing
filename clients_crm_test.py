@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://07f1b190-de56-4e07-a657-56a25e323e51.preview.emergentagent.com/api"
+BACKEND_URL = "https://growth-funnel-8.preview.emergentagent.com/api"
 
 # Admin credentials from /app/memory/test_credentials.md
 ADMIN_EMAIL = "admin@brivomarketing.com"

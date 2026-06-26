@@ -12,7 +12,7 @@ render without a horizontal scrollbar even on a first-gen iPhone SE.
 Usage:
     # One-off, local (requires `playwright install chromium` once):
     python3 tests/responsive_snapshots.py \
-        --base-url https://gracious-volhard-12.preview.emergentagent.com \
+        --base-url https://growth-funnel-8.preview.emergentagent.com \
         --out /app/tests/snapshots
 
     # CI (exit code is 0 on pass, 1 on any overflow):
@@ -241,7 +241,7 @@ def main():
         "--base-url",
         default=os.environ.get(
             "BRIVO_BASE_URL",
-            "https://gracious-volhard-12.preview.emergentagent.com",
+            "https://growth-funnel-8.preview.emergentagent.com",
         ),
     )
     parser.add_argument("--out", default="/app/tests/snapshots")
