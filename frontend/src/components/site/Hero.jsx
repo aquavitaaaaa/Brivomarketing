@@ -3,6 +3,7 @@ import { ArrowRight, Play, Star, Instagram } from "lucide-react";
 import HeroTechOverlay, { LivePulseBadge } from "@/components/site/HeroTechOverlay";
 import HeroShowcase from "@/components/site/HeroShowcase";
 import useMagneticHover from "@/hooks/useMagneticHover";
+import { useAbTest } from "@/hooks/useAbTest";
 
 const fadeUp = {
   hidden: { y: 32, opacity: 0 },
@@ -15,6 +16,7 @@ const fadeUp = {
 
 export default function Hero({ onCTA }) {
   const magneticRef = useMagneticHover({ strength: 0.25, radius: 150 });
+  const headline = useAbTest("hero_headline", ["a", "b"]);
   return (
     <section
       id="top"
@@ -90,12 +92,25 @@ export default function Hero({ onCTA }) {
             data-testid="hero-title"
             style={{ textShadow: "0 4px 40px rgba(0,0,0,0.45)" }}
           >
-            Custom websites,
-            <br />
-            built to move{" "}
-            <em style={{ fontStyle: "italic" }} className="text-[#E8C28A] font-[500] hero-shimmer">
-              markets.
-            </em>
+            {headline === "b" ? (
+              <>
+                Websites that turn
+                <br />
+                visitors into{" "}
+                <em style={{ fontStyle: "italic" }} className="text-[#E8C28A] font-[500] hero-shimmer">
+                  revenue.
+                </em>
+              </>
+            ) : (
+              <>
+                Custom websites,
+                <br />
+                built to move{" "}
+                <em style={{ fontStyle: "italic" }} className="text-[#E8C28A] font-[500] hero-shimmer">
+                  markets.
+                </em>
+              </>
+            )}
           </motion.h1>
 
           <motion.p

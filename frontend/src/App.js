@@ -28,6 +28,10 @@ import InquiryDialog from "@/components/site/InquiryDialog";
 import ChatWidget from "@/components/site/ChatWidget";
 import CaseStudyModal from "@/components/site/CaseStudyModal";
 import ScrollReveal from "@/components/site/ScrollReveal";
+import ExitIntentModal from "@/components/site/ExitIntentModal";
+import MobileCtaBar from "@/components/site/MobileCtaBar";
+import WelcomeBackBanner from "@/components/site/WelcomeBackBanner";
+import { useVisitor } from "@/hooks/useVisitor";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -73,15 +77,20 @@ const Home = () => {
   const [inquiryService, setInquiryService] = useState("");
   const [inquirySource, setInquirySource] = useState("manual");
   const [activeCase, setActiveCase] = useState(null);
+  const { isReturning, hasConverted, visits } = useVisitor();
 
   const openInquiry = (service = "", source = "manual") => {
     setInquiryService(service);
     setInquirySource(source);
     setInquiryOpen(true);
+    trackEvent("cta_click", window.location.pathname, { meta: { source } });
   };
 
   return (
     <div className="App relative" data-testid="home-root">
+      {isReturning && !hasConverted && (
+        <WelcomeBackBanner visits={visits} onCTA={() => openInquiry("", "welcome-back")} />
+      )}
       <Navigation onCTA={() => openInquiry("", "nav-cta")} />
       <Hero onCTA={() => openInquiry("", "hero-cta")} />
       <TrustBar />
@@ -127,6 +136,8 @@ const Home = () => {
         onCTA={(title) => openInquiry(title, "case-study")}
       />
       <ChatWidget />
+      <MobileCtaBar onCTA={() => openInquiry("", "mobile-bar")} />
+      <ExitIntentModal />
     </div>
   );
 };

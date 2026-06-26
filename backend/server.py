@@ -92,6 +92,14 @@ class AnalyticsEventCreate(BaseModel):
     meta: Optional[Dict[str, Any]] = None
 
 
+class LeadMagnetCreate(BaseModel):
+    email: EmailStr
+    website: Optional[str] = None
+    source: Optional[str] = "lead-magnet"
+    session_id: Optional[str] = None
+    ref_code: Optional[str] = None
+
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -260,6 +268,47 @@ async def track_event(payload: AnalyticsEventCreate, request: Request):
     return {"ok": True}
 
 
+@api_router.post("/leads/audit", response_model=Inquiry)
+async def create_audit_lead(payload: LeadMagnetCreate, request: Request):
+    """Low-friction, email-only capture for the lead magnet (free homepage
+    teardown) and the exit-intent offer. Lands in the same inquiries pipeline
+    so it surfaces in the admin inbox + CRM + analytics."""
+    site = (payload.website or "").strip()
+    msg = "Requested a free homepage teardown / audit."
+    if site:
+        msg += f" Website: {site}"
+    inquiry = Inquiry(
+        name="Free audit request",
+        email=payload.email,
+        company=None,
+        service_interest="Audit request",
+        message=msg,
+        source=payload.source or "lead-magnet",
+        ref_code=payload.ref_code,
+        session_id=payload.session_id,
+    )
+    doc = inquiry.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['ip'] = analytics_utils.client_ip_from_request(request)
+    doc['ua'] = request.headers.get("user-agent")
+    doc['audit_website'] = site or None
+    await db.inquiries.insert_one(doc)
+    logger.info(f"Audit lead from {inquiry.email} (source={inquiry.source})")
+    try:
+        ref_id = await affiliates_module.attach_inquiry_to_affiliate(
+            db, ref_code=payload.ref_code, inquiry=doc
+        )
+        if ref_id:
+            await db.inquiries.update_one(
+                {"id": inquiry.id},
+                {"$set": {"affiliate_referral_id": ref_id}},
+            )
+    except Exception:
+        logger.exception("Affiliate attribution failed (non-fatal)")
+    asyncio.create_task(email_client.send_new_lead_notification(doc))
+    return inquiry
+
+
 # =====================================================================
 # AUTH
 # =====================================================================
@@ -360,6 +409,113 @@ async def inquiry_analytics(
         "funnel": funnel,
         "series": series,
         "top_sources": top_sources,
+    }
+
+
+@api_router.get("/admin/funnel")
+async def conversion_funnel(
+    days: int = 30,
+    admin: dict = Depends(get_current_admin),
+):
+    """Behavioural conversion funnel built from analytics_events.
+
+    Returns ordered steps (distinct sessions reaching each event), the overall
+    step-to-step conversion, exit-intent capture stats, and an A/B-test
+    breakdown (variant -> visitors + conversions)."""
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    events = await db.analytics_events.find(
+        {"created_at": {"$gte": since}}, {"_id": 0}
+    ).to_list(50000)
+
+    # sessions that performed each event
+    sessions_by_event: Dict[str, set] = {}
+    counts_by_event: Dict[str, int] = {}
+    for e in events:
+        ev = e.get("event") or "unknown"
+        sid = e.get("session_id") or e.get("ip") or "anon"
+        sessions_by_event.setdefault(ev, set()).add(sid)
+        counts_by_event[ev] = counts_by_event.get(ev, 0) + 1
+
+    # Inquiry submissions also live in the inquiries collection (source of truth
+    # for actual conversions). Count distinct sessions that submitted.
+    inq = await db.inquiries.find(
+        {"created_at": {"$gte": since}}, {"_id": 0, "session_id": 1, "source": 1}
+    ).to_list(5000)
+    submit_sessions = {i.get("session_id") for i in inq if i.get("session_id")}
+    # merge any front-end submit events too
+    submit_sessions |= sessions_by_event.get("inquiry_submitted", set())
+
+    step_defs = [
+        ("pageview", "Visited site"),
+        ("cta_click", "Clicked a CTA"),
+        ("inquiry_open", "Opened inquiry form"),
+        ("inquiry_step", "Progressed in form"),
+        ("inquiry_submitted", "Submitted inquiry"),
+    ]
+    steps = []
+    top = None
+    for ev, label in step_defs:
+        if ev == "inquiry_submitted":
+            s = len(submit_sessions)
+        else:
+            s = len(sessions_by_event.get(ev, set()))
+        if top is None:
+            top = s
+        pct = round((s / top) * 100, 1) if top else 0.0
+        steps.append({"event": ev, "label": label, "sessions": s, "pct_of_top": pct})
+
+    visitors = len(sessions_by_event.get("pageview", set())) or 1
+    submitted = len(submit_sessions)
+    overall_cvr = round((submitted / visitors) * 100, 2)
+
+    exit_intent = {
+        "shown": len(sessions_by_event.get("exit_intent_shown", set())),
+        "captured": len(sessions_by_event.get("exit_intent_captured", set())),
+    }
+    exit_intent["capture_rate"] = (
+        round((exit_intent["captured"] / exit_intent["shown"]) * 100, 1)
+        if exit_intent["shown"] else 0.0
+    )
+
+    audit_leads = sessions_by_event.get("audit_submitted", set())
+
+    # A/B test breakdown: ab_assigned events carry meta.test + meta.variant
+    ab: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for e in events:
+        if e.get("event") != "ab_assigned":
+            continue
+        meta = e.get("meta") or {}
+        test = meta.get("test") or "default"
+        variant = meta.get("variant") or "a"
+        sid = e.get("session_id") or "anon"
+        t = ab.setdefault(test, {})
+        v = t.setdefault(variant, {"variant": variant, "_sessions": set()})
+        v["_sessions"].add(sid)
+
+    ab_out = []
+    for test, variants in ab.items():
+        rows = []
+        for variant, v in variants.items():
+            vis = v["_sessions"]
+            conv = len(vis & submit_sessions)
+            rows.append({
+                "variant": variant,
+                "visitors": len(vis),
+                "conversions": conv,
+                "cvr": round((conv / len(vis)) * 100, 2) if vis else 0.0,
+            })
+        rows.sort(key=lambda r: r["variant"])
+        ab_out.append({"test": test, "variants": rows})
+
+    return {
+        "days": days,
+        "visitors": len(sessions_by_event.get("pageview", set())),
+        "submitted": submitted,
+        "overall_cvr": overall_cvr,
+        "steps": steps,
+        "exit_intent": exit_intent,
+        "audit_leads": len(audit_leads),
+        "ab_tests": ab_out,
     }
 
 

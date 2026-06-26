@@ -10,6 +10,14 @@ export const submitInquiry = (payload) =>
 export const submitRoiLead = (payload) =>
   axios.post(`${API}/inquiries/roi`, payload).then((r) => r.data);
 
+export const submitAudit = (payload) =>
+  axios.post(`${API}/leads/audit`, payload).then((r) => r.data);
+
+export const fetchFunnel = (days = 30) =>
+  axios
+    .get(`${API}/admin/funnel`, { headers: authHeaders(), params: { days } })
+    .then((r) => r.data);
+
 // ---------- Affiliate / Partner Program ----------
 export const fetchAffiliateProgram = () =>
   axios.get(`${API}/affiliates/program`).then((r) => r.data);

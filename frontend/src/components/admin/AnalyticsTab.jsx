@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { TrendingUp, Users, Eye, Inbox } from "lucide-react";
 import { fetchAnalyticsSummary } from "@/lib/api";
+import ConversionFunnel from "@/components/admin/ConversionFunnel";
 
 function Stat({ icon: Icon, label, value, sub }) {
   return (
@@ -140,6 +141,9 @@ export default function AnalyticsTab() {
       </div>
 
       <DailyChart data={data?.daily_pageviews} />
+
+      <ConversionFunnel days={days} />
+
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <BreakdownList title="Top countries" items={data?.by_country} />
