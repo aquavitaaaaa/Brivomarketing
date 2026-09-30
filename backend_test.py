@@ -9,7 +9,7 @@ import json
 from typing import Dict, Any
 
 # Backend URL from frontend/.env
-BASE_URL = "https://1aec4801-332e-47df-b1cb-fcdfa94eb566.preview.emergentagent.com"
+BASE_URL = "https://strange-goldberg-8.preview.emergentagent.com"
 
 # Admin credentials from test_credentials.md
 ADMIN_EMAIL = "admin@brivomarketing.com"

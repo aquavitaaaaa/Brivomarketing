@@ -1506,7 +1506,7 @@ agent_communication:
       ✅ FULL BACKEND REGRESSION COMPLETE - ALL 9 TEST SUITES PASSED
       
       Test file: /app/backend_regression_test.py
-      Backend URL: https://growth-funnel-8.preview.emergentagent.com/api
+      Backend URL: https://strange-goldberg-8.preview.emergentagent.com/api
       Admin credentials: admin@brivomarketing.com / BrivoAdmin2025!
       
       ═══════════════════════════════════════════════════════════════════════════
