@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 7 — Brivo marketing + Control Room (alerts + Instagram autopilot + DWJ/LOBA portfolio). Backend: 24/24 pytest passed (auth guards on all admin/alerts/* and admin/social/autopilot/* endpoints; alerts status/list/test/read; inquiry->alert wiring; Bland webhook->inquiry+alert; autopilot overview/shots/settings validation; run-now (manual)->draft with correct shot+image; skip cancels; edit persists; approve queues; hot-lead loop detected + hot_alerted_at set within ~90s). Frontend: portfolio DWJ & LOBA cards visible with case modals rendering KPI pods and correct 'Visit live site' hrefs (https://dwjhomeservices.com/, https://lobacatskills.com/); admin login->Alerts tab renders channel checklist (all channels correctly showing as unset/skipped), send-test-alert adds a Test alert row (5->6) and toast confirms 'RESEND_API_KEY not set / Twilio not configured'; /admin/social autopilot panel renders, mode switching auto/timed/manual works, time input appears for timed+manual, drafts show Approve/Skip buttons, all client shots (dwj-site, loba-site, ...) are visible; existing social sections (Content Queue, Cross-Poster, Client Wins, Fleet, Safety) still render. Restored autopilot: mode=auto, enabled=false.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AutopilotPanel", "issue": "Clicking data-testid='autopilot-generate' (and shot buttons) did not fire the POST /admin/social/autopilot/run-now request in one Playwright run after several rapid mode switches. Backend endpoint itself is fully working (verified in pytest). Likely a residual `busy` state or React state race after two consecutive save() calls. Not reproducible reliably; low priority — recommend clearing busy on save() completion or disabling mode buttons while busy.", "selector": "[data-testid=\"autopilot-generate\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_alerts_autopilot.py", "/app/test_reports/pytest/iter7_results.xml"],
+  "action_items": [
+    "None blocking. Optional: harden AutopilotPanel busy-state so rapid save() -> run() clicks always dispatch the POST."
+  ],
+  "critical_code_review_comments": [
+    "alerts.py: notify_inquiry correctly wraps email/sms in try/except and records to db.alerts with ref_id=inquiry.id — degrades to 'skipped: <error>' when keys unset (verified).",
+    "alerts.py: hot_lead_alert_loop uses $nin stage filter + hot_alerted_at $exists:false — idempotent per lead. Daily cap applied via count_documents on rolling 24h. Good.",
+    "social_autopilot.py: PUT /admin/social/autopilot validates mode + post_time + timezone with proper 400s (all 3 negative tests pass). Nice.",
+    "social_autopilot.py: autopilot_tick guards with `local.hour >= 6` — correct per spec; won't overpost. autopilot_date field prevents duplicate per day.",
+    "social_autopilot.py: run_now with body.slug validates against SHOTS dict -> 404. build_post uses SHOWCASE_ROTATION with used-list to avoid repeats. Good.",
+    "server.py: /api/webhooks/bland mirrors call variables.email into inquiries + fires notify_inquiry — verified end-to-end (alert appears with kind='inquiry').",
+    "Portfolio.jsx: DWJ and LOBA entries include url= properly, so CaseStudyModal renders `case-visit-{id}` anchor with target=_blank + noopener — good.",
+    "AlertsTab.jsx: KIND map covers hot_lead/inquiry/call/social_failed/test — all rendered kinds are typed. Polling every 20s; test button disables while sending — good UX.",
+    "AutopilotPanel.jsx: `busy` state is a single string; two overlapping actions could both set/clear it out of order. Consider replacing with per-action loading flags to avoid rare double-click race."
+  ],
+  "updated_files": ["/app/backend/tests/test_alerts_autopilot.py"],
+  "success_rate": {"backend": "100% (24/24)", "frontend": "95% (portfolio + alerts + autopilot render + interact; one flaky generate-click observed once)"},
+  "test_credentials": "admin@brivo.com / BrivoAdmin2026! (from /app/memory/test_credentials.md; login POST /api/auth/admin/login returns {token})",
+  "seed_data_creation": "Test suite creates TEST_ prefixed inquiries + a TEST_hot_* lead (signal_score=95) to prove hot-lead loop. Test drafts are all skipped (status=cancelled) at end. Autopilot settings restored to mode=auto, enabled=false via module-scoped fixture teardown.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Full backend pytest at /app/backend/tests/test_alerts_autopilot.py — 24 tests, ~110s runtime for the fast subset and ~90s for the hot-lead loop test. Public URL from REACT_APP_BACKEND_URL. Frontend testids used: portfolio-item-dwj, portfolio-item-loba, case-visit-dwj, case-visit-loba, admin-tab-alerts, alerts-tab, alerts-config, alerts-send-test, alert-<id>, autopilot-panel, autopilot-channel, autopilot-enabled-toggle, autopilot-mode-{auto,timed,manual}, autopilot-time, autopilot-tz, autopilot-generate, autopilot-post-now, autopilot-post-<id>, approve-<id>, skip-<id>, shot-<slug>, social-shots. Emergent LLM key falls back to curated captions for autopilot showcase posts — this is expected (test relies on 'shot' + 'image_url' only, not caption content).",
+  "rca of the issue": "N/A — no functional bugs."
+}
