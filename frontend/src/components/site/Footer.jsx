@@ -58,6 +58,8 @@ export default function Footer({ onCTA }) {
             <li><a className="link-underline" href="#work">Work</a></li>
             <li><a className="link-underline" href="#process">Process</a></li>
             <li><a className="link-underline" href="#pricing">Pricing</a></li>
+            <li><a className="link-underline" href="/work/dwj-home-services" data-testid="footer-case-dwj">DWJ case study</a></li>
+            <li><a className="link-underline" href="/work/loba-catskill-restaurant" data-testid="footer-case-loba">LOBA case study</a></li>
             <li><a className="link-underline" href="/brand-kit" data-testid="footer-brand-kit-link">Brand kit</a></li>
           </ul>
         </div>

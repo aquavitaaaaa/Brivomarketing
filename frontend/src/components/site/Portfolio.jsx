@@ -132,6 +132,7 @@ const projects = [
     metric: "Photo in, price out — in seconds",
     img: "/portfolio/dwj-desktop.jpg",
     url: "https://dwjhomeservices.com/",
+    page: "/work/dwj-home-services",
     span: "lg:col-span-7",
     desc: "A conversion-first site for a Tampa Bay pool-enclosure and lanai-screen contractor. Homeowners upload a photo of damaged screens and an AI estimator returns a price range and financing option on the spot. Built around click-to-call, free inspections, a before/after slider, a time-lapse of the crew at work and a service-area map for Tampa, Lutz, Wesley Chapel, Brandon, Clearwater and more.",
     kpis: [
@@ -149,6 +150,7 @@ const projects = [
     metric: "Live-fire dining, booked online",
     img: "/portfolio/loba-desktop.jpg",
     url: "https://lobacatskills.com/",
+    page: "/work/loba-catskill-restaurant",
     span: "lg:col-span-5",
     desc: "An atmospheric, story-led site for a charcoal-fire restaurant in Tannersville, NY. A table-finder sits above the fold, the menu leads with signature dishes, and a 'Provenance Ledger' names every farm on the menu. Seasonal storytelling, a locals-pricing pass, a pasta counter for takeaway and a mailing list turn scrollers into reservations.",
     kpis: [

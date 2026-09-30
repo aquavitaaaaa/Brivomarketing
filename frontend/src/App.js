@@ -44,6 +44,7 @@ import InstagramKit from "@/pages/InstagramKit";
 import IgPromo from "@/pages/IgPromo";
 import PartnersPage from "@/pages/Partners";
 import PairWizard from "@/pages/PairWizard";
+import CaseStudyPage from "@/pages/CaseStudyPage";
 import { trackEvent } from "@/lib/api";
 
 function PageViewTracker() {
@@ -158,6 +159,7 @@ function App() {
         <Route path="/instagram-kit" element={<InstagramKit />} />
         <Route path="/ig-promo" element={<IgPromo />} />
         <Route path="/partners" element={<PartnersPage />} />
+        <Route path="/work/:slug" element={<CaseStudyPage />} />
         <Route path="/pair" element={<PairWizard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
