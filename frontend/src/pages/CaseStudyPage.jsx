@@ -187,6 +187,12 @@ export default function CaseStudyPage() {
               Start a project <ArrowRight size={16} />
             </button>
           </div>
+          {cs.industryPage && (
+            <Link to={`/web-design/${cs.industryPage}`} data-testid="case-industry-link"
+              className="mt-8 mr-8 inline-flex items-center gap-2 text-[15px] text-[#0B1B2B] hover:text-[#B8864C]">
+              Web design for {cs.industryLabel} <ArrowRight size={15} />
+            </Link>
+          )}
           {related && (
             <Link to={`/work/${related.slug}`} data-testid="case-related-link"
               className="mt-8 inline-flex items-center gap-2 text-[15px] text-[#0B1B2B] hover:text-[#B8864C]">

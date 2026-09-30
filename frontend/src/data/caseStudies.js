@@ -49,6 +49,7 @@ export const CASE_STUDIES = {
       { q: "Where can I see the finished website?", a: "The live site is dwjhomeservices.com." },
     ],
     related: "loba-catskill-restaurant",
+    industryPage: "home-service-contractors",
   },
   "loba-catskill-restaurant": {
     slug: "loba-catskill-restaurant",
@@ -98,6 +99,7 @@ export const CASE_STUDIES = {
       { q: "Where can I see the finished website?", a: "The live site is lobacatskills.com." },
     ],
     related: "dwj-home-services",
+    industryPage: "restaurants",
   },
 };
 

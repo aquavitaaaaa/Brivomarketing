@@ -26,3 +26,6 @@ P1: Verify email/SMS/Bland/IG with real keys; deploy + custom domain. P2: real s
 P0: deploy + custom domain, run gen_sitemap.py, submit to Google Search Console + Google Business Profile; add real keys (Resend/Twilio/Bland/Meta).
 P1: real client testimonials + measured results; industry landing pages (home-services / restaurant web design); blog/insights posts for local SEO; pre-render (SPA) for faster indexing; Meta Pixel/GA4 conversion tracking; Calendly booking.
 P2: Reels/carousel autopilot; review-request automation; email nurture sequences.
+
+## 2026-09-30 — Industry landing pages
+- `/web-design/home-service-contractors` and `/web-design/restaurants` (`pages/IndustryPage.jsx`, content `src/data/industryPages.js`): SEO title/meta/canonical/OG, Service + FAQPage + BreadcrumbList JSON-LD, problems, inclusions, trades, process, FAQ, CTA (inquiry preselected "Web Design & Development"), links to matching case study + cross-link. Linked from footer and case pages; added to sitemap script. Verified by screenshots only.
