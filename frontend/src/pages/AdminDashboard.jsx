@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Bot,
   Users,
+  Bell,
 } from "lucide-react";
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
@@ -17,6 +18,7 @@ import CallsTab from "@/components/admin/CallsTab";
 import OperatorTab from "@/components/admin/OperatorTab";
 import MessagesTab from "@/components/admin/MessagesTab";
 import AgentsTab from "@/components/admin/AgentsTab";
+import AlertsTab from "@/components/admin/AlertsTab";
 import AdminNav from "@/components/admin/AdminNav";
 
 const TABS = [
@@ -27,6 +29,7 @@ const TABS = [
   { id: "agents", label: "AI Agents", icon: Bot },
   { id: "calls", label: "Calls", icon: PhoneCall },
   { id: "operator", label: "Operator", icon: Radio },
+  { id: "alerts", label: "Alerts", icon: Bell },
 ];
 
 export default function AdminDashboard() {
@@ -66,6 +69,7 @@ export default function AdminDashboard() {
     agents: AgentsTab,
     calls: CallsTab,
     operator: OperatorTab,
+    alerts: AlertsTab,
   }[tab];
 
   return (

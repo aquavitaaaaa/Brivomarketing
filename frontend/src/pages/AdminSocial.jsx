@@ -7,6 +7,7 @@ import {
   Shield, Pause, PlayCircle, Trophy, Zap, Target, Trash2, Eye, Link2, Share2,
 } from "lucide-react";
 import AdminNav from "@/components/admin/AdminNav";
+import AutopilotPanel from "@/components/admin/AutopilotPanel";
 import {
   adminMe, socialDashboard, socialAgents, socialCreatePairCode, socialRevokeAgent,
   socialCreatePairInvite,
@@ -1271,6 +1272,8 @@ export default function AdminSocial() {
           <StatCard label="Published"     value={dash?.published     ?? 0} testid="stat-published" />
           <StatCard label="Failed"        value={dash?.failed        ?? 0} testid="stat-failed" />
         </div>
+
+        <AutopilotPanel />
 
         {/* Pair + Agents */}
         <div className="grid md:grid-cols-2 gap-6">

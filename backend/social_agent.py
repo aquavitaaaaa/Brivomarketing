@@ -824,10 +824,11 @@ async def _pick_agent() -> Optional[str]:
 async def _process_due_posts(db) -> None:
     """Find posts whose scheduled_at <= now and dispatch one job per platform."""
     now_iso = _now()
-    cursor = db.social_posts.find(
-        {"status": "queued", "scheduled_at": {"$lte": now_iso}},
-        {"_id": 0},
-    ).limit(20)
+    import social_autopilot
+    q = {"status": "queued", "scheduled_at": {"$lte": now_iso}}
+    if (await social_autopilot.channel_status(db))["active"] != "paired_host":
+        q["source"] = {"$ne": "autopilot"}
+    cursor = db.social_posts.find(q, {"_id": 0}).limit(20)
     posts = await cursor.to_list(length=20)
     if not posts:
         return

@@ -140,6 +140,18 @@ export default function CaseStudyModal({ open, project, onClose, onCTA }) {
                   Start a similar project
                   <ArrowRight size={15} />
                 </button>
+                {project.url && (
+                  <a
+                    href={project.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`case-visit-${project.id}`}
+                    className="inline-flex items-center gap-2 border border-[#0B1B2B] text-[#0B1B2B] rounded-full text-[14px] font-medium px-7 py-3.5 hover:bg-[#0B1B2B] hover:text-white transition-colors"
+                  >
+                    Visit live site
+                    <ArrowRight size={15} />
+                  </a>
+                )}
                 <button
                   onClick={onClose}
                   className="text-[13px] text-[#8190A1] hover:text-[#0B1B2B] transition-colors"

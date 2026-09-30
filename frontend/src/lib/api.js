@@ -347,3 +347,21 @@ export const directIgDisconnect = (id) =>
     .then((r) => r.data);
 
 
+
+// ---------- Alerts + Instagram autopilot ----------
+const aget = (p, params) => axios.get(`${API}${p}`, { headers: authHeaders(), params }).then((r) => r.data);
+const apost = (p, body = {}, params) => axios.post(`${API}${p}`, body, { headers: authHeaders(), params, timeout: 120000 }).then((r) => r.data);
+
+export const alertsStatus = () => aget("/admin/alerts/status");
+export const alertsList = () => aget("/admin/alerts");
+export const alertsMarkRead = () => apost("/admin/alerts/read");
+export const alertsTest = () => apost("/admin/alerts/test");
+
+export const apOverview = () => aget("/admin/social/autopilot");
+export const apUpdate = (body) => axios.put(`${API}/admin/social/autopilot`, body, { headers: authHeaders() }).then((r) => r.data);
+export const apPosts = () => aget("/admin/social/autopilot/posts");
+export const apRunNow = (body) => apost("/admin/social/autopilot/run-now", body);
+export const apApprove = (id, publish_now = true) => apost(`/admin/social/autopilot/posts/${id}/approve`, {}, { publish_now });
+export const apSkip = (id) => apost(`/admin/social/autopilot/posts/${id}/skip`);
+export const apEdit = (id, body) => axios.patch(`${API}/admin/social/autopilot/posts/${id}`, body, { headers: authHeaders() }).then((r) => r.data);
+export const apShots = () => aget("/admin/social/autopilot/shots");

@@ -125,6 +125,40 @@ const projects = [
     ],
     summary: "Silicon-Valley-serious, editorially restrained, and built to be screenshotted by the people you want in the room.",
   },
+  {
+    id: "dwj",
+    title: "DWJ Home Services",
+    cat: "Home services · Lead-gen site + AI estimator",
+    metric: "Photo in, price out — in seconds",
+    img: "/portfolio/dwj-desktop.jpg",
+    url: "https://dwjhomeservices.com/",
+    span: "lg:col-span-7",
+    desc: "A conversion-first site for a Tampa Bay pool-enclosure and lanai-screen contractor. Homeowners upload a photo of damaged screens and an AI estimator returns a price range and financing option on the spot. Built around click-to-call, free inspections, a before/after slider, a time-lapse of the crew at work and a service-area map for Tampa, Lutz, Wesley Chapel, Brandon, Clearwater and more.",
+    kpis: [
+      { label: "AI estimator",   value: "Live",   note: "photo or sq-ft quote" },
+      { label: "Services",       value: "7",      note: "each with 'from' pricing" },
+      { label: "Financing",      value: "$89/mo", note: "shown on every CTA" },
+      { label: "Service area",   value: "8",      note: "Tampa Bay cities" },
+    ],
+    summary: "The fastest way to win a local job is to answer 'how much?' before the competitor picks up the phone. We built the site that does.",
+  },
+  {
+    id: "loba",
+    title: "LOBA Catskill Restaurant",
+    cat: "Hospitality · Restaurant site + reservations",
+    metric: "Live-fire dining, booked online",
+    img: "/portfolio/loba-desktop.jpg",
+    url: "https://lobacatskills.com/",
+    span: "lg:col-span-5",
+    desc: "An atmospheric, story-led site for a charcoal-fire restaurant in Tannersville, NY. A table-finder sits above the fold, the menu leads with signature dishes, and a 'Provenance Ledger' names every farm on the menu. Seasonal storytelling, a locals-pricing pass, a pasta counter for takeaway and a mailing list turn scrollers into reservations.",
+    kpis: [
+      { label: "Reservations",   value: "Online", note: "date, guests, time" },
+      { label: "Named farms",    value: "9",      note: "on the provenance ledger" },
+      { label: "Wine list",      value: "120+",   note: "labels featured" },
+      { label: "Menu refresh",   value: "4x/yr",  note: "seasonal storytelling" },
+    ],
+    summary: "A restaurant is a feeling before it is a menu. We put the fire, the mountain and the table on the screen — then made booking one tap away.",
+  },
 ];
 
 export default function Portfolio({ onOpen }) {
@@ -199,8 +233,8 @@ export default function Portfolio({ onOpen }) {
 
       <div className="mt-8 text-center">
         <p className="text-[12px] text-[#8190A1]">
-          Representative outcomes from launched engagements. References, contact,
-          and live URLs available under NDA.
+          DWJ Home Services and LOBA are live and linked in their case studies.
+          Other outcomes are representative; references available on request.
         </p>
       </div>
     </section>

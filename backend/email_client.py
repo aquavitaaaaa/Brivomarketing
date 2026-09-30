@@ -76,12 +76,16 @@ def _inquiry_email_html(inquiry: Dict[str, Any]) -> str:
     """
 
 
+def _recipients(raw: str) -> list:
+    return [e.strip() for e in (raw or "").split(",") if e.strip()]
+
+
 def _send_sync(to_email: str, subject: str, html: str) -> None:
     resend.api_key = os.environ["RESEND_API_KEY"]
-    sender = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+    sender = os.environ.get("SENDER_EMAIL", "").strip() or "onboarding@resend.dev"
     resend.Emails.send({
         "from": sender,
-        "to": [to_email],
+        "to": _recipients(to_email),
         "subject": subject,
         "html": html,
     })
@@ -101,3 +105,17 @@ async def send_new_lead_notification(inquiry: Dict[str, Any]) -> None:
         logger.info(f"Lead email sent to {notify_to} for {inquiry.get('email')}")
     except Exception:
         logger.exception("Failed to send lead notification email")
+
+
+async def send_email(to_email: str, subject: str, html: str) -> dict:
+    """Generic send. Returns {ok, error?}. Never raises."""
+    if not is_configured():
+        return {"ok": False, "error": "RESEND_API_KEY not set"}
+    if not _recipients(to_email):
+        return {"ok": False, "error": "NOTIFY_EMAIL not set"}
+    try:
+        await asyncio.to_thread(_send_sync, to_email, subject, html)
+        return {"ok": True}
+    except Exception as e:
+        logger.exception("send_email failed")
+        return {"ok": False, "error": str(e)[:200]}

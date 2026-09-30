@@ -25,6 +25,8 @@ from auth import (
 import bland_client
 import analytics_utils
 import email_client
+import alerts as alerts_module
+import social_autopilot
 import agents as agents_module
 import social_agent
 import lead_engine
@@ -209,7 +211,7 @@ async def create_inquiry(payload: InquiryCreate, request: Request):
             )
     except Exception:
         logger.exception("Affiliate attribution failed (non-fatal)")
-    asyncio.create_task(email_client.send_new_lead_notification(doc))
+    asyncio.create_task(alerts_module.notify_inquiry(db, doc))
     return inquiry
 
 
@@ -240,7 +242,7 @@ async def create_roi_lead(payload: RoiLeadCreate, request: Request):
     doc['ua'] = request.headers.get("user-agent")
     await db.inquiries.insert_one(doc)
     logger.info(f"ROI lead from {inquiry.email} — lift ${payload.lift:,.0f}")
-    asyncio.create_task(email_client.send_new_lead_notification(doc))
+    asyncio.create_task(alerts_module.notify_inquiry(db, doc))
     return inquiry
 
 
@@ -305,7 +307,7 @@ async def create_audit_lead(payload: LeadMagnetCreate, request: Request):
             )
     except Exception:
         logger.exception("Affiliate attribution failed (non-fatal)")
-    asyncio.create_task(email_client.send_new_lead_notification(doc))
+    asyncio.create_task(alerts_module.notify_inquiry(db, doc))
     return inquiry
 
 
@@ -787,7 +789,7 @@ async def operator_toggle(
                 status_code=400,
                 detail="Set BLAND_INBOUND_NUMBER in backend/.env to enable inbound.",
             )
-        webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhooks/bland"
+        webhook_url = f"{(os.environ.get('PUBLIC_BASE_URL') or str(request.base_url)).rstrip('/')}/api/webhooks/bland"
         await bland_client.configure_inbound_number(
             phone_number=inbound,
             pathway_id=os.environ.get("BLAND_PATHWAY_ID") or None,
@@ -822,7 +824,7 @@ async def operator_outbound_call(
         f"book a 30-minute audit call. Collect email and best callback time. "
         f"Keep the call under 3 minutes. Be friendly and confident."
     )
-    webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhooks/bland"
+    webhook_url = f"{(os.environ.get('PUBLIC_BASE_URL') or str(request.base_url)).rstrip('/')}/api/webhooks/bland"
     result = await bland_client.start_outbound_call(
         phone_number=payload.phone_number,
         task=task,
@@ -902,7 +904,7 @@ async def bland_webhook(request: Request):
     if variables.get("email") or variables.get("customer_email"):
         email = variables.get("email") or variables.get("customer_email")
         try:
-            await db.inquiries.insert_one({
+            inq = {
                 "id": str(uuid.uuid4()),
                 "name": variables.get("name") or variables.get("customer_name") or "Phone lead",
                 "email": email,
@@ -915,9 +917,14 @@ async def bland_webhook(request: Request):
                 "source": f"operator-{call_doc['direction']}",
                 "status": "new",
                 "created_at": datetime.now(timezone.utc).isoformat(),
-            })
+            }
+            await db.inquiries.insert_one(dict(inq))
+            asyncio.create_task(alerts_module.notify_inquiry(db, inq))
         except Exception:
             logger.exception("Failed to mirror call to inquiries")
+    else:
+        caller = call_doc.get("from_number") or call_doc.get("phone_number") or "unknown"
+        asyncio.create_task(alerts_module.notify_call(db, caller, call_doc["direction"], payload.get("call_length")))
 
     return {"ok": True}
 
@@ -1167,6 +1174,12 @@ app.include_router(affiliates_module.router, prefix="/api")
 instagram_direct.attach(db)
 app.include_router(instagram_direct.router, prefix="/api")
 
+alerts_module.attach(db)
+app.include_router(alerts_module.router, prefix="/api")
+
+social_autopilot.attach(db)
+app.include_router(social_autopilot.router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -1251,6 +1264,22 @@ async def on_startup():
         await affiliates_module.ensure_indexes(db)
     except Exception:
         logger.exception("Affiliate index seeding failed (non-fatal)")
+    try:
+        await db.alerts.create_index("created_at")
+        await db.client_wins.update_one({"title": "DWJ Home Services"}, {"$setOnInsert": {
+            "id": str(uuid.uuid4()), "title": "DWJ Home Services", "metric": "Photo-to-price AI estimator",
+            "detail": "Tampa Bay pool-cage contractor site: AI estimate from a photo, $89/mo financing on every CTA, before/after proof.",
+            "tags": ["local", "home-services"], "vertical": "home services", "uses": 0, "last_used_at": None,
+            "created_at": datetime.now(timezone.utc).isoformat()}}, upsert=True)
+        await db.client_wins.update_one({"title": "LOBA Catskill Restaurant"}, {"$setOnInsert": {
+            "id": str(uuid.uuid4()), "title": "LOBA Catskill Restaurant", "metric": "9 named farms + online reservations",
+            "detail": "Charcoal-fire restaurant in Tannersville NY: table-finder above the fold, provenance ledger, seasonal storytelling.",
+            "tags": ["restaurant", "hospitality"], "vertical": "hospitality", "uses": 0, "last_used_at": None,
+            "created_at": datetime.now(timezone.utc).isoformat()}}, upsert=True)
+    except Exception:
+        logger.exception("client win seeding failed (non-fatal)")
+    asyncio.create_task(alerts_module.hot_lead_alert_loop(db))
+    asyncio.create_task(social_autopilot.autopilot_loop(db))
     logger.info("Admin seeded. Ready.")
 
 
