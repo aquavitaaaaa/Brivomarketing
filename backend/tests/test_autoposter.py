@@ -9,7 +9,7 @@ Covers:
 - URL leak scrub: no generated caption or preview body should contain a
   literal .com / .ai hostname belonging to Brivo's own site.
 
-These tests are resilient to EMERGENT_LLM_KEY budget exhaustion — they fall
+These tests are resilient to AI-key budget exhaustion — they fall
 back to deterministic templates that still respect the URL-scrub rule.
 """
 import os
@@ -20,7 +20,7 @@ import requests
 
 BASE_URL = os.environ.get(
     "REACT_APP_BACKEND_URL",
-    "https://strange-goldberg-8.preview.emergentagent.com",
+    "https://brivomarketing.com",
 ).rstrip("/")
 API = f"{BASE_URL}/api"
 

@@ -5,7 +5,7 @@ Covers:
 - POST /api/inquiries (create + persistence)
 - GET /api/inquiries (list, no _id leak)
 - POST /api/inquiries (validation: bad email, missing required)
-- POST /api/chat (Claude via emergentintegrations + session continuity)
+- POST /api/chat (AI chat + session continuity)
 """
 import os
 import re
@@ -13,7 +13,7 @@ import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://strange-goldberg-8.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://brivomarketing.com").rstrip("/")
 API = f"{BASE_URL}/api"
 
 
