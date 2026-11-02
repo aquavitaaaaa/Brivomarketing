@@ -99,8 +99,11 @@ export default function Footer({ onCTA }) {
             </li>
             <li>
               <a
-                href="#"
+                href="https://www.linkedin.com/company/brivomarketing/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+                data-testid="footer-linkedin"
               >
                 <Linkedin size={15} />
                 LinkedIn
@@ -108,8 +111,11 @@ export default function Footer({ onCTA }) {
             </li>
             <li>
               <a
-                href="#"
+                href="https://x.com/brivomarketing"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+                data-testid="footer-x"
               >
                 <Twitter size={15} />
                 X · Twitter
@@ -117,8 +123,11 @@ export default function Footer({ onCTA }) {
             </li>
             <li>
               <a
-                href="#"
+                href="https://dribbble.com/brivomarketing"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 link-underline hover:text-[#D4A971] transition-colors"
+                data-testid="footer-dribbble"
               >
                 <Dribbble size={15} />
                 Dribbble
@@ -128,9 +137,9 @@ export default function Footer({ onCTA }) {
         </div>
       </div>
 
-      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 text-[12px] text-white/45">
+      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 text-[12px] text-white/45 pr-20 sm:pr-0">
         <span>© 2026 BrivoMarketing — All rights reserved</span>
-        <span>Designed and engineered with care.</span>
+        <span className="hidden sm:inline">Designed and engineered with care.</span>
       </div>
     </footer>
   );
