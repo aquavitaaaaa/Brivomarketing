@@ -5,8 +5,10 @@ import { BOOKING_URL, hasBooking } from "@/lib/config";
 
 // Persistent bottom action bar on mobile only. Surfaces after the visitor
 // scrolls past the hero so the primary CTA is always one tap away.
+// Hides when the footer is in view so it never covers the bottom bar.
 export default function MobileCtaBar({ onCTA }) {
   const [show, setShow] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
@@ -15,6 +17,16 @@ export default function MobileCtaBar({ onCTA }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer || !("IntersectionObserver" in window)) return;
+    const obs = new IntersectionObserver(([entry]) => setFooterVisible(entry.isIntersecting), {
+      threshold: 0.08,
+    });
+    obs.observe(footer);
+    return () => obs.disconnect();
   }, []);
 
   const book = () => {
@@ -34,7 +46,7 @@ export default function MobileCtaBar({ onCTA }) {
   return (
     <div
       className={`md:hidden fixed inset-x-0 bottom-0 z-[90] transition-transform duration-300 ${
-        show ? "translate-y-0" : "translate-y-full"
+        show && !footerVisible ? "translate-y-0" : "translate-y-full"
       }`}
       data-testid="mobile-cta-bar"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
