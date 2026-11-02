@@ -188,6 +188,11 @@ async def generate_post_batch(
                 continue
 
             caption_full = cap["caption"]
+            if not caption_full:
+                cap_fb, tags_fb = FALLBACK_CAPTIONS.get(theme, FALLBACK_CAPTIONS["receipts"])
+                caption_full = cap_fb
+                if tags_fb and not cap["hashtags"]:
+                    cap["hashtags"] = tags_fb
             if cap["hashtags"]:
                 caption_full = f"{caption_full}\n\n{cap['hashtags']}"
 
