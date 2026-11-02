@@ -180,3 +180,9 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# overlay black-box crash/user-report dumps — session data, never history
+**/.emergent/recordings/
+.emergent/recordings/
+frontend/node_modules/.cache/default-development/3.pack
+frontend/node_modules/.cache/default-development/1.pack

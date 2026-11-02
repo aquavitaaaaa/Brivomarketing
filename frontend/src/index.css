@@ -246,10 +246,10 @@ html, body { max-width: 100%; }
   100% { transform: translateX(380%); opacity: 0; }
 }
 
-/* Slow Ken-Burns drift on hero bg image — subtle "alive" feel */
+/* Slow Ken-Burns drift on hero bg image — position shift only (no scale, no page overflow) */
 @keyframes heroBgDrift {
-  0%, 100% { transform: scale(1.08) translate(0, 0); }
-  50%      { transform: scale(1.12) translate(-1%, -0.8%); }
+  0%, 100% { object-position: 50% 50%; }
+  50%      { object-position: 48% 46%; }
 }
 
 /* ─── HERO: AURORA + 3D HORIZON GRID ─────────────────────────
@@ -281,7 +281,6 @@ html, body { max-width: 100%; }
   object-position: center;
   opacity: 0.88;
   animation: heroBgDrift 30s ease-in-out infinite;
-  will-change: transform;
 }
 .hero-image-tint {
   position: absolute;
@@ -601,16 +600,17 @@ html, body { max-width: 100%; }
   50%      { transform: translate(6%, 8%) scale(1.14); opacity: 0.55; }
 }
 
-/* ── 3D horizon grid — receding perspective floor ── */
+/* ── 3D horizon grid — receding perspective floor (clipped to viewport) ── */
 .hero-horizon {
   position: absolute;
   bottom: -2%;
-  left: 50%;
-  width: 220%;
+  left: 0;
+  width: 100%;
   height: 58%;
-  transform: translateX(-50%) perspective(900px) rotateX(62deg);
+  transform: perspective(900px) rotateX(62deg);
   transform-origin: bottom center;
   pointer-events: none;
+  overflow: hidden;
   mask-image: linear-gradient(to top, black 35%, transparent 95%);
   -webkit-mask-image: linear-gradient(to top, black 35%, transparent 95%);
 }

@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /pair
 Disallow: /api/
 
-Sitemap: https://2459f6a0-f18e-4421-9b5a-fede7cc01981.preview.emergentagent.com/sitemap.xml
+Sitemap: https://brivomarketing.com/sitemap.xml

@@ -52,8 +52,10 @@ async def get_current_admin(request: Request) -> dict:
 
 
 async def seed_admin(db) -> None:
-    admin_email = os.environ["ADMIN_EMAIL"].lower().strip()
-    admin_password = os.environ["ADMIN_PASSWORD"]
+    admin_email = (os.environ.get("ADMIN_EMAIL", "") or "").lower().strip()
+    admin_password = os.environ.get("ADMIN_PASSWORD", "")
+    if not admin_email or not admin_password:
+        return
     existing = await db.users.find_one({"email": admin_email})
     if existing is None:
         await db.users.insert_one({

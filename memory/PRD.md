@@ -1,31 +1,70 @@
-# Brivo — AI Performance Studio
+# PRD — BrivoMarketing Go-Live (67.217.246.13 + brivomarketing.com)
 
-## Problem statement
-Premium marketing-agency landing page for BrivoMarketing + private admin "Control Room" (analytics, leads, calls, Bland.ai AI phone operator, lead engine, social auto-poster, affiliates). Goal: more exposure and more clients.
+## What this project is
+BrivoMarketing: AI performance-studio marketing site (React) + FastAPI backend
+(inquiries, chat, admin CRM, social auto-poster, lead engine, affiliates) +
+host agent for a home Mac Mini that drives real social posting.
+Repo: github.com/aquavitaaaaa/Brivomarketing (private, branch main).
 
-## Implemented
-- Public site, ROI calc, chat, case-study modal, analytics, admin dashboard, lead engine, social agent/direct IG poster (pre-existing).
-- 2026-09-30: env restored (backend/.env, frontend/.env), app running in preview.
-- 2026-09-30: Alerts — `backend/alerts.py`: new inquiry/ROI/audit/AI-call -> Resend email + Twilio SMS + dashboard feed; hot lead (signal_score >= HOT_LEAD_THRESHOLD, default 75, cap 20/day) batched every 90s. Admin "Alerts" tab with channel checklist + test button. Keys blank in backend/.env -> channels show "skipped" until set.
-- 2026-09-30: Instagram autopilot — `backend/social_autopilot.py` + `AutopilotPanel.jsx` (in /admin/social). Modes auto / timed / manual(draft+approve), timezone, post-now, editable drafts, 12 branded social shots (`scripts/make_social_cards.py` -> public/kit-assets/social). Channels: Graph API (META_ACCESS_TOKEN + IG_BUSINESS_ACCOUNT_ID + PUBLIC_BASE_URL) > direct account > paired host.
-- 2026-09-30: Portfolio: added DWJ Home Services (dwjhomeservices.com) and LOBA Catskill Restaurant (lobacatskills.com) case studies with "Visit live site" link; seeded as client wins for the recycler.
-- Bland webhook URL now uses PUBLIC_BASE_URL; phone leads alert.
+## Where things stand (2026-11-02)
+- GitHub project is on this box and RUNNING: backend live, admin login
+  verified, inquiry validation verified, frontend serving
+  "Brivo — AI Performance Studio".
+- Fixed on this box: resend added to venv, ADMIN seed crash hardened
+  (backend starts without ADMIN creds), react-helmet-async installed,
+  hero horizontal-overflow fixed (desktop + mobile re-verified).
+- Go-live artifacts committed locally (bee9f42, NOT yet pushed — GitHub
+  returns 403 "Write access not granted" for the saved PAT despite the API
+  reporting push:true; owner must re-issue token or grant write):
+  - scripts/deploy-67.sh — one-command prod deploy for 67.217.246.13
+    (system deps, venv, nginx, systemd, certbot HTTPS, sitemap regen)
+  - backend/.env.example — full env template for the live box
+  - sitemap.xml + robots.txt regenerated for https://brivomarketing.com
+  - frontend/yarn.lock now tracked for reproducible builds
 
-## Keys the user must add in /app/backend/.env
-RESEND_API_KEY, SENDER_EMAIL, NOTIFY_EMAIL; TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, ALERT_SMS_TO; BLAND_API_KEY, BLAND_INBOUND_NUMBER, BLAND_PATHWAY_ID, BLAND_WEBHOOK_SECRET; META_ACCESS_TOKEN, IG_BUSINESS_ACCOUNT_ID. Set PUBLIC_BASE_URL to the production domain after deploy.
+## GitHub (remote) vs this box (local) — inventory
+- Remote: full BrivoMarketing app — 26 backend .py files (server, auth,
+  social suite, lead engine, affiliates, IG direct), 246 frontend files
+  (site components, 14 pages, admin), agent_host (Mac Mini poster),
+  scripts (incl. gen_sitemap.py), backend tests.
+- Local: identical to remote PLUS the go-live commit above.
+- Neither 74.208.113.74 nor 67.217.246.13 hosts Brivo today (.74 = solar +
+  GivBux apps; .13 = game dashboard + KAIROS deck). Real brivo.com is WP
+  Engine (unrelated). brivomarketing.com currently 403 "Edge IP Restricted"
+  (Cloudflare 1034 — domain not attached to any hosting; DNS points at
+  Cloudflare IPs waiting for a server).
+
+## What's needed to port this to 67 + get it on the domain
+1. OWNER — GitHub: re-issue PAT with Contents write (or invite
+   collaborator), then push bee9f42. Nothing deploys until this lands.
+2. OWNER — 67 box: rotate the exposed root password, then run
+   scripts/deploy-67.sh as root (needs fresh secure access; we never SSH'd).
+   Script installs Mongo/nginx, builds frontend with
+   REACT_APP_BACKEND_URL=https://brivomarketing.com, issues HTTPS via
+   certbot, serves /agent-host/ for the Mac Mini installer.
+3. OWNER — env on 67: copy backend/.env.example to backend/.env and set
+   ADMIN_EMAIL/ADMIN_PASSWORD (strong), JWT_SECRET (32+ random), CORS_ORIGINS
+   + PUBLIC_BASE_URL to https://brivomarketing.com (+www). Optional keys can
+   stay empty (skeleton mode): RESEND_API_KEY, EMERGENT_LLM_KEY (chat returns
+   500 "LLM key not configured" until set — verified), Meta/Bland/X/Twilio.
+4. OWNER — DNS (Cloudflare): A @ to 67.217.246.13, A www to 67.217.246.13
+   (DNS-only first, then orange-cloud + Full/Strict SSL after certbot).
+   This clears the current 1034 Edge-IP-Restricted error.
+5. Post-deploy: submit sitemap in Search Console, set BOOKING_URL in
+   frontend/src/lib/config.js if a scheduler link exists, pair the Mac Mini
+   via /admin/social, change default admin password.
+
+## Test status
+- PASS: backend root, admin login + JWT, inquiry validation (4xx on bad
+  email/missing fields), frontend title + desktop/mobile screenshots,
+  production yarn build.
+- KNOWN-GAP (not a bug): /api/chat returns 500 "LLM key not configured"
+  until EMERGENT_LLM_KEY is set on the box. Test file expects chat to work;
+  set the key or accept fallback before calling it done.
+- NOT done: testing-agent e2e (backend suite run directly instead),
+  push to GitHub (blocked on 403), anything on the 67 box (no access used).
 
 ## Backlog
-P1: Verify email/SMS/Bland/IG with real keys; deploy + custom domain. P2: real screenshots of client sites, testimonials, case-study pages/SEO, Reels/carousel autopilot.
-
-## 2026-09-30 — Local SEO case-study pages
-- Routes `/work/dwj-home-services` and `/work/loba-catskill-restaurant` (`pages/CaseStudyPage.jsx`, content in `src/data/caseStudies.js`): per-page title/meta/canonical/OG via react-helmet-async, JSON-LD (BreadcrumbList, CreativeWork, FAQPage), FAQ, CTA -> inquiry dialog, internal links (portfolio modal "Read full case study", footer).
-- `public/index.html` ProfessionalService JSON-LD; `public/robots.txt` + `sitemap.xml` generated by `scripts/gen_sitemap.py <domain>` (must re-run with production domain after deploy).
-- Verified via screenshots only (no testing-agent run for this step).
-
-## Gaps to be "best" (backlog)
-P0: deploy + custom domain, run gen_sitemap.py, submit to Google Search Console + Google Business Profile; add real keys (Resend/Twilio/Bland/Meta).
-P1: real client testimonials + measured results; industry landing pages (home-services / restaurant web design); blog/insights posts for local SEO; pre-render (SPA) for faster indexing; Meta Pixel/GA4 conversion tracking; Calendly booking.
-P2: Reels/carousel autopilot; review-request automation; email nurture sequences.
-
-## 2026-09-30 — Industry landing pages
-- `/web-design/home-service-contractors` and `/web-design/restaurants` (`pages/IndustryPage.jsx`, content `src/data/industryPages.js`): SEO title/meta/canonical/OG, Service + FAQPage + BreadcrumbList JSON-LD, problems, inclusions, trades, process, FAQ, CTA (inquiry preselected "Web Design & Development"), links to matching case study + cross-link. Linked from footer and case pages; added to sitemap script. Verified by screenshots only.
+- P0: push bee9f42 once token fixed; deploy-67.sh run; DNS cutover.
+- P1: set EMERGENT_LLM_KEY + RESEND keys; verify chat + lead emails live.
+- P2: rotate both exposed root passwords; retire KAIROS/THX-Scout vhosts.
