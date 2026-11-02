@@ -137,9 +137,9 @@ export default function Footer({ onCTA }) {
         </div>
       </div>
 
-      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 text-[12px] text-white/45 pr-20 sm:pr-0">
+      <div className="relative z-10 mt-16 pt-6 border-t border-white/10 flex items-center justify-between flex-wrap gap-4 text-[12px] text-white/45 pr-24" data-testid="footer-bottom-bar">
         <span>© 2026 BrivoMarketing — All rights reserved</span>
-        <span className="hidden sm:inline">Designed and engineered with care.</span>
+        <span>Designed and engineered with care.</span>
       </div>
     </footer>
   );

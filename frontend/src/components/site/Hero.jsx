@@ -168,7 +168,7 @@ export default function Hero({ onCTA }) {
             initial="hidden"
             animate="show"
             custom={4}
-            className="mt-10 flex items-center gap-3"
+            className="mt-10 flex items-center gap-3 pr-20 sm:pr-0"
           >
             <span className="text-[11px] tracking-[0.22em] uppercase text-white/45">
               Follow our work

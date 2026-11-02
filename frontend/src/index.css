@@ -62,7 +62,13 @@ html, body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Prevent any horizontal overflow bleed on narrow viewports */
-html, body { max-width: 100%; }
+/* Page-level guard: fixed-pixel decorative glows must never create a
+   horizontal scrollbar on small screens. Sections already clip their own
+   orbs; this is the backstop. */
+html, body { max-width: 100%; overflow-x: clip; }
+@supports not (overflow: clip) {
+  html, body { overflow-x: hidden; }
+}
 
 /* Ensure tap targets meet 44px on touch devices */
 @media (hover: none) and (pointer: coarse) {
