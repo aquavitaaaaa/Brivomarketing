@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import {
   BarChart3,
   Inbox,
+  Mail,
   PhoneCall,
   Radio,
   MessageSquare,
@@ -13,6 +14,7 @@ import {
 import { adminMe } from "@/lib/api";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import LeadsTab from "@/components/admin/LeadsTab";
+import EmailInboxTab from "@/components/admin/EmailInboxTab";
 import ClientsTab from "@/components/admin/ClientsTab";
 import CallsTab from "@/components/admin/CallsTab";
 import OperatorTab from "@/components/admin/OperatorTab";
@@ -26,6 +28,7 @@ const TABS = [
   { id: "clients", label: "Clients", icon: Users },
   { id: "messages", label: "Messages", icon: MessageSquare },
   { id: "leads", label: "Inbox", icon: Inbox },
+  { id: "email", label: "Email", icon: Mail },
   { id: "agents", label: "AI Agents", icon: Bot },
   { id: "calls", label: "Calls", icon: PhoneCall },
   { id: "operator", label: "Operator", icon: Radio },
@@ -66,6 +69,7 @@ export default function AdminDashboard() {
     clients: ClientsTab,
     messages: MessagesTab,
     leads: LeadsTab,
+    email: EmailInboxTab,
     agents: AgentsTab,
     calls: CallsTab,
     operator: OperatorTab,

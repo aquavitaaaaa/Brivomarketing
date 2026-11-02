@@ -351,6 +351,10 @@ export const directIgDisconnect = (id) =>
 // ---------- Alerts + Instagram autopilot ----------
 const aget = (p, params) => axios.get(`${API}${p}`, { headers: authHeaders(), params }).then((r) => r.data);
 const apost = (p, body = {}, params) => axios.post(`${API}${p}`, body, { headers: authHeaders(), params, timeout: 120000 }).then((r) => r.data);
+const apatch = (p, body = {}) => axios.patch(`${API}${p}`, body, { headers: authHeaders() }).then((r) => r.data);
+export { aget, apost, apatch };
+export const fetchInboundEmails = () => aget("/admin/inbound-emails");
+export const markInboundEmailRead = (id, read = true) => apatch(`/admin/inbound-emails/${id}`, { read });
 
 export const alertsStatus = () => aget("/admin/alerts/status");
 export const alertsList = () => aget("/admin/alerts");

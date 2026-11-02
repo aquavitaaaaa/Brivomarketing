@@ -184,6 +184,8 @@ credentials.json
 # overlay black-box crash/user-report dumps — session data, never history
 **/.emergent/recordings/
 .emergent/recordings/
+# local-only worker secret (deployed to 67 + Cloudflare separately)
+.worker_secret
 frontend/node_modules/.cache/default-development/3.pack
 frontend/node_modules/.cache/default-development/1.pack
 frontend/node_modules/.cache/default-development/2.pack_

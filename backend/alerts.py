@@ -103,6 +103,21 @@ async def notify_inquiry(db, inquiry: dict) -> None:
         logger.exception("notify_inquiry failed")
 
 
+async def notify_inbound_email(db, email: dict) -> None:
+    """New inbound email to *@brivomarketing.com: owner alert + dashboard record."""
+    try:
+        sender = email.get("from") or "Someone"
+        subject = email.get("subject") or "(no subject)"
+        title = f"Inbox · {sender}"
+        detail = subject
+        email_res = await email_client.send_email(
+            os.environ.get("NOTIFY_EMAIL", ""), title,
+            _wrap(title, f"<p>From: {_esc(sender)}</p><p>To: {_esc(email.get('to'))}</p><p>{_esc(email.get('text', '')[:2000])}</p>"))
+        await _record(db, "inbound_email", title, detail, email_res, {"ok": False, "error": "SMS not used for inbox"}, email.get("id"))
+    except Exception:
+        logger.exception("notify_inbound_email failed")
+
+
 async def notify_call(db, caller: str, direction: str, length) -> None:
     try:
         title = f"{direction.title()} AI-operator call · {caller}"

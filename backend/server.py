@@ -137,6 +137,14 @@ class ChatMessage(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class InboundEmailCreate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    sender: str = Field(default="", max_length=320)
+    to: str = Field(default="", max_length=320)
+    subject: str = Field(default="", max_length=500)
+    text: str = Field(default="", max_length=8000)
+
+
 # -------------------- Agents --------------------
 class AgentCreate(BaseModel):
     name: str
@@ -188,6 +196,52 @@ Tone: Confident, sharp, direct. Sound like a top-tier strategist who closes deal
 @api_router.get("/")
 async def root():
     return {"message": "BrivoMarketing API live"}
+
+
+@api_router.post("/inbound/email")
+async def inbound_email(payload: InboundEmailCreate, request: Request):
+    """Catch-all inbox receiver (Cloudflare Email Routing worker).
+
+    Every message to *@brivomarketing.com lands here and is stored in
+    `inbound_emails` so no lead is ever lost — even before a personal
+    forwarding inbox is configured. Shared-secret auth (WORKER_SECRET).
+    Also promotes the sender into the clients CRM view.
+    """
+    secret = os.environ.get("WORKER_SECRET", "").strip()
+    if not secret or request.headers.get("x-worker-secret") != secret:
+        raise HTTPException(status_code=401, detail="Invalid worker secret")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "from": payload.sender.strip()[:320],
+        "to": payload.to.strip()[:320],
+        "subject": payload.subject.strip()[:500],
+        "text": payload.text.strip()[:8000],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "read": False,
+    }
+    if not doc["from"]:
+        raise HTTPException(status_code=400, detail="Missing sender")
+    await db.inbound_emails.insert_one(doc)
+    logger.info(f"Inbound email from {doc['from']} — {doc['subject'][:80]}")
+    try:
+        await alerts_module.notify_inbound_email(db, doc)
+    except Exception:
+        logger.exception("Inbound email alert failed (non-fatal)")
+    doc.pop("_id", None)
+    return {"ok": True, "id": doc["id"]}
+
+
+@api_router.get("/admin/inbound-emails")
+async def list_inbound_emails(admin: dict = Depends(get_current_admin)):
+    docs = await db.inbound_emails.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return docs
+
+
+@api_router.patch("/admin/inbound-emails/{email_id}")
+async def mark_inbound_email(email_id: str, body: Dict[str, Any], admin: dict = Depends(get_current_admin)):
+    read = body.get("read", True)
+    await db.inbound_emails.update_one({"id": email_id}, {"$set": {"read": bool(read)}})
+    return {"ok": True}
 
 
 @api_router.post("/inquiries", response_model=Inquiry)
