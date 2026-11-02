@@ -44,7 +44,7 @@ if [ ! -d "$APP_DIR/backend/venv" ]; then
   python3 -m venv "$APP_DIR/backend/venv"
 fi
 "$APP_DIR/backend/venv/bin/pip" install -q --upgrade pip
-"$APP_DIR/backend/venv/bin/pip" install -q -r "$APP_DIR/backend/requirements.txt"
+"$APP_DIR/backend/venv/bin/pip" install -q --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ -r "$APP_DIR/backend/requirements.txt"
 
 # ---- 5. backend env (create once, patch keys without overwriting secrets) ----
 if [ ! -f "$APP_DIR/backend/.env" ]; then
