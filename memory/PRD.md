@@ -4,55 +4,49 @@
 BrivoMarketing: AI performance-studio marketing site (React) + FastAPI backend
 (inquiries, chat, admin CRM, social auto-poster, lead engine, affiliates) +
 host agent for a home Mac Mini that drives real social posting.
-Repo: github.com/aquavitaaaaa/Brivomarketing (private, branch main).
-PUSHED to GitHub 2026-11-02 (commit 680e785, origin/main in sync).
+Repo: github.com/aquavitaaaaa/Brivomarketing (public for deploy, branch main).
 
-## Where things stand (2026-11-02)
-- GitHub project is on this box and RUNNING: backend live, admin login
-  verified, inquiry validation verified, frontend serving
-  "Brivo — AI Performance Studio".
-- Fixed on this box: resend added to venv, ADMIN seed crash hardened,
-  react-helmet-async installed, hero horizontal-overflow fixed (desktop +
-  mobile re-verified), .env files untracked + gitignored, crash dumps
-  removed from history, frontend/yarn.lock tracked.
-- PUSHED: scripts/deploy-67.sh, backend/.env.example, domain sitemap +
-  robots.txt, overflow fixes.
+## LIVE STATUS (2026-11-02, verified by testing_agent iteration_9: 5/5 pass)
+- https://brivomarketing.com serves Brivo ("Brivo — AI Performance Studio").
+- /login.html?next=%2F 301-redirects to / (legacy Kairos login URL retired).
+- HTTP -> HTTPS redirect works. /api/ live. LE cert valid to Jan 2027.
+- Zero Kairos/khaelyx/Emergent strings in visible text (partners = EVERLINE).
+- Backend active on 67 (port 8201), mongo container brivo-mongo, nginx vhost.
+- Inbox + autopilot CREDS on 67: email keys present (4 keys), autopilot
+  enabled manual mode, posts_per_day=4, 3 queued teasers.
 
-## GitHub vs this box — inventory
-- Remote == local (0 ahead, 0 behind). Remote: 26 backend .py files, 246
-  frontend files, 14 pages, admin suite, agent_host, scripts, backend tests.
-- Neither 74.208.113.74 nor 67.217.246.13 hosts Brivo today (.74 = solar +
-  GivBux; .13 = game dashboard + KAIROS deck). brivomarketing.com = Cloudflare
-  1034 Edge IP Restricted (domain parked, not attached to any server).
+## What was built this session
+- Side-by-side deploy on shared 67 box (own /opt/brivo, ports 8201/27027,
+  mongo container, nginx vhost, systemd service) — other sites untouched.
+- DNS cutover: apex + www to 67.217.246.13, DNS-only. certbot HTTPS.
+- Managed email for lead alerts (from=BrivoMarketing, reply-to=hello@).
+  BLOCKED on empty Emergent credit balance (402 insufficient_credits on live
+  send test) — code correct, needs top-up under Universal Key Buy Credits.
+- Autopilot posts_per_day (1-4, default 4) with randomized daily windows;
+  caption fallback so queue never stores blanks (verified 4/4 non-empty).
+- Sanitize: no customer-facing Emergent/khaelyx refs; TrustBar=EVERLINE.
+- gen_sitemap repo-relative; tests point at brivomarketing.com; backend suite
+  5 passed 1 skipped.
 
-## What remains: deploy to 67 + connect domain (needs box access)
-1. OWNER — 67 box: rotate exposed root password in IONOS console first.
-2. SSH into 67 and run (as root):
-     git clone https://github.com/aquavitaaaaa/Brivomarketing.git /opt/brivo
-     bash /opt/brivo/scripts/deploy-67.sh brivomarketing.com
-   Script installs Mongo/nginx, builds frontend with
-   REACT_APP_BACKEND_URL=https://brivomarketing.com, configures nginx
-   (frontend + /api/ proxy + /agent-host/), systemd backend, certbot HTTPS.
-   NOTE: script clones via HTTPS — needs repo access from the box
-   (deploy key or public repo) OR copy /opt/brivo over manually.
-3. On 67: cp backend/.env.example backend/.env, set ADMIN_PASSWORD
-   (strong), JWT_SECRET (32+ random). Optional empty = skeleton mode:
-   RESEND_API_KEY, EMERGENT_LLM_KEY (chat 500s until set), Meta/Bland/X.
-4. DNS (Cloudflare): A @ to 67.217.246.13, A www to 67.217.246.13,
-   DNS-only until certbot succeeds, then orange-cloud + Full/Strict.
-   Then re-run deploy script if certbot first failed.
-5. Post-deploy: verify https://brivomarketing.com + /api/, submit sitemap
-   in Search Console, set BOOKING_URL in frontend/src/lib/config.js,
-   pair Mac Mini via /admin/social, change default admin password.
+## hello@brivomarketing.com — receiving status
+- MX still points to registrar forwarding (eforward registrar-servers),
+  NOT Cloudflare Email Routing (status unconfigured, no addresses API).
+- Saved Cloudflare token fails verify (Invalid API Token) — need fresh token
+  with Zone:Edit + Email Routing:Edit to enable hello@ receiving via CF.
+- Until then: lead alerts SEND to hello@ (once credits topped up) but hello@
+  receiving depends on registrar forwarding config (outside this box).
 
-## Test status
-- PASS: backend root, admin login + JWT, inquiry validation, frontend
-  title + desktop/mobile screenshots, production yarn build.
-- KNOWN-GAP: /api/chat 500s without EMERGENT_LLM_KEY (by design).
-- NOT done: e2e testing-agent, anything ON the 67 box (no SSH used —
-  only public HTTP/HTTPS/banner probes per approved read-only plan).
+## Auto-posting 4x/day — how it works + how to go live-posting
+- Autopilot tick creates up to 4 posts/day at randomized slots across
+  07-10 / 11-14 / 15-18 / 19-21 ET windows; manual mode = drafts for review,
+  auto mode = queued for publish. Teasers generate via AI with curated
+  fallback. 8-teaser batch verified locally.
+- Publishing needs a paired channel: /admin/social -> pair X/IG/LinkedIn or
+  the Mac Mini host agent (agent_host/). Until paired, queue builds drafts.
+- To start: Admin Social -> enable autopilot auto mode -> pair channel.
 
 ## Backlog
-- P0: deploy-67.sh run on 67; DNS cutover; HTTPS verify.
-- P1: EMERGENT_LLM_KEY + RESEND keys; verify chat + lead emails live.
-- P2: rotate both exposed root passwords; retire KAIROS/THX-Scout vhosts.
+- P0: top up Emergent credits (unblocks lead-alert emails); fresh CF token
+  for Email Routing hello@ receiving.
+- P1: pair social channel or Mac Mini agent; flip autopilot to auto mode.
+- P2: rotate both exposed root passwords; retire KAIROS/THX vhosts if desired.
