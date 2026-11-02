@@ -10,7 +10,7 @@ const LOGOS = [
   { name: "Aura",              style: "font-display italic tracking-tight" },
   { name: "Obsidian",          style: "font-display tracking-tight" },
   { name: "MERIDIAN",          style: "font-display tracking-[0.12em]" },
-  { name: "khaelyx holdings",  style: "font-display italic tracking-tight lowercase" },
+  { name: "EVERLINE",          style: "font-display italic tracking-tight lowercase" },
   { name: "Strata",            style: "font-display italic tracking-tight" },
 ];
 

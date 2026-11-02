@@ -1,4 +1,4 @@
-# Brivo Auto-Poster -- one-click installer for Windows (Khaelyx host agent).
+# Brivo Auto-Poster -- one-click installer for Windows.
 #
 # Run from PowerShell (NOT Command Prompt):
 #   irm https://brivomarketing.com/agent-host/install.ps1 | iex

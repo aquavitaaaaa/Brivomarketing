@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Brivo Auto-Poster — installer for Linux / systemd (Khaelyx host agent).
+# Brivo Auto-Poster — installer for Linux / systemd.
 #
 # Usage on the Linux box that should host the agent:
 #   curl -fsSL https://brivomarketing.com/agent-host/install-linux.sh | bash

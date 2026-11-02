@@ -1,7 +1,7 @@
-"""Instant alerts — email (Resend) + SMS (Twilio) for new inquiries and hot leads.
+"""Instant alerts — email (managed) + SMS (Twilio) for new inquiries and hot leads.
 
 Env (all optional; channels without keys are skipped and logged as 'skipped'):
-  RESEND_API_KEY, SENDER_EMAIL, NOTIFY_EMAIL (comma-separated ok)
+  EMERGENT_EMAIL_KEY, EMAIL_FROM_NAME, EMAIL_REPLY_TO, NOTIFY_EMAIL (comma-separated ok)
   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
   ALERT_SMS_TO            — your mobile in E.164, comma-separated ok
   HOT_LEAD_THRESHOLD      — signal_score that counts as "hot" (default 75)
@@ -87,7 +87,7 @@ async def _record(db, kind: str, title: str, detail: str, email_res: dict, sms_r
 async def notify_inquiry(db, inquiry: dict) -> None:
     """New inbound inquiry: rich lead email (existing) + SMS ping + dashboard alert."""
     try:
-        email_res = {"ok": False, "error": "RESEND_API_KEY not set"}
+        email_res = {"ok": False, "error": "Email not configured"}
         if email_client.is_configured():
             await email_client.send_new_lead_notification(inquiry)
             email_res = {"ok": True}
@@ -171,7 +171,7 @@ async def alerts_status(admin=Depends(get_current_admin)):
     return {
         "email_configured": email_client.is_configured(),
         "notify_email": os.environ.get("NOTIFY_EMAIL", ""),
-        "sender_email": os.environ.get("SENDER_EMAIL", "") or "onboarding@resend.dev",
+        "sender_display": os.environ.get("EMAIL_FROM_NAME", ""),
         "sms_configured": sms_configured(),
         "sms_to": os.environ.get("ALERT_SMS_TO", ""),
         "hot_threshold": _threshold(),

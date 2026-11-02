@@ -37,6 +37,7 @@ DEFAULTS = {
     "mode": "auto",
     "post_time": "12:00",
     "timezone": "America/New_York",
+    "posts_per_day": 4,
 }
 AUTO_TIMES = {0: "12:00", 1: "11:30", 2: "12:00", 3: "18:30", 4: "11:00", 5: "10:00", 6: "17:00"}
 
@@ -212,6 +213,24 @@ async def build_post(db, *, slug: Optional[str] = None, scheduled_at: datetime, 
     return doc
 
 
+def _daily_slots_utc(settings: dict, local_day: datetime) -> list:
+    """4 randomized slots per day (07:00–21:00 local) when posts_per_day=4,
+    else the classic single timed/auto slot. Jittered each day."""
+    ppd = int(settings.get("posts_per_day", 1) or 1)
+    tz = _tz(settings["timezone"])
+    if ppd <= 1:
+        return [_slot_utc(settings, local_day)]
+    base_day = local_day.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tz)
+    windows = [(7, 10), (11, 14), (15, 18), (19, 21)]
+    slots = []
+    for i in range(min(ppd, 4)):
+        lo, hi = windows[i]
+        h = random.randint(lo, hi)
+        m = random.randint(0, 59)
+        slots.append((base_day + timedelta(hours=h, minutes=m)).astimezone(timezone.utc))
+    return sorted(slots)
+
+
 async def autopilot_tick(db) -> None:
     s = await get_settings(db)
     now = _now()
@@ -219,15 +238,20 @@ async def autopilot_tick(db) -> None:
         tz = _tz(s["timezone"])
         local = now.astimezone(tz)
         today = local.strftime("%Y-%m-%d")
-        exists = await db.social_posts.find_one({"source": "autopilot", "autopilot_date": today})
-        if not exists and local.hour >= 6:
-            slot = _slot_utc(s, local)
-            if slot < now:
-                slot = now + timedelta(minutes=2)
-            status = "draft" if s["mode"] == "manual" else "queued"
-            doc = await build_post(db, scheduled_at=slot, status=status)
-            await db.social_posts.update_one({"id": doc["id"]}, {"$set": {"autopilot_date": today}})
-            logger.info("Autopilot created %s post for %s (%s)", status, today, doc["scheduled_at"])
+        ppd = int(s.get("posts_per_day", 1) or 1)
+        made_today = await db.social_posts.count_documents({"source": "autopilot", "autopilot_date": today})
+        if made_today < ppd and local.hour >= 6:
+            created = 0
+            for slot in _daily_slots_utc(s, local):
+                if made_today + created >= ppd:
+                    break
+                if slot < now:
+                    slot = now + timedelta(minutes=2 + created * 3)
+                status = "draft" if s["mode"] == "manual" else "queued"
+                doc = await build_post(db, scheduled_at=slot, status=status)
+                await db.social_posts.update_one({"id": doc["id"]}, {"$set": {"autopilot_date": today}})
+                logger.info("Autopilot created %s post for %s (%s)", status, today, doc["scheduled_at"])
+                created += 1
 
     ch = await channel_status(db)
     if ch["active"] == "paired_host":
@@ -271,6 +295,7 @@ class SettingsBody(BaseModel):
     mode: Optional[str] = None
     post_time: Optional[str] = None
     timezone: Optional[str] = None
+    posts_per_day: Optional[int] = None
 
 
 class PostEdit(BaseModel):
@@ -319,6 +344,13 @@ async def update_settings(body: SettingsBody, admin=Depends(get_current_admin)):
             ZoneInfo(upd["timezone"])
         except Exception:
             raise HTTPException(400, "unknown timezone")
+    if "posts_per_day" in upd:
+        try:
+            ppd = int(upd["posts_per_day"])
+            assert 1 <= ppd <= 4
+        except Exception:
+            raise HTTPException(400, "posts_per_day must be 1-4")
+        upd["posts_per_day"] = ppd
     await db.settings.update_one({"_id": "ig_autopilot"}, {"$set": upd}, upsert=True)
     return await get_settings(db)
 

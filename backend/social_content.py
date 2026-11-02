@@ -2,8 +2,8 @@
 Content factory — turns a 'days × posts/day' request into a batch of
 ready-to-post social entries following the BrivoMarketing weekly rhythm.
 
-Captions: Gemini 3 Pro via the Khaelyx LLM stack (text)
-Images:   Nano Banana via the Khaelyx LLM stack (image generation)
+Captions: AI-generated studio copy (text)
+Images:   AI-generated brand visuals (image generation)
 
 Theme rotation comes straight from the brand kit playbook page:
   Mon = Receipts        (client wins, screenshot vibe)

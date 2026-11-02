@@ -3,7 +3,7 @@ Social-media automation helpers — caption generator + model seeds.
 
 Most of the real posting / DM handling will come online once the user plugs in
 platform OAuth tokens. For now we focus on:
-  - AI-drafted captions (works today via the Khaelyx LLM stack)
+  - AI-drafted captions (works today via the managed AI stack)
   - DB schemas for scheduled posts + DM templates
   - Account-connection stubs returning 'not connected' status per platform
 """

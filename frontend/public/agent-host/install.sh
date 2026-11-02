@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Brivo Auto-Poster — one-click installer for macOS (Khaelyx host agent).
+# Brivo Auto-Poster — one-click installer for macOS.
 #
 # Usage on the Mac you want to host the agent:
 #   curl -fsSL https://brivomarketing.com/agent-host/install.sh | bash

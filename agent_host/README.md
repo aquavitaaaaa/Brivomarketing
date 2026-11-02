@@ -1,4 +1,4 @@
-# Brivo Auto-Poster — Host Agent (Khaelyx)
+# Brivo Auto-Poster — Host Agent
 
 This folder is what gets installed on **your spare Mac Mini** (or any Mac /
 Windows / Linux box on a residential LAN). The agent:
